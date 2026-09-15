@@ -287,7 +287,7 @@
             \begin{minipage}[c]{0.75\textwidth}
                 {\ifx\@doctype\undefined\vskip-20pt\else\vskip-22pt\RaggedRight\sffamily\bfseries\@doctype\par\fi}
                 {\RaggedRight\titlefont\@title\par\vskip8pt}
-            \end{minipage}
+            \end{minipage}%
             \hfill
             \begin{minipage}[c]{0.25\textwidth}
                 \raggedleft
