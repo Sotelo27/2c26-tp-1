@@ -1,0 +1,244 @@
+\documentclass[9pt,a4paper,twoside]{template/document}
+%\usepackage[english]{babel}
+
+%% Spanish babel recomendation
+\usepackage[spanish,es-nodecimaldot,es-noindentfirst]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+%----------------------------------------------------------
+% Title
+%----------------------------------------------------------
+
+\doctype{Arquitectura del Software (TB034)}
+\title{Trabajo Práctico 1}
+\logo{logo}
+
+%----------------------------------------------------------
+% Authors, Affiliations and dates
+%----------------------------------------------------------
+
+\author[]{
+    Sebastian Vintoñuke -- 106063             \newline
+    Cindy Teresa Hsieh -- 108051              \newline
+    Maria Delfina Cano Ros Langrehr -- 109338 \newline
+    Lautaro Martin Sotelo -- 107472
+}
+
+%----------------------------------------------------------
+
+%\affil[1]{UBA | Facultad de Ingeniería}
+
+%----------------------------------------------------------
+
+%\dates{This manuscript was compile on February 24, 2026}
+
+%----------------------------------------------------------
+% Corresponding author-, Document- information
+%----------------------------------------------------------
+
+%\corres{\textsuperscript{\textasteriskcentered}Corresponding author: \href{mailto:author.one@institute.org}{author.one@institute.org} (A. One).}
+%\corres{\textsuperscript{\textdagger}These authors contributed equally to this work.}
+
+%----------------------------------------------------------
+
+%\docinfo{This document class was prepared on Overleaf and compiled with pdf\LaTeX{}. No errors were found during the compilation process. This class supports external editors, though additional setup may be required.}
+
+%----------------------------------------------------------
+
+\journalname{UBA | Facultad de Ingeniería}
+\footerlogo{logo\_fiuba\_big}
+\journal{Arquitectura del Software (TB034)}
+\theday{\today}
+%\vol{}
+%\no{}
+
+%----------------------------------------------------------
+% Abstract y palabras clave
+% (opcional: se arma con \abstracttitle{...} + \begin{abstract}...\end{abstract};
+% si no se definen, la caja del abstract no se dibuja)
+%----------------------------------------------------------
+
+%----------------------------------------------------------
+
+%\keywords{Document Class, Research Article, Laboratory Report, Academic Writing, Journal}
+
+%----------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+\thispagestyle{firststyle}
+
+%----------------------------------------------------------
+
+% TODO: BORRAR PARA LA ENTREGA
+\newcommand{\recordatorioevidencia}{
+    \begin{tcolorbox}[
+        colback=red!10,
+        colframe=red!80!black,
+        boxrule=1pt,
+        arc=2mm
+    ]
+    \textbf{Toda} afirmación que se realice debe estar apoyada en \textbf{evidencia}.
+    Si se encuentra alguna \textbf{afirmación} que no está correctamente \textbf{fundamentada}
+    con \textbf{evidencia}, se disminuirá la nota. Esto incluye las observaciones que
+    realicen sobre el código y su funcionamiento en general. Que no existan
+    métricas para un determinado QA no implica que no pueda evidenciarse el
+    efecto de una táctica.
+    \end{tcolorbox}
+}
+\recordatorioevidencia
+
+\section{Sistema Recibido}
+\label{sec:sistema_recibido}
+
+    \subsection{Arquitectura}
+    \label{sec:arquitectura}
+
+    \subsection{Código}
+    \label{sec:codigo}
+
+    \subsection{Infraestructura}
+    \label{sec:infraestructura}
+
+\section{Atributos de calidad}
+\label{sec:atributos_de_calidad}
+
+    \subsection{Identificación de los QA claves}
+    \label{sec:identificacion_de_los_qa_claves}
+
+        \subsubsection{Performance}
+        \label{sec:performance}
+
+        ...
+
+    \subsection{Otros QA menos relevantes}
+    \label{sec:otros_qa_menos_relevantes}
+
+        \subsubsection{Modificabilidad}
+        \label{sec:modificabilidad}
+
+        ...
+
+    \subsection{Decisiones de diseño actuales y su impacto en los QA}
+    \label{sec:decisiones_impacto_qa}
+
+        \subsubsection{Impacto en la Performance}
+        \label{sec:impacto_en_la_performance}
+
+        ...
+
+    \subsection{Critica}
+    \label{sec:critica}
+
+\section{Comportamiento del Servicio}
+\label{sec:comportamiento_del_servicio}
+
+
+    \subsection{Pruebas de carga}
+    \label{sec:pruebas_de_carga}
+
+    \subsection{Metricas}
+    \label{sec:metricas}
+
+        \subsubsection{Latencia}
+        \label{sec:metrica_latencia}
+
+        ...
+
+\section{Modificaciones Propuestas}
+\label{sec:modificaciones_propuestas}
+
+    \subsection{Propuesta 1}
+    \label{sec:propuesta_1}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.3\columnwidth]{figures/placeholder}
+        \caption{Diagrama Components \& Connectors}
+        \label{fig:propuesta_1_diagrama_components_and_conectors}
+    \end{figure}
+
+    \subsection{Impacto en los QA}
+    \label{sec:propuesta_1_impacto_en_los_qa}
+
+        \subsubsection{Performance}
+        \label{sec:propuesta_1_performance}
+
+        ...
+
+    \subsection{Pruebas de carga}
+    \label{sec:propuesta_1_pruebas_de_carga}
+
+    \subsection{Metricas}
+    \label{sec:propuesta_1_metricas}
+
+        \subsubsection{Latencia}
+        \label{sec:propuesta_1_metrica_latencia}
+
+        ...
+
+    \subsection{Resultados y conclusiones}
+    \label{sec:propuesta_1_resultados_y_conclusiones}
+
+\section{Métricas Adicionales}
+\label{sec:metricas_adicionales}
+
+    % Estas métricas deberían aparecer en el dashboard de alguno de los casos estudiados.
+
+    \subsection{Volumen operado por moneda}
+    \label{sec:objetivo_metricas_moneda}
+
+    \subsection{Volumen neto operado}
+    \label{sec:volumen_neto_operado}
+
+%\section{Modificacion: Uso de DB externa}
+%\label{sec:modificacion_uso_de_db_externa}
+%
+%    \begin{figure}[H]
+%        \centering
+%        \includegraphics[width=0.3\columnwidth]{figures/placeholder}
+%        \caption{Diagrama Components \& Connectors}
+%        \label{fig:db_diagrama_components_and_conectors}
+%    \end{figure}
+%
+%    \subsection{Impacto en los QA}
+%    \label{sec:db_impacto_en_los_qa}
+%
+%        \subsubsection{Performance}
+%        \label{sec:db_performance}
+%
+%        ...
+%
+%    \subsection{Pruebas de carga}
+%    \label{sec:db_pruebas_de_carga}
+%
+%    \subsection{Metricas}
+%    \label{sec:db_metricas}
+%
+%        \subsubsection{Latencia}
+%        \label{sec:db_metrica_latencia}
+%
+%        ...
+%
+%    \subsection{Resultados y conclusiones}
+%    \label{sec:db_resultados_y_conclusiones}
+
+\section{Uso de herramientas de IA}
+\label{sec:uso_de_herramientas_de_ia}
+
+    ...
+
+\appendix
+
+\section{Apendice}
+\label{sec:apendice}
+
+%----------------------------------------------------------
+
+\printbibliography
+
+%----------------------------------------------------------
+
+\end{document}

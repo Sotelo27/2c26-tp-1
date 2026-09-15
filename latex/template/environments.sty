@@ -1,0 +1,63 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This package defines custom environments (e.g., note, 
+% info) for adding structured annotations to your document.
+% --------------------------------------------------------
+% If you do not intend to use any of these environments,
+% you may safely remove this package from 'document.cls'.
+% --------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------
+% Package configuration 
+%----------------------------------------------------------
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{template/environments}[24/02/2026 Environments LaTeX2e package]
+
+%----------------------------------------------------------
+% Environment definition style 
+%----------------------------------------------------------
+
+\mdfdefinestyle{envstyle}{
+    backgroundcolor=themecolor!13,
+    linecolor=themecolor,
+    leftline=false,
+    rightline=false,
+    topline=false,
+    bottomline=false,
+    frametitlerule=true,
+    frametitlerulewidth=0.2pt,
+    frametitlefont=\color{themecolor}\bfseries\sffamily,
+    frametitlealignment=\raggedright,
+    innertopmargin=6pt,
+    innerbottommargin=6pt,
+    innerleftmargin=6pt,
+    innerrightmargin=6pt,
+    font=\sffamily\small,
+    fontcolor=themecolor,
+    frametitleaboveskip=4pt,
+    frametitlebelowskip=4pt,
+    skipabove=9pt,
+    roundcorner=3pt
+}
+
+%----------------------------------------------------------
+% Customenv-, Info-, Note- environments
+%----------------------------------------------------------
+
+% Customenv
+\newmdenv[style=envstyle]{customenv}
+
+%----------------------------------------------------------
+
+% Info
+\newmdenv[style=envstyle, frametitle=\infolanguage]{info}
+
+%----------------------------------------------------------
+
+% Note
+\newmdenv[style=envstyle, frametitle=\notelanguage]{note}
+
+%----------------------------------------------------------
+
+\endinput
