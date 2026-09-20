@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid";
 
 import { init as stateInit, getAccounts as stateAccounts, getRates as stateRates, getLog as stateLog } from "./state.js";
+import { logVolume, logNet } from "./currency_metrics.js";
 
 let accounts;
 let rates;
@@ -90,6 +91,11 @@ export async function exchange(exchangeRequest) {
         counterAccount.balance -= counterAmount;
         exchangeResult.ok = true;
         exchangeResult.counterAmount = counterAmount;
+
+        logVolume(baseCurrency, baseAmount);
+        logVolume(counterCurrency, counterAmount);
+        logNet(baseCurrency, baseAmount);
+        logNet(counterCurrency, -counterAmount);
       } else {
         //could not transfer to clients' counter account, return base amount to client
         await transfer(baseAccount.id, clientBaseAccountId, baseAmount);

@@ -1,4 +1,6 @@
 config:
+  plugins:
+    metrics-by-endpoint: {}
   environments:
     api:
       target: 'http://localhost:5555'
