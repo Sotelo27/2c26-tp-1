@@ -1,2 +1,4 @@
 node_modules
-runs
+graficos/.venv
+graficos/data
+__pycache__/

@@ -1,0 +1,26 @@
+import matplotlib.pyplot as plt
+
+FONDO = '#E4E8E1'
+
+AZUL = '#2f5db2'
+VERDE = '#2B4D17'
+VIOLETA = '#6A3D9A'
+ROJO = '#E31A1C'
+AMARILLO = '#EAB839'
+NARANJA = '#FF7F00'
+MARRON = '#B15928'
+ROSA = '#FB9A99'
+
+COLORES = [
+    AZUL,
+    VERDE,
+    VIOLETA,
+    ROJO,
+    AMARILLO,
+    NARANJA,
+    MARRON,
+    ROSA
+]
+
+def apply_latex_style():
+    return 0
