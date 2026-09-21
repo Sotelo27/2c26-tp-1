@@ -89,6 +89,9 @@
 }
 \recordatorioevidencia
 
+% TODO bloque de comentarios, sacar al final
+\newcommand{\todo}[1]{\vspace{2mm}\noindent\colorbox{yellow}{\textbf{TODO:}}\colorbox{yellow!20}{\parbox[t]{0.9\textwidth}{#1}}\vspace{2mm}}
+
 \section{Sistema Recibido}
 \label{sec:sistema_recibido}
 
@@ -107,18 +110,94 @@
     \subsection{Identificación de los QA claves}
     \label{sec:identificacion_de_los_qa_claves}
 
+        Se identifican los siguientes atributos de calidad como claves en el contexto del negocio.
+        Adicionalmente, se citan especificaciones y requerimientos que motivaron estas afirmaciones.
+
+        \subsubsection{Availability (disponibilidad)}
+        \label{sec:disponibilidad}
+
+            Habilidad del sistema para reparar o enmascarar fallas de manera tal que el período fuera de servicio no exceda un determinado valor durante un lapso de tiempo especificado.
+
+            \begin{customenv}[frametitle=]
+                La startup arVault es una fintech que opera una billetera digital
+            \end{customenv}
+
+            Al ser una billetera digital, el servicio permite manipular el dinero de los usuarios. Un servicio con baja o nula disponibilidad implicaria que los usuarios no pueden acceder a su propio dinero.
+            Adicionalmente, el modelo de negocio se basa en que los usuarios operen, si el servicio no es disponible para permitir estas operaciones, se estan perdiendo potenciales ganancias.
+
         \subsubsection{Performance}
         \label{sec:performance}
 
-        ...
+            Habilidad del sistema para reaccionar ante ciertos eventos en un determinado tiempo.
+
+            \begin{customenv}[frametitle=]
+                Si bien el lanzamiento fue exitoso, comenzaron a aparecer reclamos de los usuarios sobre problemas en el uso de la función de cambio de monedas.
+            \end{customenv}
+
+            Uno de los principales problemas que impulsaron esta review es el endpoint de /exchanges, como se mostro es (TODO) este considerablemente mas lento que el resto de endpoints, lo que podria implicar el descontento de los usuarios.
+
+            \begin{customenv}[frametitle=]
+                las tasas de cambio no tienen gap entre el valor de compra y de venta.
+            \end{customenv}
+
+            Adicinalmente, el modelo de negocios es ofrecer una tasa de cambio sin gap, es decir en tiempo real.
+            Una performance pobre en esta operacion implicaria que las tasas podrian que tener que ajustarse negativamente en comparacion a lo que se le ofrece al usuario en primera instancia.
+
+        \subsubsection{Scalability (escalabilidad)}
+        \label{sec:escalabilidad}
+
+            Habilidad del sistema para incorporar recursos adicionales de manera efectiva. Efectividad = mejora mensurable de algún QA + no requerir un esfuerzo inapropiado + no interrumpir el funcionamiento.
+
+            \begin{customenv}[frametitle=]
+                Para ganar usuarios, las tasas de cambio...
+            \end{customenv}
+
+            Se especifica que objetivo a corto plaso es incrementar el numero de usuarios, el cual, el sistema debe ser capaz de manejar incorporando los recursos necesarios.
+
+        \subsubsection{Reliability (confiabilidad)}
+        \label{sec:confiabilidad}
+
+            Grado en que la arquitectura es susceptible a fallas a nivel de sistema cuando se producen fallas parciales en componentes, conectores o datos.
+
+            \todo{TODO: justificar}
+
+        \subsubsection{Security (seguridad)}
+        \label{sec:seguridad}
+
+            Capacidad del sistema de prevenir acciones maliciosas o accidentales fuera del uso esperado.
+
+            \begin{customenv}[frametitle=]
+                se valida que haya saldo en la cuenta del cliente, se espera que lo haga la UI
+            \end{customenv}
+
+            La posibilidad de que los usuarios puedan realizar acciones maliciosas implican perdidas monetarias para el resto de usuarios, para la propia organizacion, ademas de una perdida de reputacion y con esto perdida de usuarios e inversiones.
 
     \subsection{Otros QA menos relevantes}
     \label{sec:otros_qa_menos_relevantes}
 
-        \subsubsection{Modificabilidad}
+        Ademas se mencionan otros QA, que aunque no resulten claves y por ende no son una prioridad, son desceables, especialmente conforme el proyecto crezca.
+
+        \todo{TODO: busca en el enunciado o en la documentacion como justificar estos QA}
+
+        \subsubsection{Efficiency}
+        \label{sec:eficiencia}
+
+        Performance por recurso consumido.
+
+        \subsubsection{Testability (testeabilidad)}
         \label{sec:modificabilidad}
 
-        ...
+        Grado en que un componente/sistema de software permite ser probado para exhibir sus fallas; usualmente relacionado al esfuerzo necesario para llevar adelante las tareas de testing.
+
+        \subsubsection{Manageability}
+        \label{sec:manejabilidad}
+
+        Define la facilidad de gestión del sistema por parte de los administradores del mismo.
+
+        \subsubsection{Simplicity}
+        \label{sec:simplicidad}
+
+        Facilidad con la que la arquitectura de un sistema puede ser entendida, razonada y explicada.
 
     \subsection{Decisiones de diseño actuales y su impacto en los QA}
     \label{sec:decisiones_impacto_qa}
