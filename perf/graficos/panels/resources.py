@@ -1,12 +1,12 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-from render import connect_nulls, elapsed_seconds, legend_table, percent_axis
+from render import connect_nulls, elapsed_seconds, legend_table, percent_axis, time_axis
 from styles import AMARILLO, VERDE_GRAFANA
 from transforms import keep_last_value, derivative, as_percent, remove_below_value
 
 MEMORY_32GB = 34_359_738_368
 
-def generate_resources_plot(cadvisor_dataframe: pd.DataFrame, start: int, output_path: str):
+def generate_resources_plot(cadvisor_dataframe: pd.DataFrame, meta: dict, output_path: str):
     cpu = cadvisor_dataframe["stats.gauges.cadvisor.exchange-api-1.cpu_cumulative_usage"].copy()
     memory = cadvisor_dataframe["stats.gauges.cadvisor.exchange-api-1.memory_working_set"].copy()
 
@@ -21,7 +21,7 @@ def generate_resources_plot(cadvisor_dataframe: pd.DataFrame, start: int, output
 
     for series, label, color in ((cpu, "CPU", VERDE_GRAFANA), (memory, "Memory", AMARILLO)):
         points = connect_nulls(series)
-        seconds = elapsed_seconds(points.index, start)
+        seconds = elapsed_seconds(points.index, meta["start"])
         ax.plot(
             seconds,
             points,
@@ -33,7 +33,7 @@ def generate_resources_plot(cadvisor_dataframe: pd.DataFrame, start: int, output
         )
         ax.fill_between(seconds, points, color=color, alpha=0.1)
 
-    ax.set_xlabel("Tiempo (s)")
+    time_axis(ax, meta)
     percent_axis(ax)
     legend_table(ax, [("CPU", VERDE_GRAFANA, cpu), ("Memory", AMARILLO, memory)])
 

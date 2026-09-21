@@ -4,6 +4,9 @@ import pandas as pd
 def load_cadvisor_dataframe(file_path: str) -> pd.DataFrame:
     return load_raw_json_to_dataframe(file_path)
 
+def load_artillery_dataframe(file_path: str) -> pd.DataFrame:
+    return load_raw_json_to_dataframe(file_path)
+
 def load_meta(file_path: str) -> dict:
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
