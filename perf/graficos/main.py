@@ -3,6 +3,7 @@ import sys
 
 from loaders import load_artillery_dataframe, load_cadvisor_dataframe, load_meta
 from styles import apply_latex_style
+from panels.requests_state import generate_requests_state_plot
 from panels.resources import generate_resources_plot
 from panels.response_time import generate_response_time_plot
 
@@ -29,6 +30,7 @@ def main():
     apply_latex_style()
     generate_resources_plot(cadvisor_dataframe, meta, output_path)
     generate_response_time_plot(artillery_dataframe, meta, output_path)
+    generate_requests_state_plot(artillery_dataframe, meta, output_path)
     return 0
 
 if __name__ == "__main__":

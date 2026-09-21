@@ -12,3 +12,9 @@ def as_percent(series: pd.Series, max_value: float) -> pd.Series:
 
 def remove_below_value(series: pd.Series, threshold: float = 0.0001) -> pd.Series:
     return series.mask(series < threshold, np.nan)
+
+def sum_series(dataframe: pd.DataFrame, prefix: str) -> pd.Series:
+    columns = [c for c in dataframe.columns if c.startswith(prefix)]
+    if not columns:
+        return pd.Series(dtype=float)
+    return dataframe[columns].sum(axis=1, min_count=1)

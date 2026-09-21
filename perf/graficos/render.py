@@ -24,11 +24,17 @@ def percent_axis(ax):
 def ms_axis(ax):
     value_axis(ax, lambda v: f"{v:g} ms")
 
+def short_axis(ax):
+    value_axis(ax, lambda v: f"{v:g}")
+
 def format_percent(value: float) -> str:
     return f"{value:.3g}%"
 
 def format_ms(value: float) -> str:
     return f"{value:#.3g}".rstrip(".") + " ms"
+
+def format_short(value: float) -> str:
+    return f"{value:.3g}"
 
 def legend_table(ax, entries: list[tuple[str, str, pd.Series]], formatter=format_percent):
     rows = []
