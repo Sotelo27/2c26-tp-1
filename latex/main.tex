@@ -105,13 +105,54 @@
     \subsection{Arquitectura}
     \label{sec:arquitectura}
 
+    Arquitectura monolitica cliente-servidor, formada por una unica instancia app.js.
+    Separacion en tres capas: app.js punto de entrada y definicion de endpoints, exchange.js logica de negocio, state.js persistencia.
+    No se implementa coordinacion, no hay locks ni mecanismos de concurrencia sobre secciones criticas, como la verificacion del saldo.
+    No se implementa tolerancia a fallos, no hay manejo de errores try/catch.
+    No hay replicacion, unica instancia, no hay replicas.
+    No hay recovery, si el servidor muere hay que levantarlo manualmente.
+    No hay consistencia entre los datos en memoria y los datos en disco, la consistencia es eventual sin mecanismos de transaccionabilidad.
+
+    \todo{redactarlo mas bonito y justificar}
+
     \subsection{Código}
     \label{sec:codigo}
 
+    No hay separacion de responsabilidades, exchange maneja tanto logica de negocio, como logica de bajo nivel.
+    Calcula tanto counterAmount como se encargar de persistir los cambios en counterAccount.balance.
+
+    \begin{code}
+        \lstinputlisting[language=JavaScript]{./code/exchange_method.js}
+        \caption{app/exchange.js}
+        \label{lst:separacion_de_responsabilidades}
+    \end{code}
+
+    Hay alto acoplamiento, exchange.js accede directamente a variables que deberian ser privadas de state.js.
+    exchange.js no deberia conocer detalles de implementacion de la persistencia, se deberia programar contra interfaces.
+    Cambiar la persistencia implica modificar exchange.js.
+    No hay modelo de clases, todo esta basado en constantes globales y funciones publicas.
+
+    \begin{code}
+        \lstinputlisting[language=JavaScript]{./code/acoplamiento.js}
+        \caption{app/exchange.js}
+        \label{lst:acoplamiento}
+    \end{code}
+
+    No se implementa transaccionalidad, posibles inconsistencias ante fallos incluso al recuperarse.
+
     \begin{code}
         \lstinputlisting[language=JavaScript]{./code/save.js}
-        %\caption{app/state.js}
+        \caption{app/state.js}
         \label{lst:save}
+    \end{code}
+
+    No se implemento un diseño guiado por dominio, se opera directamente contra los tipos de datos primitivos.
+    Se modela el dinero utilizando floats, esto genera perdida de precision.
+
+    \begin{code}
+        \lstinputlisting[language=JavaScript]{./code/floats.js}
+        \caption{app/exchange.js}
+        \label{lst:floats}
     \end{code}
 
     \subsection{Infraestructura}
