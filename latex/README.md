@@ -8,3 +8,6 @@
 
 ### Limpia todo, incluido el PDF
 `latexmk -C`
+
+### Compila los diagramas .puml de figures/ a .pdf (mismo nombre)
+`plantuml -tpdf figures/*.puml`

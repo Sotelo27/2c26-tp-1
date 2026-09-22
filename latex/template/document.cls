@@ -513,6 +513,24 @@
 }
 \lstset{style=mystyle}
 
+\lstdefinelanguage{JavaScript}{
+    morekeywords=[1]{
+        as, async, await, break, case, catch, class, const, continue, debugger,
+        default, delete, do, else, export, extends, finally, for, from, function,
+        get, if, import, in, instanceof, let, new, of, return, set, static, super,
+        switch, this, throw, try, typeof, var, void, while, with, yield,
+        true, false, null, undefined, NaN, Infinity
+    },
+    sensitive=true,
+    upquote=true,
+    morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]',
+    morestring=[b]",
+    morestring=[b]`,
+}
+\lstalias{js}{JavaScript}
+
 %----------------------------------------------------------
 % Minted setup
 %----------------------------------------------------------

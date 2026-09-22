@@ -1,0 +1,63 @@
+@startuml componentes_y_conectores_base
+left to right direction
+
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam componentStyle uml2
+skinparam ArrowFontSize 10
+skinparam ArrowColor #2B4C17
+
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #37474F
+    FontColor #212121
+}
+skinparam component<<externo>> {
+    BackgroundColor #F5F5F5
+    BorderColor #9E9E9E
+    FontColor #616161
+}
+skinparam database {
+    BackgroundColor #FFFFFF
+    BorderColor #37474F
+}
+skinparam rectangle {
+    BackgroundColor #E3E8E1
+    BorderColor #E3E8E1
+    FontColor #E3E8E1
+}
+skinparam package {
+    BackgroundColor #E3E8E1
+    BorderColor #2B4C17
+    FontColor #2B4C17
+}
+
+component "Cliente arVault" as Cliente <<externo>>
+component "Autenticación / Autorización" as Auth <<externo>>
+
+package "Servicio de Cambio de Monedas" {
+    component "nginx (proxy)\nport: 5555->80" as Nginx
+    package "exchange-api" as Api {
+        component "API REST (Express)\nport: 3000" as Rest
+        component "exchange.js" as Logica
+        component "state.js" as Estado
+    }
+    rectangle " " {
+        database "accounts.json\nrates.json\nlog.json" as Json
+    }
+}
+
+component "Servicio de Transferencia de Fondos" as Transferencia <<externo>>
+
+Cliente --> Auth : **HTTP**
+Auth --> Nginx : **HTTP**
+Nginx --> Rest : **HTTP**
+Rest --> Logica
+Logica --> Estado : getAccounts()\ngetRates()\ngetLog()\n
+Estado --> Json : save()\nscheduleSave()
+Json -left-> Estado : load()
+Logica "transfer()" -[norank,dashed]-> Transferencia
+Rest -[hidden]-> Transferencia
+
+@enduml
