@@ -456,7 +456,7 @@
               }
             ]
           },
-          "unit": "rps"
+          "unit": "short"
         },
         "overrides": [
           {
@@ -771,7 +771,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "currencyUSD"
         },
         "overrides": []
       },
@@ -862,7 +863,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "currencyUSD"
         },
         "overrides": []
       },
@@ -994,6 +996,6 @@
   "timezone": "",
   "title": "Main dashboard Copy",
   "uid": "afz3shkkexgjkf",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
