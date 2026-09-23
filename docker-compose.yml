@@ -1,6 +1,12 @@
 services:
     api:
-      build: ./app
+        build: ./app
+        deploy:
+            resources:
+                limits:
+                    memory: 2G
+                reservations:
+                    memory: 1G
 
     nginx:
         image: nginx:1.29.8

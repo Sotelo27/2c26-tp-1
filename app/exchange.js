@@ -92,10 +92,13 @@ export async function exchange(exchangeRequest) {
         exchangeResult.ok = true;
         exchangeResult.counterAmount = counterAmount;
 
-        logVolume(baseCurrency, baseAmount);
-        logVolume(counterCurrency, counterAmount);
-        logNet(baseCurrency, baseAmount);
-        logNet(counterCurrency, -counterAmount);
+        const baseAmountUsd = toUsd(baseCurrency, baseAmount);
+        const counterAmountUsd = toUsd(counterCurrency, counterAmount);
+
+        logVolume(baseCurrency, baseAmountUsd);
+        logVolume(counterCurrency, counterAmountUsd);
+        logNet(baseCurrency, baseAmountUsd);
+        logNet(counterCurrency, -counterAmountUsd);
       } else {
         //could not transfer to clients' counter account, return base amount to client
         await transfer(baseAccount.id, clientBaseAccountId, baseAmount);
@@ -123,6 +126,20 @@ async function transfer(fromAccountId, toAccountId, amount) {
   return new Promise((resolve) =>
     setTimeout(() => resolve(true), Math.random() * (max - min + 1) + min)
   );
+}
+
+function toUsd(currency, amount) {
+  if (currency == 'USD') {
+    return amount;
+  }
+
+  const pivotRateToUsd = rates['ARS']?.['USD'];
+
+  if (currency == 'ARS') {
+    return amount * pivotRateToUsd;
+  }
+
+  return amount * rates[currency]?.['ARS'] * pivotRateToUsd;
 }
 
 function findAccountByCurrency(currency) {
