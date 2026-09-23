@@ -4,6 +4,7 @@
 %% Spanish babel recomendation
 \usepackage[spanish,es-nodecimaldot,es-noindentfirst]{babel}
 \usepackage{amsmath}
+\usepackage{longtable}
 
 %----------------------------------------------------------
 % Title
@@ -105,21 +106,39 @@
     \subsection{Arquitectura}
     \label{sec:arquitectura}
 
-    Arquitectura monolitica cliente-servidor, formada por una unica instancia app.js.
-    Separacion en tres capas: app.js punto de entrada y definicion de endpoints, exchange.js logica de negocio, state.js persistencia.
-    No se implementa coordinacion, no hay locks ni mecanismos de concurrencia sobre secciones criticas, como la verificacion del saldo.
-    No se implementa tolerancia a fallos, no hay manejo de errores try/catch.
-    No hay replicacion, unica instancia, no hay replicas.
-    No hay recovery, si el servidor muere hay que levantarlo manualmente.
-    No hay consistencia entre los datos en memoria y los datos en disco, la consistencia es eventual sin mecanismos de transaccionabilidad.
+    El despliegue recibido sigue una arquitectura cliente-servidor. Nginx actúa como
+    reverse proxy y deriva las solicitudes hacia una única instancia de la API de
+    intercambio implementada con Node.js y Express. El despliegue también incluye
+    Graphite/StatsD, Grafana y cAdvisor como componentes de observabilidad, aunque
+    estos no forman parte de la lógica de negocio.
 
-    \todo{redactarlo mas bonito y justificar}
+    Dentro de la API existe una separación lógica en tres módulos: \texttt{app.js}
+    expone la interfaz HTTP, \texttt{exchange.js} coordina las operaciones de cambio
+    y \texttt{state.js} carga y persiste el estado. Esta separación es parcial: la
+    lógica de negocio conserva referencias mutables a cuentas, tasas y logs, y
+    modifica directamente dichas estructuras.
+
+    El archivo \texttt{docker-compose.yml} declara una sola instancia de la API y no
+    configura réplicas, health checks ni una política de reinicio. Por lo tanto, una
+    caída del proceso interrumpe el servicio hasta que un operador o una herramienta
+    externa lo vuelva a iniciar. Además, la API es stateful: mantiene las cuentas,
+    tasas y operaciones en memoria, por lo que agregar réplicas sin introducir un
+    mecanismo de coordinación produciría estados divergentes.
+
+    La persistencia se realiza periódicamente sobre archivos JSON. Las cuentas y el
+    log se escriben cada segundo, mientras que las tasas se escriben cada cinco
+    segundos. En consecuencia, existe una ventana entre la modificación en memoria
+    y su escritura en disco durante la cual una terminación abrupta puede provocar
+    pérdida de datos. Esto no constituye un protocolo de consistencia eventual, sino
+    una estrategia de durabilidad diferida sin garantías transaccionales.
 
     \subsection{Código}
     \label{sec:codigo}
 
-    No hay separacion de responsabilidades, exchange maneja tanto logica de negocio, como logica de bajo nivel.
-    Calcula tanto counterAmount como se encargar de persistir los cambios en counterAccount.balance.
+    La separación de responsabilidades es incompleta. \texttt{exchange.js} calcula
+    importes, coordina las llamadas al servicio de transferencias, valida el saldo
+    interno, modifica las cuentas y registra el resultado. Esta concentración aumenta
+    el acoplamiento y dificulta probar cada responsabilidad de forma aislada.
 
     \begin{code}
         \lstinputlisting[language=JavaScript]{./code/exchange_method.js}
@@ -127,10 +146,13 @@
         \label{lst:separacion_de_responsabilidades}
     \end{code}
 
-    Hay alto acoplamiento, exchange.js accede directamente a variables que deberian ser privadas de state.js.
-    exchange.js no deberia conocer detalles de implementacion de la persistencia, se deberia programar contra interfaces.
-    Cambiar la persistencia implica modificar exchange.js.
-    No hay modelo de clases, todo esta basado en constantes globales y funciones publicas.
+    \texttt{state.js} no expone directamente sus variables internas, pero sus getters
+    retornan las mismas referencias mutables almacenadas por el módulo. Luego de la
+    inicialización, \texttt{exchange.js} conserva esas referencias y modifica los
+    objetos sin pasar por una operación explícita del componente de persistencia.
+    Por ello, la abstracción es permeable: reemplazar los JSON por un repositorio o
+    una base de datos requeriría adaptar también la forma en que la lógica de negocio
+    lee y actualiza el estado.
 
     \begin{code}
         \lstinputlisting[language=JavaScript]{./code/acoplamiento.js}
@@ -138,7 +160,37 @@
         \label{lst:acoplamiento}
     \end{code}
 
-    No se implementa transaccionalidad, posibles inconsistencias ante fallos incluso al recuperarse.
+    El endpoint de cambio también contiene una condición de carrera. La comprobación
+    de saldo se ejecuta antes de dos operaciones asíncronas. Mientras una solicitud se
+    encuentra suspendida en un \texttt{await}, otra puede comprobar el mismo saldo y
+    aprobar la operación. Ambas solicitudes pueden completar los descuentos y dejar
+    un saldo negativo. El Listado~\ref{lst:race_condition} muestra la sección crítica,
+    que no está protegida por exclusión mutua, serialización ni una transacción.
+
+    \begin{code}
+        \lstinputlisting[language=JavaScript]{./code/race_condition.js}
+        \caption{Sección crítica de \texttt{app/exchange.js} en el caso base.}
+        \label{lst:race_condition}
+    \end{code}
+
+    El registro de operaciones tampoco tiene una política de retención. Cada resultado
+    se agrega a un arreglo en memoria y \texttt{GET /log} devuelve el arreglo completo.
+    A medida que aumenta la cantidad de operaciones, crecen el consumo de memoria, el
+    tamaño de la respuesta y el trabajo necesario para serializar el estado. Además,
+    el arreglo completo se convierte a JSON y se reescribe cada segundo, por lo que el
+    costo de cada persistencia aumenta con el historial.
+
+    \begin{code}
+        \lstinputlisting[language=JavaScript]{./code/log_growth.js}
+        \caption{Crecimiento y persistencia del log en el caso base.}
+        \label{lst:log_growth}
+    \end{code}
+
+    La escritura utiliza directamente el archivo definitivo. No se escribe primero a
+    un archivo temporal ni se realiza un reemplazo atómico, por lo que una interrupción
+    durante \texttt{writeFile} puede dejar un JSON incompleto. El manejo de errores de
+    \texttt{state.js} registra el fallo, pero no lo propaga ni permite que la API informe
+    que el estado no pudo persistirse.
 
     \begin{code}
         \lstinputlisting[language=JavaScript]{./code/save.js}
@@ -146,17 +198,78 @@
         \label{lst:save}
     \end{code}
 
-    No se implemento un diseño guiado por dominio, se opera directamente contra los tipos de datos primitivos.
-    Se modela el dinero utilizando floats, esto genera perdida de precision.
+    Los importes monetarios se representan mediante \texttt{Number}, cuyo formato de
+    punto flotante binario no representa exactamente todos los valores decimales. Sin
+    una regla explícita de redondeo o una representación en unidades mínimas, el error
+    puede acumularse en los saldos y en los importes entregados al cliente.
 
     \begin{code}
         \lstinputlisting[language=JavaScript]{./code/floats.js}
-        \caption{app/exchange.js}
+        \caption{Cálculo monetario con \texttt{Number} en \texttt{app/exchange.js}.}
         \label{lst:floats}
     \end{code}
 
+    Finalmente, las validaciones HTTP comprueban únicamente la presencia mediante
+    condiciones de truthiness. No se validan tipos, rangos, monedas soportadas ni
+    coherencia entre moneda y cuenta. Por ejemplo, un importe negativo supera la
+    validación inicial y puede alterar los saldos en el sentido contrario al esperado.
+    Las monedas inexistentes también pueden producir excepciones al acceder a una tasa
+    o cuenta no encontrada. A su vez, los rechazos de negocio se informan como HTTP 500,
+    aunque no necesariamente representan una falla interna del servidor.
+
+    \begin{code}
+        \lstinputlisting[language=JavaScript]{./code/request_validation.js}
+        \caption{Validación por presencia en \texttt{app/app.js}.}
+        \label{lst:request_validation}
+    \end{code}
+
+    \begingroup
+    \small
+    \setlength{\tabcolsep}{4pt}
+    \renewcommand{\arraystretch}{1.2}
+    \begin{longtable}{@{}p{0.13\textwidth}p{0.22\textwidth}p{0.12\textwidth}p{0.19\textwidth}p{0.19\textwidth}@{}}
+        \caption{Hallazgos del análisis estático del caso base.}
+        \label{tab:hallazgos_codigo_base}\\
+        \toprule
+        \textbf{Hallazgo} & \textbf{Evidencia} & \textbf{QA afectados} & \textbf{Consecuencia posible} & \textbf{Validación propuesta} \\
+        \midrule
+        \endfirsthead
+        \toprule
+        \textbf{Hallazgo} & \textbf{Evidencia} & \textbf{QA afectados} & \textbf{Consecuencia posible} & \textbf{Validación propuesta} \\
+        \midrule
+        \endhead
+        Carrera concurrente & La verificación de saldo precede a dos operaciones asíncronas y el descuento ocurre después (Listado~\ref{lst:race_condition}). & Reliability, Security & Dos solicitudes pueden aprobarse con el mismo saldo y producir un balance negativo. & Ejecutar dos cambios concurrentes de 80 unidades contra un saldo interno de 100 y observar respuestas y saldo final. \\
+        \midrule
+        Estado mutable expuesto & Los getters de \texttt{state.js} retornan objetos que \texttt{exchange.js} conserva y modifica. & Modificabilidad, Testability, Reliability & Las actualizaciones eluden una interfaz de repositorio y dificultan sustituir o simular la persistencia. & Probar la lógica con un repositorio simulado y registrar qué dependencias deben reemplazarse. \\
+        \midrule
+        Log sin límite & Cada operación ejecuta \texttt{log.push}; \texttt{GET /log} retorna el arreglo completo (Listado~\ref{lst:log_growth}). & Performance, Scalability, Availability & Aumentan memoria, tamaño de respuesta y tiempo de serialización con cada operación. & Ejecutar lotes crecientes y medir memoria, bytes y latencia de \texttt{GET /log}. \\
+        \midrule
+        Reescritura completa & \texttt{scheduleSave} serializa y escribe el log completo cada segundo. & Performance, Efficiency, Reliability & El costo de I/O crece con el historial y una interrupción puede dejar el archivo incompleto. & Medir tamaño, tiempo de escritura y actividad de I/O para distintos volúmenes de log. \\
+        \midrule
+        Durabilidad diferida & Los cambios residen en memoria hasta el siguiente intervalo y la escritura no es atómica. & Reliability, Availability & Una terminación abrupta puede perder operaciones confirmadas o impedir cargar el JSON. & Terminar la API dentro de la ventana de persistencia, reiniciarla y comparar estado y log. \\
+        \midrule
+        Dinero con \texttt{Number} & El importe se obtiene mediante \texttt{baseAmount * exchangeRate} sin redondeo explícito (Listado~\ref{lst:floats}). & Reliability, Security & Pueden aparecer residuos decimales y acumularse diferencias en los saldos. & Utilizar valores como 0.1 y 0.2 y comparar contra un cálculo decimal exacto. \\
+        \midrule
+        Validación incompleta & La API solo verifica truthiness y acepta valores negativos o combinaciones incoherentes (Listado~\ref{lst:request_validation}). & Security, Reliability, Testability & Entradas inválidas pueden alterar saldos o provocar excepciones no controladas. & Crear casos con importes negativos, tipos incorrectos, monedas inexistentes y cuentas incompatibles. \\
+        \bottomrule
+    \end{longtable}
+    \endgroup
+
     \subsection{Infraestructura}
     \label{sec:infraestructura}
+
+    La infraestructura se define mediante Docker Compose. Nginx publica la API en el
+    puerto 5555; Grafana, Graphite/StatsD y cAdvisor conforman el subsistema de
+    observabilidad. La API no publica directamente su puerto al host, por lo que las
+    pruebas externas deben atravesar Nginx, tal como requiere el enunciado.
+
+    El estado de la API se copia dentro de la imagen y no está asociado a un volumen.
+    Por lo tanto, eliminar o recrear el contenedor descarta las modificaciones de sus
+    archivos JSON. Grafana sí utiliza un volumen, mientras que Graphite no declara uno
+    para conservar sus series. Estas decisiones limitan la durabilidad y la
+    reproducibilidad de las mediciones entre recreaciones del entorno.
+
+    \todo{Agregar evidencia de ejecución sobre recuperación, persistencia y funcionamiento de cAdvisor en el equipo de pruebas.}
 
 \section{Atributos de calidad}
 \label{sec:atributos_de_calidad}
@@ -188,14 +301,21 @@
                 Si bien el lanzamiento fue exitoso, comenzaron a aparecer reclamos de los usuarios sobre problemas en el uso de la función de cambio de monedas.
             \end{customenv}
 
-            Uno de los principales problemas que impulsaron esta review es el endpoint de /exchanges, como se mostro es (TODO) este considerablemente mas lento que el resto de endpoints, lo que podria implicar el descontento de los usuarios.
+            Uno de los principales candidatos a explicar los reclamos es el endpoint
+            \texttt{/exchange}. Una operación exitosa realiza dos transferencias
+            secuenciales de entre 200 y 400 milisegundos cada una, por lo que su tiempo
+            de respuesta esperado es mayor que el de los endpoints que solo consultan
+            memoria. Esta hipótesis debe contrastarse con las pruebas de carga.
 
             \begin{customenv}[frametitle=]
                 las tasas de cambio no tienen gap entre el valor de compra y de venta.
             \end{customenv}
 
-            Adicinalmente, el modelo de negocios es ofrecer una tasa de cambio sin gap, es decir en tiempo real.
-            Una performance pobre en esta operacion implicaria que las tasas podrian que tener que ajustarse negativamente en comparacion a lo que se le ofrece al usuario en primera instancia.
+            La ausencia de gap significa que la compra y la venta utilizan la misma
+            cotización; no implica por sí misma que la tasa se actualice en tiempo real.
+            Sin embargo, una latencia elevada aumenta el tiempo entre la cotización y
+            la finalización del cambio, y por ello incrementa el riesgo de operar con
+            un valor que ya no represente las condiciones vigentes.
 
         \subsubsection{Scalability (escalabilidad)}
         \label{sec:escalabilidad}
@@ -206,14 +326,21 @@
                 Para ganar usuarios, las tasas de cambio...
             \end{customenv}
 
-            Se especifica que objetivo a corto plaso es incrementar el numero de usuarios, el cual, el sistema debe ser capaz de manejar incorporando los recursos necesarios.
+            Se especifica que el objetivo a corto plazo es incrementar el número de
+            usuarios. El sistema debe poder acompañar ese crecimiento incorporando
+            recursos sin interrumpir el servicio ni exigir un esfuerzo inapropiado.
 
         \subsubsection{Reliability (confiabilidad)}
         \label{sec:confiabilidad}
 
             Grado en que la arquitectura es susceptible a fallas a nivel de sistema cuando se producen fallas parciales en componentes, conectores o datos.
 
-            \todo{TODO: justificar}
+            La confiabilidad es clave porque el servicio modifica saldos que representan
+            dinero. Una respuesta exitosa con un saldo incorrecto constituye una falla
+            aunque el proceso permanezca disponible. La condición de carrera y la
+            persistencia diferida identificadas en la Sección~\ref{sec:codigo} pueden
+            producir pérdida de operaciones confirmadas, balances negativos o un estado
+            distinto después de reiniciar el servicio.
 
         \subsubsection{Security (seguridad)}
         \label{sec:seguridad}
@@ -221,17 +348,22 @@
             Capacidad del sistema de prevenir acciones maliciosas o accidentales fuera del uso esperado.
 
             \begin{customenv}[frametitle=]
-                se valida que haya saldo en la cuenta del cliente, se espera que lo haga la UI
+                No se valida que haya saldo en la cuenta del cliente; se espera que lo haga la UI.
             \end{customenv}
 
-            La posibilidad de que los usuarios puedan realizar acciones maliciosas implican perdidas monetarias para el resto de usuarios, para la propia organizacion, ademas de una perdida de reputacion y con esto perdida de usuarios e inversiones.
+            Confiar en validaciones realizadas exclusivamente por el cliente permite que
+            un consumidor invoque directamente la API con valores inesperados. Aunque el
+            enunciado supone autenticación y autorización previas, esos mecanismos no
+            sustituyen la validación de tipos, rangos e invariantes de negocio. Una
+            operación inválida puede provocar pérdidas monetarias y reputacionales.
 
     \subsection{Otros QA menos relevantes}
     \label{sec:otros_qa_menos_relevantes}
 
-        Ademas se mencionan otros QA, que aunque no resulten claves y por ende no son una prioridad, son desceables, especialmente conforme el proyecto crezca.
+        Además se mencionan otros QA que, aunque no resulten claves y por ende no sean
+        una prioridad, son deseables, especialmente conforme el proyecto crezca.
 
-        \todo{TODO: busca en el enunciado o en la documentacion como justificar estos QA}
+        \todo{Buscar en el enunciado o en la documentación evidencia que justifique estos QA.}
 
         \subsubsection{Efficiency}
         \label{sec:eficiencia}
@@ -239,7 +371,7 @@
         Performance por recurso consumido.
 
         \subsubsection{Testability (testeabilidad)}
-        \label{sec:modificabilidad}
+        \label{sec:testeabilidad}
 
         Grado en que un componente/sistema de software permite ser probado para exhibir sus fallas; usualmente relacionado al esfuerzo necesario para llevar adelante las tareas de testing.
 
