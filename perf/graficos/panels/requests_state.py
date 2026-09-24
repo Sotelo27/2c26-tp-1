@@ -1,46 +1,37 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-from render import elapsed_seconds, format_short, legend_table, short_axis, time_axis
-from styles import AMARILLO_LIMITED, AZUL_GRAFANA, ROJO_GRAFANA, VERDE_COMPLETED
-from transforms import sum_series
+from render import format_short, legend_table, plot_series, short_axis, time_axis
+from styles import FIJO_AMARILLO, FIJO_AZUL, FIJO_ROJO, FIJO_VERDE
+from transforms import sum_matching
 
 SERVER = "stats.gauges.artillery-api"
+CODES = f"{SERVER}.codes."
 
 def generate_requests_state_plot(artillery_dataframe: pd.DataFrame, meta: dict, output_path: str):
-    targets = [
-        ("Errored", ROJO_GRAFANA, sum_series(artillery_dataframe, f"{SERVER}.errors.")),
-        ("Completed", VERDE_COMPLETED, artillery_dataframe.get(f"{SERVER}.codes.200")),
-        ("Pending", AZUL_GRAFANA, artillery_dataframe.get(f"{SERVER}.pendingRequests")),
-        ("Limited", AMARILLO_LIMITED, artillery_dataframe.get(f"{SERVER}.codes.429")),
+    pending = artillery_dataframe.get(f"{SERVER}.pendingRequests", pd.Series(dtype=float))
+    izq = [
+        ("Completed", FIJO_VERDE, sum_matching(artillery_dataframe, CODES, r"\.[1-3][0-9]{2}$")),
+        ("Limited", FIJO_AMARILLO, sum_matching(artillery_dataframe, CODES, r"\.4[0-9]{2}$")),
+        ("Failed", FIJO_ROJO, sum_matching(artillery_dataframe, CODES, r"\.5[0-9]{2}$")),
     ]
-    series = [(label, color, s) for label, color, s in targets if s is not None and not s.empty]
-
-    frame = pd.DataFrame({label: s for label, _, s in series}).dropna(how="all")
-    levels = frame.fillna(0).cumsum(axis=1)
-    seconds = elapsed_seconds(levels.index, meta["start"])
 
     fig, ax = plt.subplots(figsize=(10, 3))
 
-    lower = 0.0
-    for label, color, _ in series:
-        upper = levels[label]
-        ax.fill_between(seconds, lower, upper, color=color, alpha=0.7)
-        ax.plot(
-            seconds,
-            upper,
-            label=label,
-            color=color,
-            marker="o",
-            markersize=4,
-            linewidth=1,
-        )
-        lower = upper
+    for label, color, values in izq:
+        plot_series(ax, values, meta, label, color)
+
+    if not pending.dropna().empty:
+        derecha = ax.twinx()
+        plot_series(derecha, pending, meta, "Pending", FIJO_AZUL)
+        short_axis(derecha)
+        ax.set_zorder(derecha.get_zorder() + 1)
+        ax.patch.set_visible(False)
 
     time_axis(ax, meta)
     short_axis(ax)
-    legend_table(ax, [(label, color, frame[label]) for label, color, _ in series], format_short)
+    legend_table(ax, [("Pending", FIJO_AZUL, pending)] + izq, format_short)
 
-    ax.set_title("Requests state (stacked)")
+    ax.set_title("Requests State")
     ax.grid(True, linestyle="--", alpha=0.3)
 
     fig.savefig(f"{output_path}/requests_state.pdf", format="pdf", bbox_inches="tight")
