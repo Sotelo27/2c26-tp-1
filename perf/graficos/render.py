@@ -169,7 +169,7 @@ def log_ms_axis(ax):
 def currency_axis(ax):
     value_axis(ax, format_currency, bottom=None)
 
-def legend_table(ax, entries: list[tuple[str, str, pd.Series]], formatter=format_percent):
+def legend_table(ax, entries: list[tuple[str, str, pd.Series]], formatter=format_percent, anchor_x=1.02):
     visible = [(name, color, series.dropna()) for name, color, series in entries]
     visible = [entry for entry in visible if not entry[2].empty]
     if not visible:
@@ -199,7 +199,7 @@ def legend_table(ax, entries: list[tuple[str, str, pd.Series]], formatter=format
         handles,
         labels,
         loc="upper left",
-        bbox_to_anchor=(1.02, 1.0),
+        bbox_to_anchor=(anchor_x, 1.0),
         frameon=False,
         handlelength=1.2,
         prop={"family": "monospace", "size": 8},

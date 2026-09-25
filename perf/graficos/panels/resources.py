@@ -8,7 +8,8 @@ CONTAINER = "stats.gauges.cadvisor.exchange-api-1"
 MEMORY_4GB = 4_294_967_296
 NS_POR_CORE_SEGUNDO = 1_000_000_000
 BUCKET_SEGUNDOS = 10
-# Todo mover memoria al eje derecho
+LEYENDA_X = 1.08
+
 def generate_resources_plot(cadvisor_dataframe: pd.DataFrame, meta: dict, output_path: str):
     cpu = cadvisor_dataframe[f"{CONTAINER}.cpu_cumulative_usage"].copy()
     memory = cadvisor_dataframe[f"{CONTAINER}.memory_working_set"].copy()
@@ -24,13 +25,15 @@ def generate_resources_plot(cadvisor_dataframe: pd.DataFrame, meta: dict, output
     ]
 
     fig, ax = plt.subplots(figsize=(10, 3))
+    memory_ax = ax.twinx()
 
-    for label, color, values in series:
-        plot_series(ax, values, meta, label, color)
+    plot_series(ax, cpu, meta, "CPU", FIJO_VERDE)
+    plot_series(memory_ax, memory, meta, "Memory", FIJO_AMARILLO)
 
     time_axis(ax, meta)
     percent_axis(ax)
-    legend_table(ax, series)
+    percent_axis(memory_ax)
+    legend_table(ax, series, anchor_x=LEYENDA_X)
 
     ax.set_title("Resources")
     ax.grid(True, linestyle="--", alpha=0.3)

@@ -7,7 +7,7 @@ from transforms import alias_by_node, exclude, remove_below_value
 LATENCY = "stats.timers.exchange.latency."
 PERCENTIL = ".upper_95"
 EXCLUIDO = "accounts_balance"
-# Todo aclarar que es P95
+
 def generate_endpoint_response_time_plot(latency_dataframe: pd.DataFrame, meta: dict, output_path: str):
     series = [
         (name, color_clasico(i), values)
@@ -25,7 +25,7 @@ def generate_endpoint_response_time_plot(latency_dataframe: pd.DataFrame, meta: 
     log_ms_axis(ax)
     legend_table(ax, series, format_duration_ms)
 
-    ax.set_title("Response Time by Endpoint (server-side)")
+    ax.set_title("Response Time by Endpoint (server-side) (P95)")
     ax.grid(True, linestyle="--", alpha=0.3)
 
     fig.savefig(f"{output_path}/endpoint_response_time.pdf", format="pdf", bbox_inches="tight")

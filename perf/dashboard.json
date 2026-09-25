@@ -455,7 +455,7 @@
           "textEditor": false
         }
       ],
-      "title": "Response Time by Endpoint (server-side)",
+      "title": "Response Time by Endpoint (server-side) (P95)",
       "type": "timeseries"
     },
     {
@@ -720,6 +720,10 @@
                   "fixedColor": "yellow",
                   "mode": "fixed"
                 }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
               }
             ]
           },
@@ -1086,13 +1090,13 @@
     ]
   },
   "time": {
-    "from": "2026-09-25T04:50:51.000Z",
-    "to": "2026-09-25T04:54:57.000Z"
+    "from": "now-48m",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Main dashboard Copy2",
   "uid": "afz3shkkexgjkf2",
-  "version": 3,
+  "version": 4,
   "weekStart": ""
 }
