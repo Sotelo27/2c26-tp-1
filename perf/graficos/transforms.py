@@ -1,18 +1,14 @@
 import re
 import pandas as pd
-import numpy as np
 
-def keep_last_value(series: pd.Series, limit: int = 100) -> pd.Series:
-    return series.ffill(limit=limit)
+def bucket_max_rate(series: pd.Series, seconds: int = 10) -> pd.Series:
+    return series.dropna().resample(f"{seconds}s").max().diff() / seconds
 
-def derivative(series: pd.Series) -> pd.Series:
-    return series.diff()
+def integral(series: pd.Series) -> pd.Series:
+    return series.fillna(0.0).cumsum().where(series.notna())
 
 def as_percent(series: pd.Series, max_value: float) -> pd.Series:
     return (series / max_value) * 100.0
-
-def remove_below_value(series: pd.Series, threshold: float = 0.0001) -> pd.Series:
-    return series.mask(series < threshold, np.nan)
 
 def alias_by_metric(dataframe: pd.DataFrame, prefix: str) -> list[tuple[str, pd.Series]]:
     columns = [

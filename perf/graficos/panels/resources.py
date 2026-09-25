@@ -2,21 +2,21 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from render import legend_table, percent_axis, plot_series, time_axis
 from styles import FIJO_AMARILLO, FIJO_VERDE
-from transforms import keep_last_value, derivative, as_percent, remove_below_value
+from transforms import bucket_max_rate, as_percent
 
 CONTAINER = "stats.gauges.cadvisor.exchange-api-1"
-MEMORY_2GB = 2_147_483_648
+MEMORY_4GB = 4_294_967_296
+NS_POR_CORE_SEGUNDO = 1_000_000_000
+BUCKET_SEGUNDOS = 10
 
 def generate_resources_plot(cadvisor_dataframe: pd.DataFrame, meta: dict, output_path: str):
     cpu = cadvisor_dataframe[f"{CONTAINER}.cpu_cumulative_usage"].copy()
     memory = cadvisor_dataframe[f"{CONTAINER}.memory_working_set"].copy()
 
-    cpu = keep_last_value(cpu, 100)
-    cpu = derivative(cpu)
-    cpu = as_percent(cpu, 10_000_000_000)
-    cpu = remove_below_value(cpu, 0.0001)
+    cpu = bucket_max_rate(cpu, BUCKET_SEGUNDOS)
+    cpu = as_percent(cpu, NS_POR_CORE_SEGUNDO)
 
-    memory = as_percent(memory, max_value=MEMORY_2GB)
+    memory = as_percent(memory, max_value=MEMORY_4GB)
 
     series = [
         ("CPU", FIJO_VERDE, cpu),

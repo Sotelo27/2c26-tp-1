@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-from render import format_ms, legend_table, ms_axis, plot_series, time_axis
+from render import format_duration_ms, legend_table, ms_axis, plot_series, time_axis
 from styles import FIJO_AMARILLO, FIJO_ROJO, FIJO_VERDE
 
 SERVER = "stats.gauges.artillery-api"
@@ -19,7 +19,7 @@ def generate_response_time_plot(artillery_dataframe: pd.DataFrame, meta: dict, o
 
     time_axis(ax, meta)
     ms_axis(ax)
-    legend_table(ax, series, format_ms)
+    legend_table(ax, series, format_duration_ms)
 
     ax.set_title("Response Time (client-side)")
     ax.grid(True, linestyle="--", alpha=0.3)

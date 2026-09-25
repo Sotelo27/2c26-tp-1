@@ -9,7 +9,7 @@ start=$(date +%s)
 npm run artillery -- run "${scenario}.yaml" -e "$env" --output "$data_dir/report.json"
 end=$(date +%s)
 
-sleep 2
+sleep 10
 
 curl -s "http://localhost:8090/render?target=stats.gauges.artillery-api.**&format=json&from=${start}&until=${end}" -o "$data_dir/artillery.json"
 
