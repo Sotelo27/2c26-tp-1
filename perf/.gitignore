@@ -1,4 +1,5 @@
 node_modules
 graficos/.venv
 graficos/data
+graficos/figures
 __pycache__/
