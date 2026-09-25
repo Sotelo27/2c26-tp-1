@@ -157,6 +157,15 @@ def ms_axis(ax):
 def short_axis(ax):
     value_axis(ax, format_short)
 
+def log_axis(ax, tick_format):
+    ax.set_yscale("log")
+    ax.yaxis.set_major_locator(mticker.LogLocator(base=10))
+    ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: tick_format(v)))
+    ax.yaxis.set_minor_formatter(mticker.NullFormatter())
+
+def log_ms_axis(ax):
+    log_axis(ax, format_duration_ms)
+
 def currency_axis(ax):
     value_axis(ax, format_currency, bottom=None)
 

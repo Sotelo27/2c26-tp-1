@@ -1,5 +1,6 @@
 import express from "express";
 
+import { logEndpoint } from "./endpoint_metrics.js";
 import {
   init as exchangeInit,
   getAccounts,
@@ -15,6 +16,7 @@ await exchangeInit();
 const app = express();
 const port = 3000;
 
+app.use(logEndpoint);
 app.use(express.json());
 
 // ACCOUNT endpoints

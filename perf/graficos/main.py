@@ -5,10 +5,12 @@ from loaders import (
     load_artillery_dataframe,
     load_cadvisor_dataframe,
     load_currency_dataframe,
+    load_latency_dataframe,
     load_meta,
 )
 from styles import apply_latex_style
 from panels.currency import generate_currency_plot, generate_net_currency_plot
+from panels.endpoint_response_time import generate_endpoint_response_time_plot
 from panels.requests_state import generate_requests_state_plot
 from panels.resources import generate_resources_plot
 from panels.response_time import generate_response_time_plot
@@ -31,12 +33,14 @@ def main():
     cadvisor_dataframe = load_cadvisor_dataframe(os.path.join(DATA_DIR, scenario, 'cadvisor.json'))
     artillery_dataframe = load_artillery_dataframe(os.path.join(DATA_DIR, scenario, 'artillery.json'))
     currency_dataframe = load_currency_dataframe(os.path.join(DATA_DIR, scenario, 'currency.json'))
+    latency_dataframe = load_latency_dataframe(os.path.join(DATA_DIR, scenario, 'latency.json'))
 
     output_path = os.path.join(FIGURES_DIR, scenario)
     os.makedirs(output_path, exist_ok=True)
     apply_latex_style()
     generate_resources_plot(cadvisor_dataframe, meta, output_path)
     generate_response_time_plot(artillery_dataframe, meta, output_path)
+    generate_endpoint_response_time_plot(latency_dataframe, meta, output_path)
     generate_requests_state_plot(artillery_dataframe, meta, output_path)
     generate_scenarios_plot(artillery_dataframe, meta, output_path)
     generate_currency_plot(currency_dataframe, meta, output_path)

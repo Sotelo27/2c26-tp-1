@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 10,
   "links": [],
   "panels": [
     {
@@ -271,60 +271,20 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byName",
-              "options": "Completed"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
+              "id": "byValue",
+              "options": {
+                "op": "gte",
+                "reducer": "allIsNull",
+                "value": 0
               }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*Limited.*"
             },
             "properties": [
               {
-                "id": "color",
+                "id": "custom.hideFrom",
                 "value": {
-                  "fixedColor": "yellow",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*Failed.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*Pending.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "blue",
-                  "mode": "fixed"
+                  "legend": true,
+                  "tooltip": true,
+                  "viz": false
                 }
               }
             ]
@@ -337,7 +297,132 @@
         "x": 12,
         "y": 0
       },
-      "id": 5,
+      "id": 4,
+      "options": {
+        "alertThreshold": true,
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "width": 250
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.10",
+      "targets": [
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "afyhkp3g9xu68e"
+          },
+          "refCount": 0,
+          "refId": "B",
+          "target": "aliasByMetric(stats.gauges.$server.scenarioCounts.*)",
+          "textEditor": false
+        }
+      ],
+      "title": "Scenarios Launched",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "graphite",
+        "uid": "afyhkp3g9xu68e"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 12,
+            "scaleDistribution": {
+              "log": 2,
+              "type": "log"
+            },
+            "showPoints": "always",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byValue",
+              "options": {
+                "op": "gte",
+                "reducer": "allIsNull",
+                "value": 0
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": true,
+                  "viz": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 7
+      },
+      "id": 8,
       "options": {
         "alertThreshold": true,
         "legend": {
@@ -366,33 +451,11 @@
           },
           "refCount": 0,
           "refId": "A",
-          "target": "alias(diffSeries(integral(stats.gauges.$server.scenariosCreated), integral(sumSeries(stats.gauges.$server.scenariosCompleted, stats.gauges.$server.scenariosAvoided, stats.gauges.$server.errors.*))), 'Pending')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "afyhkp3g9xu68e"
-          },
-          "refCount": 0,
-          "refId": "B",
-          "target": "alias(sumSeries(grep(stats.gauges.$server.codes.*, '\\.[1-3][0-9]{2}$')), 'Completed')"
-        },
-        {
-          "datasource": {
-            "type": "graphite",
-            "uid": "afyhkp3g9xu68e"
-          },
-          "refCount": 0,
-          "refId": "C",
-          "target": "alias(sumSeries(grep(stats.gauges.$server.codes.*, '\\.4[0-9]{2}$')), 'Limited')"
-        },
-        {
-          "refCount": 0,
-          "refId": "D",
-          "target": "alias(sumSeries(grep(stats.gauges.$server.codes.*, '\\.5[0-9]{2}$'), sumSeries(stats.gauges.$server.errors.*)), 'Failed')"
+          "target": "aliasByNode(exclude(stats.timers.exchange.latency.*.upper_95, 'accounts_balance'), 4)",
+          "textEditor": false
         }
       ],
-      "title": "Requests State",
+      "title": "Response Time by Endpoint (server-side)",
       "type": "timeseries"
     },
     {
@@ -457,20 +520,60 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byValue",
-              "options": {
-                "op": "gte",
-                "reducer": "allIsNull",
-                "value": 0
-              }
+              "id": "byName",
+              "options": "Completed"
             },
             "properties": [
               {
-                "id": "custom.hideFrom",
+                "id": "color",
                 "value": {
-                  "legend": true,
-                  "tooltip": true,
-                  "viz": false
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Limited.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Failed.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Pending.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
                 }
               }
             ]
@@ -480,10 +583,10 @@
       "gridPos": {
         "h": 7,
         "w": 12,
-        "x": 0,
+        "x": 12,
         "y": 7
       },
-      "id": 4,
+      "id": 5,
       "options": {
         "alertThreshold": true,
         "legend": {
@@ -511,12 +614,34 @@
             "uid": "afyhkp3g9xu68e"
           },
           "refCount": 0,
+          "refId": "A",
+          "target": "alias(diffSeries(integral(stats.gauges.$server.scenariosCreated), integral(sumSeries(stats.gauges.$server.scenariosCompleted, stats.gauges.$server.scenariosAvoided, stats.gauges.$server.errors.*))), 'Pending')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "afyhkp3g9xu68e"
+          },
+          "refCount": 0,
           "refId": "B",
-          "target": "aliasByMetric(stats.gauges.$server.scenarioCounts.*)",
-          "textEditor": false
+          "target": "alias(sumSeries(grep(stats.gauges.$server.codes.*, '\\.[1-3][0-9]{2}$')), 'Completed')"
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "afyhkp3g9xu68e"
+          },
+          "refCount": 0,
+          "refId": "C",
+          "target": "alias(sumSeries(grep(stats.gauges.$server.codes.*, '\\.4[0-9]{2}$')), 'Limited')"
+        },
+        {
+          "refCount": 0,
+          "refId": "D",
+          "target": "alias(sumSeries(grep(stats.gauges.$server.codes.*, '\\.5[0-9]{2}$'), sumSeries(stats.gauges.$server.errors.*)), 'Failed')"
         }
       ],
-      "title": "Scenarios Launched",
+      "title": "Requests State",
       "type": "timeseries"
     },
     {
@@ -636,10 +761,10 @@
         ]
       },
       "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 7
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 14
       },
       "id": 1,
       "options": {
@@ -752,7 +877,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 14
+        "y": 23
       },
       "id": 6,
       "options": {
@@ -844,7 +969,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 14
+        "y": 23
       },
       "id": 7,
       "options": {
@@ -961,13 +1086,13 @@
     ]
   },
   "time": {
-    "from": "now-5m",
-    "to": "now"
+    "from": "2026-09-25T04:50:51.000Z",
+    "to": "2026-09-25T04:54:57.000Z"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Main dashboard Copy",
-  "uid": "afz3shkkexgjkf",
-  "version": 2,
+  "title": "Main dashboard Copy2",
+  "uid": "afz3shkkexgjkf2",
+  "version": 3,
   "weekStart": ""
 }

@@ -1,0 +1,91 @@
+before:
+  flow:
+    - put:
+        url: '/accounts/1/balance'
+        json: { balance: 1000000000000000 }
+    - put:
+        url: '/accounts/2/balance'
+        json: { balance: 1000000000000000 }
+    - put:
+        url: '/accounts/3/balance'
+        json: { balance: 1000000000000000 }
+    - put:
+        url: '/accounts/4/balance'
+        json: { balance: 1000000000000000 }
+
+config:
+  plugins:
+    metrics-by-endpoint: {}
+
+  environments:
+    api:
+      target: 'http://localhost:5555'
+      plugins:
+        statsd:
+          host: localhost
+          port: 8125
+          prefix: "artillery-api"
+
+  pool: 1000
+
+  http:
+    timeout: 10
+
+  phases:
+    - name: Warmup
+      duration: 30
+      arrivalRate: 5
+
+    - name: Plain 40
+      duration: 45
+      arrivalRate: 40
+    - name: Plain 60
+      duration: 45
+      arrivalRate: 60
+    - name: Plain 80
+      duration: 45
+      arrivalRate: 80
+    - name: Plain 100
+      duration: 45
+      arrivalRate: 100
+    - name: Plain 120
+      duration: 45
+      arrivalRate: 120
+    - name: Plain 140
+      duration: 45
+      arrivalRate: 140
+    - name: Plain 160
+      duration: 45
+      arrivalRate: 160
+    - name: Plain 180
+      duration: 45
+      arrivalRate: 180
+
+    - name: Plain 5
+      duration: 60
+      arrivalRate: 5
+
+scenarios:
+  - name: exchange
+    weight: 60
+    flow:
+      - post:
+          url: '/exchange'
+          json:
+            baseCurrency: 'ARS'
+            counterCurrency: 'USD'
+            baseAccountId: 'cli-ARS'
+            counterAccountId: 'cli-USD'
+            baseAmount: 100000
+
+  - name: log
+    weight: 25
+    flow:
+      - get:
+          url: '/log'
+
+  - name: rates
+    weight: 15
+    flow:
+      - get:
+          url: '/rates'

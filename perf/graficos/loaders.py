@@ -10,6 +10,9 @@ def load_artillery_dataframe(file_path: str) -> pd.DataFrame:
 def load_currency_dataframe(file_path: str) -> pd.DataFrame:
     return load_raw_json_to_dataframe(file_path)
 
+def load_latency_dataframe(file_path: str) -> pd.DataFrame:
+    return load_raw_json_to_dataframe(file_path)
+
 def load_meta(file_path: str) -> dict:
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -25,5 +28,5 @@ def load_raw_json_to_dataframe(file_path: str) -> pd.DataFrame:
             temp_df = pd.DataFrame(datapoints, columns=[name, "timestamp"])
             temp_df["timestamp"] = pd.to_datetime(temp_df["timestamp"], unit="s")
             temp_df.set_index("timestamp", inplace=True)
-            series_dict[name] = temp_df[name]
+            series_dict[name] = pd.to_numeric(temp_df[name], errors="coerce")
     return pd.DataFrame(series_dict)
