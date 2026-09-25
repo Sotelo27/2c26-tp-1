@@ -8,7 +8,7 @@ CONTAINER = "stats.gauges.cadvisor.exchange-api-1"
 MEMORY_4GB = 4_294_967_296
 NS_POR_CORE_SEGUNDO = 1_000_000_000
 BUCKET_SEGUNDOS = 10
-
+# Todo mover memoria al eje derecho
 def generate_resources_plot(cadvisor_dataframe: pd.DataFrame, meta: dict, output_path: str):
     cpu = cadvisor_dataframe[f"{CONTAINER}.cpu_cumulative_usage"].copy()
     memory = cadvisor_dataframe[f"{CONTAINER}.memory_working_set"].copy()

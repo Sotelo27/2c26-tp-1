@@ -33,36 +33,15 @@ config:
 
   phases:
     - name: Warmup
-      duration: 30
+      duration: 60
       arrivalRate: 5
 
-    - name: Plain 40
-      duration: 45
+    - name: Soak
+      duration: 2700
       arrivalRate: 40
-    - name: Plain 60
-      duration: 45
-      arrivalRate: 60
-    - name: Plain 80
-      duration: 45
-      arrivalRate: 80
-    - name: Plain 100
-      duration: 45
-      arrivalRate: 100
-    - name: Plain 120
-      duration: 45
-      arrivalRate: 120
-    - name: Plain 140
-      duration: 45
-      arrivalRate: 140
-    - name: Plain 160
-      duration: 45
-      arrivalRate: 160
-    - name: Plain 180
-      duration: 45
-      arrivalRate: 180
 
     - name: Recovery
-      duration: 60
+      duration: 120
       arrivalRate: 5
 
 scenarios:
