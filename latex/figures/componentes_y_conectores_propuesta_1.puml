@@ -1,0 +1,75 @@
+@startuml componentes_y_conectores_propuesta_1
+left to right direction
+
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam componentStyle uml2
+skinparam ArrowFontSize 10
+skinparam ArrowColor #2B4C17
+
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #37474F
+    FontColor #212121
+}
+skinparam component<<externo>> {
+    BackgroundColor #F5F5F5
+    BorderColor #9E9E9E
+    FontColor #616161
+}
+skinparam database {
+    BackgroundColor #FFFFFF
+    BorderColor #37474F
+}
+skinparam rectangle {
+    BackgroundColor #E3E8E1
+    BorderColor #E3E8E1
+    FontColor #E3E8E1
+}
+skinparam package {
+    BackgroundColor #E3E8E1
+    BorderColor #2B4C17
+    FontColor #2B4C17
+}
+
+component "Cliente arVault" as Cliente <<externo>>
+component "Autenticación / Autorización" as Auth <<externo>>
+
+package "Servicio de Cambio de Monedas" {
+    component "nginx (proxy)\nport: 5555->80" as Nginx
+    package "exchange-api" as Api {
+        component "API REST (Express)\nport: 3000" as Rest
+        component "exchange.js" as Logica
+        component "state.js" as Estado
+    }
+    rectangle " " as Storage {
+        database "accounts.json\nrates.json" as Json
+    }
+    package "log-api" as LogApi {
+        component "API REST (Express)\nport: 3001" as LogRest
+        component "log.js" as LogLogica
+    }
+    rectangle " " as LogStorage {
+        database "log.json" as LogJson
+    }
+}
+
+component "Servicio de Transferencia de Fondos" as Transferencia <<externo>>
+
+Cliente --> Auth : **HTTP**
+Auth --> Nginx : **HTTP**
+Nginx --> Rest : **HTTP**
+Nginx --> LogRest : **HTTP**
+LogRest --> LogLogica
+LogLogica --> LogJson : append()
+LogJson -left-> LogLogica : stream()
+Rest --> Logica
+Logica -[norank,dashed]-> LogLogica : **TCP**
+Logica --> Estado : getAccounts()\ngetRates()\n
+Estado --> Json : save()\nscheduleSave()
+Json -left-> Estado : load()
+Logica "transfer()" -[norank,dashed]-> Transferencia
+Rest -[hidden]-> Transferencia
+
+@enduml

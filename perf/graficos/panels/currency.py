@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-from render import currency_axis, legend_list, plot_stacked_bars, time_axis
+from render import currency_axis, format_currency, legend_table, plot_stacked_bars, time_axis
 from styles import color_clasico
 from transforms import alias_by_metric
 
@@ -29,7 +29,7 @@ def _generate_currency_plot(currency_dataframe, meta, output_path, prefix, title
 
     time_axis(ax, meta)
     currency_axis(ax)
-    legend_list(ax, series)
+    legend_table(ax, series, format_currency, calcs=("sum", "mean", "max"))
 
     ax.set_title(title)
     ax.set_axisbelow(True)

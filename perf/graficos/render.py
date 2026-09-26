@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from decimal import Decimal, ROUND_HALF_UP
 from matplotlib.lines import Line2D
-from matplotlib.patches import Patch
 
 MARKER_SIZE = 4
 LINE_WIDTH = 1
@@ -169,7 +168,20 @@ def log_ms_axis(ax):
 def currency_axis(ax):
     value_axis(ax, format_currency, bottom=None)
 
-def legend_table(ax, entries: list[tuple[str, str, pd.Series]], formatter=format_percent, anchor_x=1.02):
+CALCULOS_LEYENDA = {
+    "sum": ("Total", lambda valid: valid.sum()),
+    "mean": ("Mean", lambda valid: valid.mean()),
+    "lastNotNull": ("Last *", lambda valid: valid.iloc[-1]),
+    "max": ("Max", lambda valid: valid.max()),
+}
+
+def legend_table(
+    ax,
+    entries: list[tuple[str, str, pd.Series]],
+    formatter=format_percent,
+    anchor_x=1.02,
+    calcs=("mean", "lastNotNull", "max"),
+):
     visible = [(name, color, series.dropna()) for name, color, series in entries]
     visible = [entry for entry in visible if not entry[2].empty]
     if not visible:
@@ -177,15 +189,10 @@ def legend_table(ax, entries: list[tuple[str, str, pd.Series]], formatter=format
 
     rows = []
     for name, _, valid in visible:
-        rows.append((
-            name,
-            formatter(valid.mean()),
-            formatter(valid.iloc[-1]),
-            formatter(valid.max()),
-        ))
+        rows.append((name, *(formatter(CALCULOS_LEYENDA[calc][1](valid)) for calc in calcs)))
 
-    headers = ("Name", "Mean", "Last *", "Max")
-    widths = [max(len(headers[i]), *(len(row[i]) for row in rows)) for i in range(4)]
+    headers = ("Name", *(CALCULOS_LEYENDA[calc][0] for calc in calcs))
+    widths = [max(len(headers[i]), *(len(row[i]) for row in rows)) for i in range(len(headers))]
     def line(cells):
         return "  ".join(c.ljust(w) for c, w in zip(cells, widths))
 
@@ -203,17 +210,4 @@ def legend_table(ax, entries: list[tuple[str, str, pd.Series]], formatter=format
         frameon=False,
         handlelength=1.2,
         prop={"family": "monospace", "size": 8},
-    )
-
-def legend_list(ax, entries: list[tuple[str, str, pd.Series]]):
-    if not entries:
-        return
-    ax.legend(
-        [Patch(color=color) for _, color, _ in entries],
-        [name for name, _, _ in entries],
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.2),
-        ncol=len(entries),
-        frameon=False,
-        prop={"size": 8},
     )
