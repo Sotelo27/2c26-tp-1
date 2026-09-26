@@ -1,12 +1,14 @@
 #!/bin/sh
 scenario=$1
 env=$2
-data_dir="graficos/data/${scenario}_$(date +%s)"
+services="api nginx"
+branch=$(git -C "$(dirname "$0")" rev-parse --abbrev-ref HEAD | tr '/' '-')
+data_dir="graficos/data/${branch}_${scenario}_$(date +%s)"
 mkdir -p "$data_dir"
 
 # /perf$ ./run-scenario.sh rates api
 
-(cd "$(dirname "$0")/.." && docker compose up -d --force-recreate api) || exit 1
+(cd "$(dirname "$0")/.." && docker compose up -d --build --force-recreate --remove-orphans $services) || exit 1
 
 i=0
 until curl -sf -o /dev/null http://localhost:5555/rates; do
@@ -32,4 +34,4 @@ curl -s "http://localhost:8090/render?target=stats_counts.exchange.**&format=jso
 
 curl -s "http://localhost:8090/render?target=stats.timers.exchange.**&format=json&from=${start}&until=${end}" -o "$data_dir/latency.json"
 
-printf '{"scenario":"%s","start":%s,"end":%s}\n' "$scenario" "$start" "$end" > "$data_dir/meta.json"
+printf '{"scenario":"%s","branch":"%s","start":%s,"end":%s}\n' "$scenario" "$branch" "$start" "$end" > "$data_dir/meta.json"
