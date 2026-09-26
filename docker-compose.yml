@@ -1,6 +1,19 @@
 services:
     api:
         build: ./app
+        depends_on:
+            - log-api
+        deploy:
+            resources:
+                limits:
+                    cpus: '1.0'
+                    memory: 4G
+                reservations:
+                    memory: 1G
+    
+    log-api:
+        build: ./app
+        entrypoint: ["node", "app_log.js"]
         deploy:
             resources:
                 limits:
@@ -18,6 +31,7 @@ services:
             - ./store/static/files:/static:ro
         links:
             - api
+            - log-api
 
     graphite:
         image: graphiteapp/graphite-statsd:1.1.10-5

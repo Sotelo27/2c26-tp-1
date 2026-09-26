@@ -1,19 +1,39 @@
 import { nanoid } from "nanoid";
 
-import { init as stateInit, getAccounts as stateAccounts, getRates as stateRates, getLog as stateLog } from "./state.js";
+import { init as stateInit, getAccounts as stateAccounts, getRates as stateRates } from "./state.js";
 import { logVolume, logNet } from "./currency_metrics.js";
+import net from "net";
 
 let accounts;
 let rates;
-let log;
+let clientLogSocket;
 
 //call to initialize the exchange service
 export async function init() {
   await stateInit();
 
+  while (!clientLogSocket) {
+    clientLogSocket = await initClientLogSocket("log-api", 3002);
+    if (!clientLogSocket) {
+      await new Promise(res => setTimeout(res, 1000));
+    }
+  }
+
   accounts = stateAccounts();
   rates = stateRates();
-  log = stateLog();
+}
+
+function initClientLogSocket(host, port) {
+  return new Promise((resolve) => {
+    const socket = net.createConnection({ host, port }, () => {
+      resolve(socket);
+    });
+
+    socket.on('error', () => {
+      socket.destroy();
+      resolve(null);
+    });
+  });
 }
 
 //returns all internal accounts
@@ -33,11 +53,6 @@ export function setAccountBalance(accountId, balance) {
 //returns all current exchange rates
 export function getRates() {
   return rates;
-}
-
-//returns the whole transaction log
-export function getLog() {
-  return log;
 }
 
 //sets the exchange rate for a given pair of currencies, and the reciprocal rate as well
@@ -114,7 +129,7 @@ export async function exchange(exchangeRequest) {
   }
 
   //log the transaction and return it
-  log.push(exchangeResult);
+  clientLogSocket.write(JSON.stringify(exchangeResult) + "\n");
 
   return exchangeResult;
 }

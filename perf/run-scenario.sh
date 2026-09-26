@@ -1,7 +1,7 @@
 #!/bin/sh
 scenario=$1
 env=$2
-services="api nginx"
+services="api log-api nginx"
 branch=$(git -C "$(dirname "$0")" rev-parse --abbrev-ref HEAD | tr '/' '-')
 data_dir="graficos/data/${branch}_${scenario}_$(date +%s)"
 mkdir -p "$data_dir"

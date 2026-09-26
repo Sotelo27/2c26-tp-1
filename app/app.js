@@ -7,7 +7,6 @@ import {
   setAccountBalance,
   getRates,
   setRate,
-  getLog,
   exchange,
 } from "./exchange.js";
 
@@ -55,12 +54,6 @@ app.put("/rates", (req, res) => {
   setRate(newRateRequest);
 
   res.json(getRates());
-});
-
-// LOG endpoint
-
-app.get("/log", (req, res) => {
-  res.json(getLog());
 });
 
 // EXCHANGE endpoint

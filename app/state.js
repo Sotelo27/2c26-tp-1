@@ -4,23 +4,19 @@ import fs from "fs";
 
 let accounts = null;
 let rates = null;
-let log = null;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const ACCOUNTS = "./state/accounts.json";
 const RATES = "./state/rates.json";
-const LOG = "./state/log.json";
 
 export async function init() {
   accounts = await load(ACCOUNTS);
   rates = await load(RATES);
-  log = await load(LOG);
 
   scheduleSave(accounts, ACCOUNTS, 1000);
   scheduleSave(rates, RATES, 5000);
-  scheduleSave(log, LOG, 1000);
 }
 
 export function getAccounts() {
@@ -29,10 +25,6 @@ export function getAccounts() {
 
 export function getRates() {
   return rates;
-}
-
-export function getLog() {
-  return log;
 }
 
 async function load(fileName) {
