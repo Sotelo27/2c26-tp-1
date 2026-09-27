@@ -9,6 +9,30 @@ services:
                 reservations:
                     memory: 1G
 
+    watchdog-1:
+        build: ./app
+        entrypoint: ["node", "watchdog.js"]
+        environment:
+            - ID=1
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+
+    watchdog-2:
+        build: ./app
+        entrypoint: ["node", "watchdog.js"]
+        environment:
+            - ID=2
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+
+    watchdog-3:
+        build: ./app
+        entrypoint: ["node", "watchdog.js"]
+        environment:
+            - ID=3
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+
     nginx:
         image: nginx:1.29.8
         ports:

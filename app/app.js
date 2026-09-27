@@ -1,6 +1,7 @@
 import express from "express";
 
 import { logEndpoint } from "./endpoint_metrics.js";
+import { startHeartbeat } from "./heartbeat.js";
 import {
   init as exchangeInit,
   getAccounts,
@@ -96,6 +97,7 @@ app.post("/exchange", async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Exchange API listening on port ${port}`);
+  startHeartbeat();
 });
 
 export default app;
