@@ -10,7 +10,10 @@ ERRORS = f"{SERVER}.errors."
 
 def generate_requests_state_plot(artillery_dataframe: pd.DataFrame, meta: dict, output_path: str):
     errors = sum_matching(artillery_dataframe, ERRORS, r".*")
+    completed = sum_matching(artillery_dataframe, CODES, r"\.[1-3][0-9]{2}$")
     failed = _add(sum_matching(artillery_dataframe, CODES, r"\.5[0-9]{2}$"), errors)
+    failed = failed.reindex(artillery_dataframe.index)
+    failed = failed.fillna(0.0).where(failed.notna() | completed.notna())
     salidas = _add(
         artillery_dataframe[f"{SERVER}.scenariosCompleted"],
         artillery_dataframe[f"{SERVER}.scenariosAvoided"],
@@ -20,7 +23,7 @@ def generate_requests_state_plot(artillery_dataframe: pd.DataFrame, meta: dict, 
 
     izq = [
         ("Pending", FIJO_AZUL, pending),
-        ("Completed", FIJO_VERDE, sum_matching(artillery_dataframe, CODES, r"\.[1-3][0-9]{2}$")),
+        ("Completed", FIJO_VERDE, completed),
         ("Limited", FIJO_AMARILLO, sum_matching(artillery_dataframe, CODES, r"\.4[0-9]{2}$")),
         ("Failed", FIJO_ROJO, failed),
     ]

@@ -16,7 +16,8 @@ LEYENDA_X = 1.08
 
 def generate_resources_plot(cadvisor_dataframe: pd.DataFrame, meta: dict, output_path: str):
     for container, file_name, title in CONTAINERS:
-        if f"{CADVISOR}.{container}.cpu_cumulative_usage" in cadvisor_dataframe.columns:
+        column = f"{CADVISOR}.{container}.cpu_cumulative_usage"
+        if column in cadvisor_dataframe.columns and cadvisor_dataframe[column].notna().any():
             generate_container_resources_plot(cadvisor_dataframe, meta, output_path, container, file_name, title)
 
 def generate_container_resources_plot(cadvisor_dataframe: pd.DataFrame, meta: dict, output_path: str, container: str, file_name: str, title: str):
