@@ -28,7 +28,7 @@ sleep 10
 
 curl -s "http://localhost:8090/render?target=stats.gauges.artillery-api.**&format=json&from=${start}&until=${end}" -o "$data_dir/artillery.json"
 
-curl -s "http://localhost:8090/render?target=stats.gauges.cadvisor.exchange-*.**&format=json&from=${start}&until=${end}" -o "$data_dir/cadvisor.json"
+curl -s "http://localhost:8090/render?target=removeEmptySeries(stats.gauges.cadvisor.exchange-*.**)&format=json&from=${start}&until=${end}" -o "$data_dir/cadvisor.json"
 
 curl -s "http://localhost:8090/render?target=stats_counts.exchange.**&format=json&from=${start}&until=${end}" -o "$data_dir/currency.json"
 
