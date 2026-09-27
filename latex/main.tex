@@ -100,7 +100,7 @@
         \centering
         \includegraphics[width=1\columnwidth]{figures/diagramas/componentes_y_conectores_base}
         \caption{ Diagrama Components \& Connectors del sistema base. }
-        \label{fig:componentes_y_conectores_base}
+        \label{fig:sistema_base_componentes_y_conectores}
     \end{figure}
 
     \subsection{Arquitectura}
@@ -286,11 +286,29 @@
     \subsection{Propuesta 1}
     \label{sec:propuesta_1}
 
+    El sistema presenta una degradacion principalmente por el manejo indevido del log.
+    Destacamos que la posibilidad de permitir consultar el log de manera completa es la principal causa de degradacion.
+    Este escala con el numero de operacion, lo que provoca un aumento en el uso de recursos para mantenerlo, y un aumento en los tiempos de respuesta para consultarlo.
+    Esto arrastra la degradacion a los otros endpoints, entre ellos exchange, el principalmente mencionado por los usuarios.
+
+    Destacamos que un endpoint que permite consultarlo todo por definicion no es escalable, recomendamos la implementacion de paginacion.
+    Sinembargo, asumimos que esta es un requerimiento de negocio y que las mejoras propuestas no deben alterar la firma del sistema para con los usuarios.
+    Se propone desacoplar el log para que la degradacion de este no afecte a los endpoints de negocio del sistema.
+    Proponemos agregar un nodo dedicado, analogo a exchange-api para el manejo del log.
+    Algunas optimizaciones de la implementacion que consideramos que vale la pena mencionar son:
+
+    \begin{itemize}
+        \item Remplazamos el uso del formato .json para el almacenamiento a .ndjson, de esta manera podemos agregar los registros al final sin reescribir todo el archivo.
+        \item El archivo ya no se carga en memoria, se stremea el cliente directamente desde disco en batches. Destacamos que agregamos los caracteres [ al inicio y ] al final del stream para mantener la firma original con respecto al formato .json.
+        \item Solo enviamos hasta el ultimo byte valido disponible al momento de recibida la consulta y verificamos que la ultima entrada sea valida (evita race condition con la escritura).
+        \item Exchange api loguea directamente al nuevo nodo dedicado mediante una conexion TCP dedicada.
+    \end{itemize}
+
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\columnwidth]{figures/diagramas/componentes_y_conectores_propuesta_1}
         \caption{ Diagrama Components \& Connectors de la propuesta 1. }
-        \label{fig:componentes_y_conectores_propuesta_1}
+        \label{fig:propuesta_1_componentes_y_conectores}
     \end{figure}
 
     \subsection{Impacto en los QA}
@@ -299,20 +317,33 @@
         \subsubsection{Performance}
         \label{sec:propuesta_1_performance}
 
-        ...
+        \todo{evaluar el impacto en cada QA}
 
     \subsection{Pruebas de carga}
     \label{sec:propuesta_1_pruebas_de_carga}
 
-    Se hicieron 3 pruebas, baseline es una prueba de carga constante en un tiempo reducido,
-    soak carga constante en un tiempo extendido,
-    stress carga creciente por niveles hasta alcanzar el límite del sistema
+    La prueba de carga se realizo usando una tasa constante de 40 usuarios durante 240s (4 minutos).
+    Cada usuario realiza un solo request, es decir se mantiene un throughput constante de 40 requests por segundo.
+    No se realizo warm-up ni ramp para no ensuciar las metricas de promedios.
+    Tampoco se realizaron recargas de saldo intermedias, se utilizo una carga inicial suficiente para cubrir toda la prueba.
+    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_base_plano]{Apendice}.
+
+    %\subsection{Metricas}
+    %\label{sec:propuesta_1_pruebas_de_carga_metricas}
+    % Me parece que no aporta mucho esta seccion, con stress y soak se ve mejor el cambio, si dejaria los resultados en el apendice
+
+    \subsection{Pruebas de estrés}
+    \label{sec:propuesta_1_pruebas_de_stress}
+
+    La prueba de estrés se realizo incrementando progresivamente la carga desde 40 hasta 180 en saltos de 20, cada salto con una duracion de 45s, el tiempo total de la prueba es de 450s (7,5 minutos).
+    Se realizo un warm-up inicial de 5 usuarios durante 30s. Ademas, al final de la prueba se dejo una instancia de recovery de nuevamente 5 usuarios esta vez durante 60s.
+    Tampoco se realizaron recargas de saldo intermedias y se mantuvo el mismo uso de endpoints para que los resultados sean comparables.
 
     \subsection{Metricas}
-    \label{sec:propuesta_1_metricas}
+    \label{sec:propuesta_1_pruebas_de_stress_metricas}
 
         \subsubsection{Disponibilidad}
-        \label{sec:propuesta_1_metrica_disponibilidad}
+        \label{sec:propuesta_1_pruebas_de_stress_metricas_disponibilidad}
 
             \begin{figure}[H]
                 \centering
@@ -326,7 +357,7 @@
             \end{figure}
 
         \subsubsection{Latencia}
-        \label{sec:propuesta_1_metrica_latencia}
+        \label{sec:propuesta_1_pruebas_de_stress_metricas_latencia}
 
             \begin{figure}[H]
                 \centering
@@ -359,7 +390,7 @@
             \end{figure}
 
         \subsubsection{Uso de recursos}
-        \label{sec:propuesta_1_metrica_recursos}
+        \label{sec:propuesta_1_pruebas_de_stress_metricas_recursos}
 
             \begin{figure}[H]
                 \centering
@@ -381,7 +412,7 @@
             \end{figure}
 
         \subsubsection{Volumen operado por moneda}
-        \label{sec:propuesta_1_metrica_volumen_operado_por_moneda}
+        \label{sec:propuesta_1_pruebas_de_stress_metricas_volumen_operado_por_moneda}
 
             \begin{figure}[H]
                 \centering
@@ -394,8 +425,8 @@
                 \label{fig:comparacion_propuesta_1_base_stress_currency}
             \end{figure}
 
-        \subsection{Volumen neto operado}
-        \label{sec:propuesta_1_metrica_volumen_neto_operado_por_moneda}
+        \subsubsection{Volumen neto operado}
+        \label{sec:propuesta_1_pruebas_de_stress_metricas_volumen_neto_operado_por_moneda}
 
             \begin{figure}[H]
                 \centering
@@ -408,8 +439,101 @@
                 \label{fig:comparacion_propuesta_1_base_stress_net_currency}
             \end{figure}
 
+    \subsection{Pruebas de resistencia}
+    \label{sec:propuesta_1_pruebas_de_resistencia}
+
+    La prueba de resistencia se realizo usando una tasa constante de 40 usuarios durante 2700s (45 minutos).
+    Se realizo un warm-up inicial de 5 usuarios durante 60s. Ademas, al final de la prueba se dejo una instancia de recovery de nuevamente 5 usuarios esta vez durante 120s (2 minutos).
+    Tampoco se realizaron recargas de saldo intermedias y se mantuvo el mismo uso de endpoints para que los resultados sean comparables.
+
+    \subsection{Metricas}
+    \label{sec:propuesta_1_pruebas_de_resistencia_metricas}
+
+        \subsubsection{Disponibilidad}
+        \label{sec:propuesta_1_pruebas_de_resistencia_metricas_disponibilidad}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/requests_state}%
+                \includegraphics[width=0.5\columnwidth]{figures/base/soak/requests_state}
+                \caption{
+                    \todo{completar}
+                }
+                \label{fig:comparacion_propuesta_1_base_soak_requests_state}
+            \end{figure}
+
+        \subsubsection{Latencia}
+        \label{sec:propuesta_1_pruebas_de_resistencia_metricas_latencia}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/response_time}%
+                \includegraphics[width=0.5\columnwidth]{figures/base/soak/response_time}
+                \caption{
+                    \todo{completar}
+                }
+                \label{fig:comparacion_propuesta_1_base_soak_response_time}
+            \end{figure}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/endpoint_response_time}%
+                \includegraphics[width=0.5\columnwidth]{figures/base/soak/endpoint_response_time}
+                \caption{
+                    \todo{completar}
+                }
+                \label{fig:comparacion_propuesta_1_base_soak_endpoint_response_time}
+            \end{figure}
+
+        \subsubsection{Uso de recursos}
+        \label{sec:propuesta_1_pruebas_de_resistencia_metricas_recursos}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/propuesta_1/soak/resources}\\
+                    \includegraphics[width=\linewidth]{figures/propuesta_1/soak/resources_log_api}
+                \end{minipage}%
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/soak/resources}
+                \end{minipage}
+                \caption{
+                    \todo{completar}
+                }
+                \label{fig:comparacion_propuesta_1_base_soak_resources}
+            \end{figure}
+
+        \subsubsection{Volumen operado por moneda}
+        \label{sec:propuesta_1_pruebas_de_resistencia_metricas_volumen_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/currency}%
+                \includegraphics[width=0.5\columnwidth]{figures/base/soak/currency}
+                \caption{
+                    \todo{completar}
+                }
+                \label{fig:comparacion_propuesta_1_base_soak_currency}
+            \end{figure}
+
+        \subsubsection{Volumen neto operado}
+        \label{sec:propuesta_1_pruebas_de_resistencia_metricas_volumen_neto_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/net_currency}%
+                \includegraphics[width=0.5\columnwidth]{figures/base/soak/net_currency}
+                \caption{
+                    \todo{completar}
+                }
+                \label{fig:comparacion_propuesta_1_base_soak_net_currency}
+            \end{figure}
+
     \subsection{Resultados y conclusiones}
     \label{sec:propuesta_1_resultados_y_conclusiones}
+
+    La propuesta 1 demostro ser capaz de aislar la degradacion producida por la consulta de logs de las opeeraciones de negocio del sistema, permitiendo ofrecer una mejor disponibilidad a los usuarios comunes.
+    Por otro lado la consulta de logs sigue degradandose con el tiempo. Sinembargo, este desacoplamiento propuesto permitiria replicar el nodo de consulta para dar soporte de lectura de los a mas usuarios, es decir, permitiendo escalabilidad horizontal.
 
 %\section{Modificacion: Uso de DB externa}
 %\label{sec:modificacion_uso_de_db_externa}
@@ -461,21 +585,21 @@
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/baseline/scenarios}
             \caption{ Escenarios del sistema base. }
-            \label{fig:base_baseline_scenarios}
+            \label{fig:resultados_completos_base_baseline_scenarios}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/baseline/requests_state}
             \caption{ Estado de las requests del sistema base. }
-            \label{fig:base_baseline_requests_state}
+            \label{fig:resultados_completos_base_baseline_requests_state}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/baseline/response_time}
             \caption{ Tiempo de respuesta del sistema base. }
-            \label{fig:base_baseline_response_time}
+            \label{fig:resultados_completos_base_baseline_response_time}
         \end{figure}
 
         \begin{figure}[H]
@@ -485,7 +609,7 @@
                 Tiempo de respuesta por endpoint del sistema base.
                 El eje tiene una escala logaritmica.
             }
-            \label{fig:base_baseline_endpoint_response_time}
+            \label{fig:resultados_completos_base_baseline_endpoint_response_time}
         \end{figure}
 
         \begin{figure}[H]
@@ -495,21 +619,21 @@
                 Estado de los recursos del sistema base.
                 El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
             }
-            \label{fig:base_baseline_resources}
+            \label{fig:resultados_completos_base_baseline_resources}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/baseline/currency}
             \caption{ Volumen operado en cada moneda en el sistema base. }
-            \label{fig:base_baseline_currency}
+            \label{fig:resultados_completos_base_baseline_currency}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/baseline/net_currency}
             \caption{ Neto operado en cada moneda en el sistema base. }
-            \label{fig:base_baseline_net_currency}
+            \label{fig:resultados_completos_base_baseline_net_currency}
         \end{figure}
 
     \clearpage
@@ -521,21 +645,21 @@
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/stress/scenarios}
             \caption{ Escenarios del sistema base. }
-            \label{fig:base_stress_scenarios}
+            \label{fig:resultados_completos_base_stress_scenarios}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/stress/requests_state}
             \caption{ Estado de las requests del sistema base. }
-            \label{fig:base_stress_requests_state}
+            \label{fig:resultados_completos_base_stress_requests_state}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/stress/response_time}
             \caption{ Tiempo de respuesta del sistema base. }
-            \label{fig:base_stress_response_time}
+            \label{fig:resultados_completos_base_stress_response_time}
         \end{figure}
 
         \begin{figure}[H]
@@ -545,7 +669,7 @@
                 Tiempo de respuesta por endpoint del sistema base.
                 El eje tiene una escala logaritmica.
             }
-            \label{fig:base_stress_endpoint_response_time}
+            \label{fig:resultados_completos_base_stress_endpoint_response_time}
         \end{figure}
 
         \begin{figure}[H]
@@ -555,21 +679,21 @@
                 Estado de los recursos del sistema base.
                 El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
             }
-            \label{fig:base_stress_resources}
+            \label{fig:resultados_completos_base_stress_resources}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/stress/currency}
             \caption{ Volumen operado en cada moneda en el sistema base. }
-            \label{fig:base_stress_currency}
+            \label{fig:resultados_completos_base_stress_currency}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/stress/net_currency}
             \caption{ Neto operado en cada moneda en el sistema base. }
-            \label{fig:base_stress_net_currency}
+            \label{fig:resultados_completos_base_stress_net_currency}
         \end{figure}
 
     \clearpage
@@ -581,21 +705,21 @@
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/soak/scenarios}
             \caption{ Escenarios del sistema base. }
-            \label{fig:base_soak_scenarios}
+            \label{fig:resultados_completos_base_soak_scenarios}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/soak/requests_state}
             \caption{ Estado de las requests del sistema base. }
-            \label{fig:base_soak_requests_state}
+            \label{fig:resultados_completos_base_soak_requests_state}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/soak/response_time}
             \caption{ Tiempo de respuesta del sistema base. }
-            \label{fig:base_soak_response_time}
+            \label{fig:resultados_completos_base_soak_response_time}
         \end{figure}
 
         \begin{figure}[H]
@@ -605,7 +729,7 @@
                 Tiempo de respuesta por endpoint del sistema base.
                 El eje tiene una escala logaritmica.
             }
-            \label{fig:base_soak_endpoint_response_time}
+            \label{fig:resultados_completos_base_soak_endpoint_response_time}
         \end{figure}
 
         \begin{figure}[H]
@@ -615,21 +739,21 @@
                 Estado de los recursos del sistema base.
                 El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
             }
-            \label{fig:base_soak_resources}
+            \label{fig:resultados_completos_base_soak_resources}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/soak/currency}
             \caption{ Volumen operado en cada moneda en el sistema base. }
-            \label{fig:base_soak_currency}
+            \label{fig:resultados_completos_base_soak_currency}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/base/soak/net_currency}
             \caption{ Neto operado en cada moneda en el sistema base. }
-            \label{fig:base_soak_net_currency}
+            \label{fig:resultados_completos_base_soak_net_currency}
         \end{figure}
 
     \clearpage
@@ -641,21 +765,21 @@
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/baseline/scenarios}
             \caption{ Escenarios de la propuesta 1. }
-            \label{fig:propuesta_1_baseline_scenarios}
+            \label{fig:resultados_completos_propuesta_1_baseline_scenarios}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/baseline/requests_state}
             \caption{ Estado de las requests de la propuesta 1. }
-            \label{fig:propuesta_1_baseline_requests_state}
+            \label{fig:resultados_completos_propuesta_1_baseline_requests_state}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/baseline/response_time}
             \caption{ Tiempo de respuesta de la propuesta 1. }
-            \label{fig:propuesta_1_baseline_response_time}
+            \label{fig:resultados_completos_propuesta_1_baseline_response_time}
         \end{figure}
 
         \begin{figure}[H]
@@ -665,7 +789,7 @@
                 Tiempo de respuesta por endpoint de la propuesta 1.
                 El eje tiene una escala logaritmica.
             }
-            \label{fig:propuesta_1_baseline_endpoint_response_time}
+            \label{fig:resultados_completos_propuesta_1_baseline_endpoint_response_time}
         \end{figure}
 
         \begin{figure}[H]
@@ -675,7 +799,7 @@
                 Estado de los recursos del nodo de exchange de la propuesta 1.
                 El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
             }
-            \label{fig:propuesta_1_baseline_resources}
+            \label{fig:resultados_completos_propuesta_1_baseline_resources}
         \end{figure}
 
         \begin{figure}[H]
@@ -685,21 +809,21 @@
                 Estado de los recursos del nodo de logs de la propuesta 1.
                 El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
             }
-            \label{fig:propuesta_1_baseline_resources_log_api}
+            \label{fig:resultados_completos_propuesta_1_baseline_resources_log_api}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/baseline/currency}
             \caption{ Volumen operado en cada moneda en la propuesta 1. }
-            \label{fig:propuesta_1_baseline_currency}
+            \label{fig:resultados_completos_propuesta_1_baseline_currency}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/baseline/net_currency}
             \caption{ Neto operado en cada moneda en la propuesta 1. }
-            \label{fig:propuesta_1_baseline_net_currency}
+            \label{fig:resultados_completos_propuesta_1_baseline_net_currency}
         \end{figure}
 
     \clearpage
@@ -711,21 +835,21 @@
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/stress/scenarios}
             \caption{ Escenarios de la propuesta 1. }
-            \label{fig:propuesta_1_stress_scenarios}
+            \label{fig:resultados_completos_propuesta_1_stress_scenarios}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/stress/requests_state}
             \caption{ Estado de las requests de la propuesta 1. }
-            \label{fig:propuesta_1_stress_requests_state}
+            \label{fig:resultados_completos_propuesta_1_stress_requests_state}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/stress/response_time}
             \caption{ Tiempo de respuesta de la propuesta 1. }
-            \label{fig:propuesta_1_stress_response_time}
+            \label{fig:resultados_completos_propuesta_1_stress_response_time}
         \end{figure}
 
         \begin{figure}[H]
@@ -735,7 +859,7 @@
                 Tiempo de respuesta por endpoint de la propuesta 1.
                 El eje tiene una escala logaritmica.
             }
-            \label{fig:propuesta_1_stress_endpoint_response_time}
+            \label{fig:resultados_completos_propuesta_1_stress_endpoint_response_time}
         \end{figure}
 
         \begin{figure}[H]
@@ -745,7 +869,7 @@
                 Estado de los recursos del nodo de exchange de la propuesta 1.
                 El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
             }
-            \label{fig:propuesta_1_stress_resources}
+            \label{fig:resultados_completos_propuesta_1_stress_resources}
         \end{figure}
 
         \begin{figure}[H]
@@ -755,21 +879,21 @@
                 Estado de los recursos del nodo de logs de la propuesta 1.
                 El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
             }
-            \label{fig:propuesta_1_stress_resources_log_api}
+            \label{fig:resultados_completos_propuesta_1_stress_resources_log_api}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/stress/currency}
             \caption{ Volumen operado en cada moneda en la propuesta 1. }
-            \label{fig:propuesta_1_stress_currency}
+            \label{fig:resultados_completos_propuesta_1_stress_currency}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/stress/net_currency}
             \caption{ Neto operado en cada moneda en la propuesta 1. }
-            \label{fig:propuesta_1_stress_net_currency}
+            \label{fig:resultados_completos_propuesta_1_stress_net_currency}
         \end{figure}
 
     \clearpage
@@ -781,21 +905,21 @@
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/soak/scenarios}
             \caption{ Escenarios de la propuesta 1. }
-            \label{fig:propuesta_1_soak_scenarios}
+            \label{fig:resultados_completos_propuesta_1_soak_scenarios}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/soak/requests_state}
             \caption{ Estado de las requests de la propuesta 1. }
-            \label{fig:propuesta_1_soak_requests_state}
+            \label{fig:resultados_completos_propuesta_1_soak_requests_state}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/soak/response_time}
             \caption{ Tiempo de respuesta de la propuesta 1. }
-            \label{fig:propuesta_1_soak_response_time}
+            \label{fig:resultados_completos_propuesta_1_soak_response_time}
         \end{figure}
 
         \begin{figure}[H]
@@ -805,7 +929,7 @@
                 Tiempo de respuesta por endpoint de la propuesta 1.
                 El eje tiene una escala logaritmica.
             }
-            \label{fig:propuesta_1_soak_endpoint_response_time}
+            \label{fig:resultados_completos_propuesta_1_soak_endpoint_response_time}
         \end{figure}
 
         \begin{figure}[H]
@@ -815,7 +939,7 @@
                 Estado de los recursos del nodo de exchange de la propuesta 1.
                 El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
             }
-            \label{fig:propuesta_1_soak_resources}
+            \label{fig:resultados_completos_propuesta_1_soak_resources}
         \end{figure}
 
         \begin{figure}[H]
@@ -825,21 +949,21 @@
                 Estado de los recursos del nodo de logs de la propuesta 1.
                 El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
             }
-            \label{fig:propuesta_1_soak_resources_log_api}
+            \label{fig:resultados_completos_propuesta_1_soak_resources_log_api}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/soak/currency}
             \caption{ Volumen operado en cada moneda en la propuesta 1. }
-            \label{fig:propuesta_1_soak_currency}
+            \label{fig:resultados_completos_propuesta_1_soak_currency}
         \end{figure}
 
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.8\columnwidth]{figures/propuesta_1/soak/net_currency}
             \caption{ Neto operado en cada moneda en la propuesta 1. }
-            \label{fig:propuesta_1_soak_net_currency}
+            \label{fig:resultados_completos_propuesta_1_soak_net_currency}
         \end{figure}
 
     \clearpage
