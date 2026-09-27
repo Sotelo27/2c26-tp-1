@@ -272,13 +272,404 @@
     \subsection{Pruebas de carga}
     \label{sec:pruebas_de_carga}
 
+    Las pruebas de carga no revelaron informacion significativa sobre el sistema inicial.
+    Sinembargo aprovechamos esta seccion para ilustrar el formato de los gráficos y explicar los criterios compartidos entre todos los escenarios.
+
+    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_base_plano]{Apendice}.
+
     \subsection{Metricas}
-    \label{sec:metricas}
+    \label{sec:pruebas_de_carga_metricas}
+
+        \subsubsection{Disponibilidad}
+        \label{sec:pruebas_de_carga_metricas_disponibilidad}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/baseline/requests_state}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    Para evaluar la disponibilidad del sistema monitoreamos el estado de las request.
+                    El eje $x$ muestra el tiempo transcurrido de la prueba y cada punto agrupa una ventana de 10 segundos.
+                    Completed indica cuántas requests finalizaron correctamente en esa ventana, mientras que Pending indica cuántas seguían en curso.
+                    Adicionalmente en la leyenda de la derecha se muestra el promedio, el ultimo valor y el maximo.\\
+                    En 4 minutos con una carga de 40 request por segundo, se puede observar que el sistema no presento inconvenientes.
+                \end{minipage}
+                \label{fig:base_baseline_requests_state}
+            \end{figure}
 
         \subsubsection{Latencia}
-        \label{sec:metrica_latencia}
+        \label{sec:pruebas_de_carga_metricas_latencia}
 
-        ...
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/baseline/response_time}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    Para evaluar la latencia del sistema optamos por utilizar dos metodologias, la primera monitorear los tiempos de respuestas desde la perspectiva del cliente a travez de Artillery.
+                    Optamos por realizar el monitoreo en P50, P95 Y P99, sinembargo una consideracion importante para esta metodlogia es que no distingue entre endpoints.
+                    Se mantiene el formato de tiempo en el eje $x$ con ventanas de 10 segundos.
+                \end{minipage}
+                \label{fig:base_baseline_response_time}
+            \end{figure}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/baseline/endpoint_response_time}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    La siguiente metodologia adoptada fue medir los tiempos de respuesta por endpoint desde la perspectiva del servidor.
+                    Se realizo agregando la recoleccion de metricas directamente en el servidor.
+                    Si bien en contraposicion a la metodologia anterior si podemos discernir entre endpoints, optamos por representarlo solo para P95 para no saturar la representacion.
+                    Se mantiene el formato de tiempo en el eje $x$ con ventanas de 10 segundos, sinembargo para el eje $y$ optamos por una escala logaritmica por la gran discrepancia entre los tiempos.
+                \end{minipage}
+                \label{fig:base_baseline_endpoint_response_time}
+            \end{figure}
+
+        \subsubsection{Uso de recursos}
+        \label{sec:pruebas_de_carga_metricas_recursos}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/baseline/resources}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    Para evaluar el uso de recursos del sistema, monitoreamos el uso del CPU y de la memoria.
+                    El uso del CPU se lee sobre el eje $y$ al lado izquierdo mientras que el uso de la memoria al lado derecho.
+                    Nuevamente, mantiene el formato de tiempo en el eje $x$ con ventanas de 10 segundos.
+                \end{minipage}
+                \label{fig:base_baseline_resources}
+            \end{figure}
+
+        \subsubsection{Volumen operado por moneda}
+        \label{sec:pruebas_de_carga_metricas_volumen_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/baseline/currency}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    Como la primera metrica de negocio, se evaluo el volumen operado por cada moneda.
+                    Para esto se agrego la recoleccion de metricas directamente en el servidor.
+                    Optamos por representar cada moneda con su respectivo valor en dolares, a la cotizacion vigente en cada operacion, para que los valores sean comparables.
+                    Los volumenes de diferentes monedas operados en un mismo punto se apilan para representar el total operado en ese punto.
+                    Se mantiene el formato de tiempo en el eje $x$ pero se redujo la ventana a 1 segundo.
+                \end{minipage}
+                \label{fig:base_baseline_currency}
+            \end{figure}
+
+        \subsubsection{Volumen neto operado}
+        \label{sec:pruebas_de_carga_metricas_volumen_neto_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/baseline/net_currency}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    Para la segunda metrica de negocio, se evaluo el volumen neto operado por cada moneda.
+                    Nuevamente, a travez de la recoleccion de metricas directamente en el servidor.
+                    De igual modo, con cada moneda en su respectivo valor en dolares.
+                    A diferencia del volumen operado, las ventas se representan como valores negativos y las compras con valores positivos.
+                    Se mantiene el formato de tiempo en el eje $x$ y la ventana de 1 segundo.
+                \end{minipage}
+                \label{fig:base_baseline_net_currency}
+            \end{figure}
+
+    \subsection{Pruebas de estrés}
+    \label{sec:pruebas_de_stress}
+
+    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_base_stress]{Apendice}.
+
+    \subsection{Metricas}
+    \label{sec:pruebas_de_stress_metricas}
+
+        \subsubsection{Disponibilidad}
+        \label{sec:pruebas_de_stress_metricas_disponibilidad}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/stress/requests_state}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_stress_requests_state}
+            \end{figure}
+
+        \subsubsection{Latencia}
+        \label{sec:pruebas_de_stress_metricas_latencia}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/stress/response_time}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_stress_response_time}
+            \end{figure}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/stress/endpoint_response_time}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_stress_endpoint_response_time}
+            \end{figure}
+
+        \subsubsection{Uso de recursos}
+        \label{sec:pruebas_de_stress_metricas_recursos}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/stress/resources}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_stress_resources}
+            \end{figure}
+
+        \subsubsection{Volumen operado por moneda}
+        \label{sec:pruebas_de_stress_metricas_volumen_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/stress/currency}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_stress_currency}
+            \end{figure}
+
+        \subsubsection{Volumen neto operado}
+        \label{sec:pruebas_de_stress_metricas_volumen_neto_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/stress/net_currency}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_stress_net_currency}
+            \end{figure}
+
+    \subsection{Pruebas de resistencia}
+    \label{sec:pruebas_de_resistencia}
+
+    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_base_soak]{Apendice}.
+
+    \subsection{Metricas}
+    \label{sec:pruebas_de_resistencia_metricas}
+
+        \subsubsection{Disponibilidad}
+        \label{sec:pruebas_de_resistencia_metricas_disponibilidad}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/soak/requests_state}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_soak_requests_state}
+            \end{figure}
+
+        \subsubsection{Latencia}
+        \label{sec:pruebas_de_resistencia_metricas_latencia}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/soak/response_time}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_soak_response_time}
+            \end{figure}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/soak/endpoint_response_time}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_soak_endpoint_response_time}
+            \end{figure}
+
+        \subsubsection{Uso de recursos}
+        \label{sec:pruebas_de_resistencia_metricas_recursos}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/soak/resources}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_soak_resources}
+            \end{figure}
+
+        \subsubsection{Volumen operado por moneda}
+        \label{sec:pruebas_de_resistencia_metricas_volumen_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/soak/currency}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_soak_currency}
+            \end{figure}
+
+        \subsubsection{Volumen neto operado}
+        \label{sec:pruebas_de_resistencia_metricas_volumen_neto_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/soak/net_currency}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_soak_net_currency}
+            \end{figure}
+
+    \subsection{Pruebas de caos}
+    \label{sec:pruebas_de_caos}
+
+    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_base_chaos]{Apendice}.
+
+    \subsection{Metricas}
+    \label{sec:pruebas_de_caos_metricas}
+
+        \subsubsection{Disponibilidad}
+        \label{sec:pruebas_de_caos_metricas_disponibilidad}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/chaos/requests_state}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_chaos_requests_state}
+            \end{figure}
+
+        \subsubsection{Latencia}
+        \label{sec:pruebas_de_caos_metricas_latencia}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/chaos/response_time}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_chaos_response_time}
+            \end{figure}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/chaos/endpoint_response_time}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_chaos_endpoint_response_time}
+            \end{figure}
+
+        \subsubsection{Uso de recursos}
+        \label{sec:pruebas_de_caos_metricas_recursos}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/chaos/resources}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_chaos_resources}
+            \end{figure}
+
+        \subsubsection{Volumen operado por moneda}
+        \label{sec:pruebas_de_caos_metricas_volumen_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/chaos/currency}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_chaos_currency}
+            \end{figure}
+
+        \subsubsection{Volumen neto operado}
+        \label{sec:pruebas_de_caos_metricas_volumen_neto_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \begin{minipage}[c]{0.5\columnwidth}
+                    \includegraphics[width=\linewidth]{figures/base/chaos/net_currency}
+                \end{minipage}%
+                \hfill
+                \begin{minipage}[c]{0.45\columnwidth}
+                    \todo{completar}
+                \end{minipage}
+                \label{fig:base_chaos_net_currency}
+            \end{figure}
 
 \section{Modificaciones Propuestas}
 \label{sec:modificaciones_propuestas}
@@ -692,6 +1083,91 @@
                 %\label{fig:comparacion_propuesta_2_base_soak_net_currency}
             %\end{figure}
 
+    \subsection{Pruebas de caos}
+    \label{sec:propuesta_2_pruebas_de_caos}
+
+    \todo{describir el escenario}
+
+    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_2_chaos]{Apendice}.
+
+    \subsection{Metricas}
+    \label{sec:propuesta_2_pruebas_de_caos_metricas}
+
+        \subsubsection{Disponibilidad}
+        \label{sec:propuesta_2_pruebas_de_caos_metricas_disponibilidad}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_2/chaos/requests_state}%
+                \includegraphics[width=0.5\columnwidth]{figures/base/chaos/requests_state}
+                \caption{
+                    \todo{completar}
+                }
+                \label{fig:comparacion_propuesta_2_base_chaos_requests_state}
+            \end{figure}
+
+        \subsubsection{Latencia}
+        \label{sec:propuesta_2_pruebas_de_caos_metricas_latencia}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_2/chaos/response_time}%
+                \includegraphics[width=0.5\columnwidth]{figures/base/chaos/response_time}
+                \caption{
+                    \todo{completar}
+                }
+                \label{fig:comparacion_propuesta_2_base_chaos_response_time}
+            \end{figure}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_2/chaos/endpoint_response_time}%
+                \includegraphics[width=0.5\columnwidth]{figures/base/chaos/endpoint_response_time}
+                \caption{
+                    \todo{completar}
+                }
+                \label{fig:comparacion_propuesta_2_base_chaos_endpoint_response_time}
+            \end{figure}
+
+        \subsubsection{Uso de recursos}
+        \label{sec:propuesta_2_pruebas_de_caos_metricas_recursos}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_2/chaos/resources}%
+                \includegraphics[width=0.5\columnwidth]{figures/base/chaos/resources}
+                \caption{
+                    \todo{completar}
+                }
+                \label{fig:comparacion_propuesta_2_base_chaos_resources}
+            \end{figure}
+
+        \subsubsection{Volumen operado por moneda}
+        \label{sec:propuesta_2_pruebas_de_caos_metricas_volumen_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_2/chaos/currency}%
+                \includegraphics[width=0.5\columnwidth]{figures/base/chaos/currency}
+                \caption{
+                    \todo{completar}
+                }
+                \label{fig:comparacion_propuesta_2_base_chaos_currency}
+            \end{figure}
+
+        \subsubsection{Volumen neto operado}
+        \label{sec:propuesta_2_pruebas_de_caos_metricas_volumen_neto_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_2/chaos/net_currency}%
+                \includegraphics[width=0.5\columnwidth]{figures/base/chaos/net_currency}
+                \caption{
+                    \todo{completar}
+                }
+                \label{fig:comparacion_propuesta_2_base_chaos_net_currency}
+            \end{figure}
+
     \subsection{Resultados y conclusiones}
     \label{sec:propuesta_2_resultados_y_conclusiones}
 
@@ -914,6 +1390,66 @@
             \includegraphics[width=0.8\columnwidth]{figures/base/soak/net_currency}
             \caption{ Neto operado en cada moneda en el sistema base. }
             \label{fig:resultados_completos_base_soak_net_currency}
+        \end{figure}
+
+    \clearpage
+
+    \subsection{Resultados completos del escenario chaos sobre el sistema base}
+    \label{sec:resultados_completos_base_chaos}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/base/chaos/scenarios}
+            \caption{ Escenarios del sistema base. }
+            \label{fig:resultados_completos_base_chaos_scenarios}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/base/chaos/requests_state}
+            \caption{ Estado de las requests del sistema base. }
+            \label{fig:resultados_completos_base_chaos_requests_state}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/base/chaos/response_time}
+            \caption{ Tiempo de respuesta del sistema base. }
+            \label{fig:resultados_completos_base_chaos_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/base/chaos/endpoint_response_time}
+            \caption{
+                Tiempo de respuesta por endpoint del sistema base.
+                El eje tiene una escala logaritmica.
+            }
+            \label{fig:resultados_completos_base_chaos_endpoint_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/base/chaos/resources}
+            \caption{
+                Estado de los recursos del sistema base.
+                El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
+            }
+            \label{fig:resultados_completos_base_chaos_resources}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/base/chaos/currency}
+            \caption{ Volumen operado en cada moneda en el sistema base. }
+            \label{fig:resultados_completos_base_chaos_currency}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/base/chaos/net_currency}
+            \caption{ Neto operado en cada moneda en el sistema base. }
+            \label{fig:resultados_completos_base_chaos_net_currency}
         \end{figure}
 
     \clearpage
@@ -1287,6 +1823,66 @@
             %\caption{}
             %\label{fig:resultados_completos_propuesta_2_soak_net_currency}
         %\end{figure}
+
+    \clearpage
+
+    \subsection{Resultados completos del escenario chaos sobre la propuesta 2}
+    \label{sec:resultados_completos_propuesta_2_chaos}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_2/chaos/scenarios}
+            \caption{ Escenarios de la propuesta 2. }
+            \label{fig:resultados_completos_propuesta_2_chaos_scenarios}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_2/chaos/requests_state}
+            \caption{ Estado de las requests de la propuesta 2. }
+            \label{fig:resultados_completos_propuesta_2_chaos_requests_state}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_2/chaos/response_time}
+            \caption{ Tiempo de respuesta de la propuesta 2. }
+            \label{fig:resultados_completos_propuesta_2_chaos_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_2/chaos/endpoint_response_time}
+            \caption{
+                Tiempo de respuesta por endpoint de la propuesta 2.
+                El eje tiene una escala logaritmica.
+            }
+            \label{fig:resultados_completos_propuesta_2_chaos_endpoint_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_2/chaos/resources}
+            \caption{
+                Estado de los recursos de la propuesta 2.
+                El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
+            }
+            \label{fig:resultados_completos_propuesta_2_chaos_resources}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_2/chaos/currency}
+            \caption{ Volumen operado en cada moneda en la propuesta 2. }
+            \label{fig:resultados_completos_propuesta_2_chaos_currency}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_2/chaos/net_currency}
+            \caption{ Neto operado en cada moneda en la propuesta 2. }
+            \label{fig:resultados_completos_propuesta_2_chaos_net_currency}
+        \end{figure}
 
 %----------------------------------------------------------
 
