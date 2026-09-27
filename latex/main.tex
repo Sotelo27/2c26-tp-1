@@ -535,6 +535,166 @@
     La propuesta 1 demostro ser capaz de aislar la degradacion producida por la consulta de logs de las opeeraciones de negocio del sistema, permitiendo ofrecer una mejor disponibilidad a los usuarios comunes.
     Por otro lado la consulta de logs sigue degradandose con el tiempo. Sinembargo, este desacoplamiento propuesto permitiria replicar el nodo de consulta para dar soporte de lectura de los a mas usuarios, es decir, permitiendo escalabilidad horizontal.
 
+    \subsection{Propuesta 2}
+    \label{sec:propuesta_2}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\columnwidth]{figures/diagramas/componentes_y_conectores_propuesta_2}
+        \caption{}
+        \label{fig:propuesta_2_componentes_y_conectores}
+    \end{figure}
+
+    \subsection{Impacto en los QA}
+    \label{sec:propuesta_2_impacto_en_los_qa}
+
+        \subsubsection{Performance}
+        \label{sec:propuesta_2_performance}
+
+    \subsection{Pruebas de carga}
+    \label{sec:propuesta_2_pruebas_de_carga}
+
+    \subsection{Pruebas de estrés}
+    \label{sec:propuesta_2_pruebas_de_stress}
+
+    \subsection{Metricas}
+    \label{sec:propuesta_2_pruebas_de_stress_metricas}
+
+        \subsubsection{Disponibilidad}
+        \label{sec:propuesta_2_pruebas_de_stress_metricas_disponibilidad}
+
+            %\begin{figure}[H]
+                %\centering
+                %\includegraphics[width=0.5\columnwidth]{figures/propuesta_2/stress/requests_state}%
+                %\includegraphics[width=0.5\columnwidth]{figures/base/stress/requests_state}
+                %\caption{}
+                %\label{fig:comparacion_propuesta_2_base_stress_requests_state}
+            %\end{figure}
+
+        \subsubsection{Latencia}
+        \label{sec:propuesta_2_pruebas_de_stress_metricas_latencia}
+
+            %\begin{figure}[H]
+                %\centering
+                %\includegraphics[width=0.5\columnwidth]{figures/propuesta_2/stress/response_time}%
+                %\includegraphics[width=0.5\columnwidth]{figures/base/stress/response_time}
+                %\caption{}
+                %\label{fig:comparacion_propuesta_2_base_stress_response_time}
+            %\end{figure}
+
+            %\begin{figure}[H]
+                %\centering
+                %\includegraphics[width=0.5\columnwidth]{figures/propuesta_2/stress/endpoint_response_time}%
+                %\includegraphics[width=0.5\columnwidth]{figures/base/stress/endpoint_response_time}
+                %\caption{}
+                %\label{fig:comparacion_propuesta_2_base_stress_endpoint_response_time}
+            %\end{figure}
+
+        \subsubsection{Uso de recursos}
+        \label{sec:propuesta_2_pruebas_de_stress_metricas_recursos}
+
+            %\begin{figure}[H]
+                %\centering
+                %\includegraphics[width=0.5\columnwidth]{figures/propuesta_2/stress/resources}%
+                %\includegraphics[width=0.5\columnwidth]{figures/base/stress/resources}
+                %\caption{}
+                %\label{fig:comparacion_propuesta_2_base_stress_resources}
+            %\end{figure}
+
+        \subsubsection{Volumen operado por moneda}
+        \label{sec:propuesta_2_pruebas_de_stress_metricas_volumen_operado_por_moneda}
+
+            %\begin{figure}[H]
+                %\centering
+                %\includegraphics[width=0.5\columnwidth]{figures/propuesta_2/stress/currency}%
+                %\includegraphics[width=0.5\columnwidth]{figures/base/stress/currency}
+                %\caption{}
+                %\label{fig:comparacion_propuesta_2_base_stress_currency}
+            %\end{figure}
+
+        \subsubsection{Volumen neto operado}
+        \label{sec:propuesta_2_pruebas_de_stress_metricas_volumen_neto_operado_por_moneda}
+
+            %\begin{figure}[H]
+                %\centering
+                %\includegraphics[width=0.5\columnwidth]{figures/propuesta_2/stress/net_currency}%
+                %\includegraphics[width=0.5\columnwidth]{figures/base/stress/net_currency}
+                %\caption{}
+                %\label{fig:comparacion_propuesta_2_base_stress_net_currency}
+            %\end{figure}
+
+    \subsection{Pruebas de resistencia}
+    \label{sec:propuesta_2_pruebas_de_resistencia}
+
+    \subsection{Metricas}
+    \label{sec:propuesta_2_pruebas_de_resistencia_metricas}
+
+        \subsubsection{Disponibilidad}
+        \label{sec:propuesta_2_pruebas_de_resistencia_metricas_disponibilidad}
+
+            %\begin{figure}[H]
+                %\centering
+                %\includegraphics[width=0.5\columnwidth]{figures/propuesta_2/soak/requests_state}%
+                %\includegraphics[width=0.5\columnwidth]{figures/base/soak/requests_state}
+                %\caption{}
+                %\label{fig:comparacion_propuesta_2_base_soak_requests_state}
+            %\end{figure}
+
+        \subsubsection{Latencia}
+        \label{sec:propuesta_2_pruebas_de_resistencia_metricas_latencia}
+
+            %\begin{figure}[H]
+                %\centering
+                %\includegraphics[width=0.5\columnwidth]{figures/propuesta_2/soak/response_time}%
+                %\includegraphics[width=0.5\columnwidth]{figures/base/soak/response_time}
+                %\caption{}
+                %\label{fig:comparacion_propuesta_2_base_soak_response_time}
+            %\end{figure}
+
+            %\begin{figure}[H]
+                %\centering
+                %\includegraphics[width=0.5\columnwidth]{figures/propuesta_2/soak/endpoint_response_time}%
+                %\includegraphics[width=0.5\columnwidth]{figures/base/soak/endpoint_response_time}
+                %\caption{}
+                %\label{fig:comparacion_propuesta_2_base_soak_endpoint_response_time}
+            %\end{figure}
+
+        \subsubsection{Uso de recursos}
+        \label{sec:propuesta_2_pruebas_de_resistencia_metricas_recursos}
+
+            %\begin{figure}[H]
+                %\centering
+                %\includegraphics[width=0.5\columnwidth]{figures/propuesta_2/soak/resources}%
+                %\includegraphics[width=0.5\columnwidth]{figures/base/soak/resources}
+                %\caption{}
+                %\label{fig:comparacion_propuesta_2_base_soak_resources}
+            %\end{figure}
+
+        \subsubsection{Volumen operado por moneda}
+        \label{sec:propuesta_2_pruebas_de_resistencia_metricas_volumen_operado_por_moneda}
+
+            %\begin{figure}[H]
+                %\centering
+                %\includegraphics[width=0.5\columnwidth]{figures/propuesta_2/soak/currency}%
+                %\includegraphics[width=0.5\columnwidth]{figures/base/soak/currency}
+                %\caption{}
+                %\label{fig:comparacion_propuesta_2_base_soak_currency}
+            %\end{figure}
+
+        \subsubsection{Volumen neto operado}
+        \label{sec:propuesta_2_pruebas_de_resistencia_metricas_volumen_neto_operado_por_moneda}
+
+            %\begin{figure}[H]
+                %\centering
+                %\includegraphics[width=0.5\columnwidth]{figures/propuesta_2/soak/net_currency}%
+                %\includegraphics[width=0.5\columnwidth]{figures/base/soak/net_currency}
+                %\caption{}
+                %\label{fig:comparacion_propuesta_2_base_soak_net_currency}
+            %\end{figure}
+
+    \subsection{Resultados y conclusiones}
+    \label{sec:propuesta_2_resultados_y_conclusiones}
+
 %\section{Modificacion: Uso de DB externa}
 %\label{sec:modificacion_uso_de_db_externa}
 %
@@ -971,15 +1131,162 @@
     \subsection{Resultados completos del escenario plano sobre la propuesta 2}
     \label{sec:resultados_completos_propuesta_2_plano}
 
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/baseline/scenarios}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_baseline_scenarios}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/baseline/requests_state}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_baseline_requests_state}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/baseline/response_time}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_baseline_response_time}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/baseline/endpoint_response_time}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_baseline_endpoint_response_time}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/baseline/resources}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_baseline_resources}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/baseline/currency}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_baseline_currency}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/baseline/net_currency}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_baseline_net_currency}
+        %\end{figure}
+
     \clearpage
 
     \subsection{Resultados completos del escenario stress sobre la propuesta 2}
     \label{sec:resultados_completos_propuesta_2_stress}
 
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/stress/scenarios}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_stress_scenarios}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/stress/requests_state}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_stress_requests_state}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/stress/response_time}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_stress_response_time}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/stress/endpoint_response_time}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_stress_endpoint_response_time}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/stress/resources}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_stress_resources}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/stress/currency}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_stress_currency}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/stress/net_currency}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_stress_net_currency}
+        %\end{figure}
+
     \clearpage
 
     \subsection{Resultados completos del escenario soak sobre la propuesta 2}
     \label{sec:resultados_completos_propuesta_2_soak}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/soak/scenarios}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_soak_scenarios}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/soak/requests_state}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_soak_requests_state}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/soak/response_time}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_soak_response_time}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/soak/endpoint_response_time}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_soak_endpoint_response_time}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/soak/resources}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_soak_resources}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/soak/currency}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_soak_currency}
+        %\end{figure}
+
+        %\begin{figure}[H]
+            %\centering
+            %\includegraphics[width=0.8\columnwidth]{figures/propuesta_2/soak/net_currency}
+            %\caption{}
+            %\label{fig:resultados_completos_propuesta_2_soak_net_currency}
+        %\end{figure}
 
 %----------------------------------------------------------
 
