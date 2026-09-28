@@ -32,7 +32,77 @@
         \subsubsection{Performance}
         \label{sec:propuesta_1_performance}
 
-        \todo{evaluar el impacto en cada QA}
+        Es el QA que la propuesta busca mejorar. Al mover el log a un nodo dedicado, la serialización y el envío del log
+        completo dejan de ejecutarse en el mismo proceso (y el mismo event loop) que atiende \texttt{/exchange}, por lo que
+        la latencia de las operaciones de negocio deja de depender del tamaño del log. Además, el nodo de logs ya no mantiene
+        el log en memoria ni lo reescribe completo cada segundo: agrega cada registro al final del archivo y lo lee desde disco
+        en streaming al ser consultado.
+
+        Como se verá en las \hyperref[sec:propuesta_1_pruebas_de_stress]{pruebas de estrés}, la latencia de \texttt{/exchange}
+        se mantiene estable mientras \texttt{/log} se degrada
+        (Figura~\ref{fig:comparacion_propuesta_1_sistema_base_stress_endpoint_response_time}). Por otro lado, la consulta del log
+        sigue siendo $O(n)$ sobre la cantidad de operaciones, por lo que \texttt{/log} continúa degradándose con el tiempo, y los
+        percentiles altos vistos desde el cliente empeoran al procesarse más operaciones.
+
+        \subsubsection{Disponibilidad}
+        \label{sec:propuesta_1_disponibilidad}
+
+        La degradación del log ya no arrastra a los endpoints de negocio: en el escenario de resistencia el sistema base
+        comenzaba a fallar a los 20 minutos, mientras que la propuesta 1 completó todas las requests durante los 45 minutos
+        (Figura~\ref{fig:comparacion_propuesta_1_sistema_base_soak_requests_state}).
+
+        Sin embargo, se agrega una nueva dependencia en el arranque: la API de exchange no comienza a atender requests hasta
+        conectarse con el nodo de logs, y reintenta indefinidamente cada 1 segundo. Si el nodo de logs no está disponible, la
+        API tampoco lo está. Una vez iniciada, en cambio, una caída del nodo de logs no detiene a la API de exchange.
+
+        \subsubsection{Confiabilidad}
+        \label{sec:propuesta_1_confiabilidad}
+
+        El nuevo formato mejora la persistencia del log: cada registro se agrega al final del archivo en lugar de reescribir el
+        archivo completo cada segundo, lo que elimina la ventana en la que un fallo durante la escritura corrompía todo el log.
+        La consulta solo envía hasta el último byte escrito al momento de recibirla y descarta una línea incompleta, por lo que
+        el cliente siempre recibe un JSON válido.
+
+        Como contrapartida, el envío del registro es \textit{fire and forget}: la API de exchange escribe en el socket TCP y
+        responde al cliente sin esperar confirmación de que el registro fue persistido. Además, la conexión se establece una
+        única vez en el arranque y no hay reconexión: si el nodo de logs se cae o se reinicia, las operaciones se siguen
+        confirmando al cliente pero dejan de registrarse en el log sin ningún aviso. Para un log de transacciones de una
+        fintech, que puede ser necesario para auditoría, esto es un riesgo que debe resolverse (por ejemplo, con reconexión y un
+        buffer local, o confirmando la escritura antes de responder, a costa de latencia).
+
+        \subsubsection{Escalabilidad}
+        \label{sec:propuesta_1_escalabilidad}
+
+        El desacoplamiento permite escalar de forma independiente la API de exchange y el nodo de logs según la carga de cada
+        uno. Replicar el nodo de logs para atender más consultas requeriría que las réplicas compartan el archivo (por ejemplo,
+        mediante un volumen) o un almacenamiento externo, ya que actualmente el archivo vive dentro del contenedor. La escritura
+        sigue concentrada en un único nodo.
+
+        \subsubsection{Seguridad}
+        \label{sec:propuesta_1_seguridad}
+
+        El puerto TCP 3002 del nodo de logs acepta registros de cualquier cliente dentro de la red de Docker, sin autenticación
+        ni validación del contenido. Cualquier contenedor comprometido podría insertar registros falsos en el log de
+        transacciones, lo que afecta su integridad. El puerto no se publica al host y nginx solo expone \texttt{GET /log}, por
+        lo que el riesgo queda acotado a la red interna.
+
+        \subsubsection{Modificabilidad}
+        \label{sec:propuesta_1_modificabilidad}
+
+        Se separan responsabilidades que antes estaban mezcladas en \texttt{state.js}: la API de exchange ya no conoce cómo se
+        almacena ni cómo se consulta el log, lo que permitiría cambiar el almacenamiento (por ejemplo, a una base de datos) sin
+        tocarla. La interfaz pública de \texttt{/log} se mantiene sin cambios para los clientes. En contrapartida, el protocolo
+        entre ambos nodos (JSON delimitado por saltos de línea sobre TCP) es ad hoc, y los nombres de host y puertos están
+        fijos en el código y en la configuración de nginx.
+
+        \subsubsection{Costo y simplicidad}
+        \label{sec:propuesta_1_costo_y_simplicidad}
+
+        Se agrega un contenedor con los mismos límites de recursos que la API (1 CPU y 4 GB de memoria), lo que duplica los
+        recursos reservados. Según las mediciones, la API de exchange queda prácticamente ociosa, con un $14.2\%$ de CPU en el
+        escenario de estrés (Figura~\ref{fig:comparacion_propuesta_1_sistema_base_stress_resources}), por lo que sus límites
+        podrían reducirse. La arquitectura suma un componente y un conector nuevo, así como un orden de arranque a respetar,
+        aunque la complejidad agregada es menor que la de la propuesta 2.
 
     \subsection{Pruebas de carga}
     \label{sec:propuesta_1_pruebas_de_baseline}
