@@ -27,6 +27,9 @@ def alias_by_node(dataframe: pd.DataFrame, prefix: str, suffix: str) -> list[tup
 def exclude(entries: list[tuple[str, pd.Series]], pattern: str) -> list[tuple[str, pd.Series]]:
     return [(name, series) for name, series in entries if not re.search(pattern, name)]
 
+def min_points(entries: list[tuple[str, pd.Series]], count: int) -> list[tuple[str, pd.Series]]:
+    return [(name, series) for name, series in entries if series.dropna().size >= count]
+
 def remove_below_value(series: pd.Series, value: float) -> pd.Series:
     return series.where(series > value)
 

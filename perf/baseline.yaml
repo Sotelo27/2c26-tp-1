@@ -38,7 +38,7 @@ config:
 
 scenarios:
   - name: exchange
-    weight: 60
+    weight: 20
     flow:
       - post:
           url: '/exchange'
@@ -50,13 +50,33 @@ scenarios:
             baseAmount: 100000
 
   - name: log
-    weight: 25
+    weight: 8
     flow:
       - get:
           url: '/log'
 
   - name: rates
-    weight: 15
+    weight: 3
     flow:
       - get:
           url: '/rates'
+
+  - name: accounts
+    weight: 3
+    flow:
+      - get:
+          url: '/accounts'
+
+  - name: set_rates
+    weight: 3
+    flow:
+      - put:
+          url: '/rates'
+          json: { baseCurrency: 'EUR', counterCurrency: 'ARS', rate: 1761 }
+
+  - name: accounts_balance
+    weight: 3
+    flow:
+      - put:
+          url: '/accounts/3/balance'
+          json: { balance: 1000000000000000 }

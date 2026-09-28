@@ -2,17 +2,17 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from render import format_duration_ms, legend_table, log_ms_axis, plot_series, time_axis
 from styles import color_clasico
-from transforms import alias_by_node, exclude, remove_below_value
+from transforms import alias_by_node, min_points, remove_below_value
 
 LATENCY = "stats.timers.exchange.latency."
 PERCENTIL = ".upper_95"
-EXCLUIDO = "accounts_balance"
+MIN_PUNTOS = 10
 
 def generate_endpoint_response_time_plot(latency_dataframe: pd.DataFrame, meta: dict, output_path: str):
     series = [
         (name, color_clasico(i), values)
         for i, (name, values) in enumerate(
-            exclude(alias_by_node(latency_dataframe, LATENCY, PERCENTIL), EXCLUIDO)
+            min_points(alias_by_node(latency_dataframe, LATENCY, PERCENTIL), MIN_PUNTOS)
         )
     ]
 
