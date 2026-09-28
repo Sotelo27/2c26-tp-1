@@ -37,10 +37,8 @@
     \subsection{Pruebas de carga}
     \label{sec:propuesta_1_pruebas_de_baseline}
 
-    La prueba de carga se realizo usando una tasa constante de 40 usuarios durante 240s (4 minutos).
-    Cada usuario realiza un solo request, es decir se mantiene un throughput constante de 40 requests por segundo.
-    No se realizo warm-up ni ramp para no ensuciar las metricas de promedios.
-    Tampoco se realizaron recargas de saldo intermedias, se utilizo una carga inicial suficiente para cubrir toda la prueba.
+    Las pruebas de carga comparten la misma configuracion con el sistema base de tal forma que los resultados sean comparables, ver \hyperref[sec:sistema_base_pruebas_de_baseline]{Pruebas de carga}.
+
     Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_1_baseline]{Apendice}.
 
     % Me parece que no aporta mucho esta seccion, con stress y soak se ve mejor el cambio, si dejaria los resultados en el apendice
@@ -48,9 +46,7 @@
     \subsection{Pruebas de estrés}
     \label{sec:propuesta_1_pruebas_de_stress}
 
-    La prueba de estrés se realizo incrementando progresivamente la carga desde 40 hasta 180 en saltos de 20, cada salto con una duracion de 45s, el tiempo total de la prueba es de 450s (7,5 minutos).
-    Se realizo un warm-up inicial de 5 usuarios durante 30s. Ademas, al final de la prueba se dejo una instancia de recovery de nuevamente 5 usuarios esta vez durante 60s.
-    Tampoco se realizaron recargas de saldo intermedias y se mantuvo el mismo uso de endpoints para que los resultados sean comparables.
+    Las pruebas de estrés comparten la misma configuracion con el sistema base de tal forma que los resultados sean comparables, ver \hyperref[sec:sistema_base_pruebas_de_stress]{Pruebas de estres}.
 
     Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_1_stress]{Apendice}.
 
@@ -166,7 +162,8 @@
                 \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/requests_state}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/requests_state}
                 \caption{
-                    \todo{completar}
+                    Comparativa de la disponibilidad ofrecida por la propuesta 1 (izquierda) y el sistema base (derecha) frente a un scenario de resistencia.
+                    El sistema base mostraba una degradacion critica a los 20 minutos, mientras que la propuesta 1 logro completar satisfactoriamente todas las request durante los 45 minutos.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_requests_state}
             \end{figure}
@@ -179,7 +176,8 @@
                 \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/response_time}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/response_time}
                 \caption{
-                    \todo{completar}
+                    Comparativa de los resultados de latencia entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un scenario de resistencia.
+                    Consistente con los resultados de disponibilidad se muestra una gran mejora especialmente posterior al minuto 20. Sinembargo, la propuesta 1 sigue mostrando una principio de degradacion a los 40 minutos, esperable dado el crecimiento del log.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_response_time}
             \end{figure}
@@ -189,7 +187,9 @@
                 \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/endpoint_response_time}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/endpoint_response_time}
                 \caption{
-                    \todo{completar}
+                    Comparativa de los resultados de latencia por endpoint entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un scenario de resistencia.
+                    Para el tiempo de respuesta desde la perspectiva del servidor, se muestra como en la propuesta 1 los tiempos del endpoint de logs ya no “empujan” los tiempos del endpoint exchange, sinembargo como ya se menciono, el endpoint de logs continua degradando.
+                    Los tiempos de respuesta de log entre ambos casos lamentablemente no son comparables puesto que menor disponibilidad implica un menor crecimiento del propio log.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_endpoint_response_time}
             \end{figure}
@@ -207,7 +207,9 @@
                     \includegraphics[width=\linewidth]{figures/sistema_base/soak/resources}
                 \end{minipage}
                 \caption{
-                    \todo{completar}
+                    Comparativa de los resultados del uso de recursos entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un scenario de resistencia.
+                    Destacar que ambos casos no son directamente comparables, la propuesta 1 dispone de dos contenedores/nodos independientes cada uno con los mismo recursos que el nodo monolitico del escenario base.
+                    Se observa que para el nodo de exchange-api los recursos son practicamente ociosos con apenas un uso del $6.4\%$ de CPU y $0.8\%$ en memoria. Tambien se observa en los recursos del nodo de logs, un uso mas constante de la memoria, esperable al stremear los datos desde disco y no conservar todos los logs en memoria.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_resources}
             \end{figure}
@@ -220,7 +222,8 @@
                 \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/currency}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/currency}
                 \caption{
-                    \todo{completar}
+                    Comparativa de los resultados de volumen operado en cada moneda entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un scenario de resistencia.
+                    Se observa que la propuesta 1 obtuvo un mayor volumen total siendo este $4.31M$ frente al $3.59M$ del sistema base, es decir una mejora del $20.06\%$.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_currency}
             \end{figure}
@@ -233,7 +236,8 @@
                 \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/net_currency}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/net_currency}
                 \caption{
-                    \todo{completar}
+                    Comparativa de los resultados de volumen neto operado en cada moneda entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un scenario de resistencia.
+                    Analogamente al volumen operado, se observa que el volumen neto tambien es mayor en la propuesta 1 frente al sistema base en la misma proporcion.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_net_currency}
             \end{figure}

@@ -5,10 +5,15 @@
     \subsection{Pruebas de carga}
     \label{sec:sistema_base_pruebas_de_baseline}
 
-    Las pruebas de carga no revelaron informacion significativa sobre el sistema inicial.
-    Sinembargo aprovechamos esta seccion para ilustrar el formato de los gráficos y explicar los criterios compartidos entre todos los escenarios.
+        Las pruebas de carga no revelaron informacion significativa sobre el sistema inicial.
+        Sinembargo aprovechamos esta seccion para ilustrar el formato de los gráficos y explicar los criterios compartidos entre todos los escenarios.
 
-    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_sistema_base_baseline]{Apendice}.
+        La prueba de carga se realizo usando una tasa constante de 40 usuarios durante 240s (4 minutos).
+        Cada usuario realiza un solo request, es decir se mantiene un throughput constante de 40 requests por segundo.
+        No se realizo warm-up ni ramp para no ensuciar las metricas de promedios.
+        Tampoco se realizaron recargas de saldo intermedias, se utilizo una carga inicial suficiente para cubrir toda la prueba.
+
+        Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_sistema_base_baseline]{Apendice}.
 
         \subsubsection{Disponibilidad}
         \label{sec:sistema_base_pruebas_de_baseline_metricas_disponibilidad}
@@ -119,7 +124,11 @@
     \subsection{Pruebas de estrés}
     \label{sec:sistema_base_pruebas_de_stress}
 
-    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_sistema_base_stress]{Apendice}.
+        La prueba de estrés se realizo incrementando progresivamente la carga desde 40 hasta 180 en saltos de 20, cada salto con una duracion de 45s, el tiempo total de la prueba es de 450s (7,5 minutos).
+        Se realizo un warm-up inicial de 5 usuarios durante 30s. Ademas, al final de la prueba se dejo una instancia de recovery de nuevamente 5 usuarios esta vez durante 60s.
+        Tampoco se realizaron recargas de saldo intermedias y se mantuvo el mismo uso de endpoints para que los resultados sean comparables.
+
+        Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_sistema_base_stress]{Apendice}.
 
         \subsubsection{Disponibilidad}
         \label{sec:sistema_base_pruebas_de_stress_metricas_disponibilidad}
