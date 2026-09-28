@@ -66,7 +66,7 @@
 \RequirePackage[notextcomp]{stix2}
 \RequirePackage{FiraSans}
 \RequirePackage[scaled=0.80]{FiraMono}
-\RequirePackage{roboto-mono}
+\RequirePackage[scale=0.85]{roboto-mono}
 
 %----------------------------------------------------------
 % Figures
@@ -497,7 +497,7 @@
     keywordstyle=\color{codeblue},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codegreen},
-    basicstyle=\robotomono\scriptsize\color{graphite},
+    basicstyle=\robotomono\footnotesize\color{graphite},
     breakatwhitespace=false,
     breaklines=true,
     captionpos=b,
