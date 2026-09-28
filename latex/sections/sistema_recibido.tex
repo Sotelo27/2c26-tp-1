@@ -79,7 +79,7 @@
     \end{code}
 
     El registro de operaciones tampoco tiene una política de retención. Cada resultado
-    se agrega a un arreglo en memoria y \texttt{GET /log} devuelve el arreglo completo.
+    se agrega a un arreglo en memoria y \texttt{GET\,/log} devuelve el arreglo completo.
     A medida que aumenta la cantidad de operaciones, crecen el consumo de memoria, el
     tamaño de la respuesta y el trabajo necesario para serializar el estado. Además,
     el arreglo completo se convierte a JSON y se reescribe cada segundo, por lo que el
@@ -132,7 +132,7 @@
     \small
     \setlength{\tabcolsep}{4pt}
     \renewcommand{\arraystretch}{1.2}
-    \begin{longtable}{@{}p{0.13\textwidth}p{0.22\textwidth}p{0.12\textwidth}p{0.19\textwidth}p{0.19\textwidth}@{}}
+    \begin{longtable}{@{}>{\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\arraybackslash}p{0.13\textwidth}p{0.22\textwidth}>{\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\arraybackslash}p{0.12\textwidth}p{0.19\textwidth}p{0.19\textwidth}@{}}
         \caption{Hallazgos del análisis estático del caso base.}
         \label{tab:hallazgos_codigo_base}\\
         \toprule
@@ -147,13 +147,13 @@
         \midrule
         Estado mutable expuesto & Los getters de \texttt{state.js} retornan objetos que \texttt{exchange.js} conserva y modifica. & Modificabilidad, Testability, Reliability & Las actualizaciones eluden una interfaz de repositorio y dificultan sustituir o simular la persistencia. & Probar la lógica con un repositorio simulado y registrar qué dependencias deben reemplazarse. \\
         \midrule
-        Log sin límite & Cada operación ejecuta \texttt{log.push}; \texttt{GET /log} retorna el arreglo completo (Listado~\ref{lst:log_growth}). & Performance, Scalability, Availability & Aumentan memoria, tamaño de respuesta y tiempo de serialización con cada operación. & Ejecutar lotes crecientes y medir memoria, bytes y latencia de \texttt{GET /log}. \\
+        Log sin límite & Cada operación ejecuta \texttt{log.push}; \texttt{GET\,/log} retorna el arreglo completo (Listado~\ref{lst:log_growth}). & Performance, Scalability, Availability & Aumentan memoria, tamaño de respuesta y tiempo de serialización con cada operación. & Ejecutar lotes crecientes y medir memoria, bytes y latencia de \texttt{GET\,/log}. \\
         \midrule
         Reescritura completa & \texttt{scheduleSave} serializa y escribe el log completo cada segundo. & Performance, Efficiency, Reliability & El costo de I/O crece con el historial y una interrupción puede dejar el archivo incompleto. & Medir tamaño, tiempo de escritura y actividad de I/O para distintos volúmenes de log. \\
         \midrule
         Durabilidad diferida & Los cambios residen en memoria hasta el siguiente intervalo y la escritura no es atómica. & Reliability, Availability & Una terminación abrupta puede perder operaciones confirmadas o impedir cargar el JSON. & Terminar la API dentro de la ventana de persistencia, reiniciarla y comparar estado y log. \\
         \midrule
-        Dinero con \texttt{Number} & El importe se obtiene mediante \texttt{baseAmount * exchangeRate} sin redondeo explícito (Listado~\ref{lst:floats}). & Reliability, Security & Pueden aparecer residuos decimales y acumularse diferencias en los saldos. & Utilizar valores como 0.1 y 0.2 y comparar contra un cálculo decimal exacto. \\
+        Dinero con \texttt{Number} & El importe se obtiene mediante $baseAmount \cdot exchangeRate$ sin redondeo explícito (Listado~\ref{lst:floats}). & Reliability, Security & Pueden aparecer residuos decimales y acumularse diferencias en los saldos. & Utilizar valores como 0.1 y 0.2 y comparar contra un cálculo decimal exacto. \\
         \midrule
         Validación incompleta & La API solo verifica truthiness y acepta valores negativos o combinaciones incoherentes (Listado~\ref{lst:request_validation}). & Security, Reliability, Testability & Entradas inválidas pueden alterar saldos o provocar excepciones no controladas. & Crear casos con importes negativos, tipos incorrectos, monedas inexistentes y cuentas incompatibles. \\
         \bottomrule
