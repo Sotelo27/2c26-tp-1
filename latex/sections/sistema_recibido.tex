@@ -70,6 +70,9 @@
     aprobar la operación. Ambas solicitudes pueden completar los descuentos y dejar
     un saldo negativo. El siguiente código muestra la sección crítica,
     que no está protegida por exclusión mutua, serialización ni una transacción.
+    Lo verificamos enviando diez cambios concurrentes de 80 USD contra un saldo interno de
+    100 USD: se aprobaron los diez y la cuenta terminó en $-700$ USD
+    (Tabla~\ref{tab:propuesta_3_concurrencia}).
 
     \begin{code}
         \lstinputlisting[language=JavaScript]{./code/race_condition.js}
@@ -105,7 +108,9 @@
     No hay un modelo de dominio, los importes monetarios se representan mediante \texttt{Number}, cuyo formato de
     punto flotante binario no representa exactamente todos los valores decimales. Sin
     una regla explícita de redondeo o una representación en unidades mínimas, el error
-    puede acumularse en los saldos y en los importes entregados al cliente.
+    puede acumularse en los saldos y en los importes entregados al cliente. Por ejemplo,
+    fijando la tasa ARS/USD en $0.1$ mediante \texttt{PUT /rates} y cambiando 3 ARS, la API
+    responde \texttt{"counterAmount": 0.30000000000000004} en lugar de $0.3$.
 
     \begin{code}
         \lstinputlisting[language=JavaScript]{./code/floats.js}
@@ -119,7 +124,10 @@
     validación inicial y puede alterar los saldos en el sentido contrario al esperado.
     Las monedas inexistentes también pueden producir excepciones al acceder a una tasa
     o cuenta no encontrada. A su vez, los rechazos de negocio se informan como HTTP 500,
-    aunque no necesariamente representan una falla interna del servidor.
+    aunque no necesariamente representan una falla interna del servidor. La
+    Tabla~\ref{tab:propuesta_3_validacion} muestra el resultado de ejecutar estas requests:
+    además del importe negativo, un importe enviado como texto convierte el saldo de la
+    cuenta interna en un string por concatenación.
 
     \begin{code}
         \lstinputlisting[language=JavaScript]{./code/request_validation.js}
