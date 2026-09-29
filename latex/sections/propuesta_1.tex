@@ -22,7 +22,7 @@
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\columnwidth]{figures/diagramas/componentes_y_conectores_propuesta_1}
-        \caption{ Diagrama Components \& Connectors de la propuesta 1. }
+        \caption{ Diagrama Components \& Connectors de la propuesta 1. Respecto al sistema base agrega el nodo \texttt{log-api}, que recibe, almacena y sirve el log por separado de la API de exchange. }
         \label{fig:propuesta_1_componentes_y_conectores}
     \end{figure}
 
@@ -35,10 +35,10 @@
         Es el QA que la propuesta busca mejorar. Al mover el log a un nodo dedicado, la serialización y el envío del log
         completo dejan de ejecutarse en el mismo proceso (y el mismo event loop) que atiende \texttt{/exchange}, por lo que
         la latencia de las operaciones de negocio deja de depender del tamaño del log. Además, el nodo de logs ya no mantiene
-        el log en memoria ni lo reescribe completo cada segundo: agrega cada registro al final del archivo y lo lee desde disco
+        el log en memoria ni lo reescribe completo cada 1s: agrega cada registro al final del archivo y lo lee desde disco
         en streaming al ser consultado.
 
-        Como se verá en las \hyperref[sec:propuesta_1_pruebas_de_stress]{pruebas de estrés}, la latencia de \texttt{/exchange}
+        Como se verá en las pruebas de estrés (Sección~\ref{sec:propuesta_1_pruebas_de_stress}), la latencia de \texttt{/exchange}
         se mantiene estable mientras \texttt{/log} se degrada
         (Figura~\ref{fig:comparacion_propuesta_1_sistema_base_stress_endpoint_response_time}). Por otro lado, la consulta del log
         sigue siendo $\mathcal{O}(n)$ sobre la cantidad de operaciones, por lo que \texttt{/log} continúa degradándose con el tiempo, y los
@@ -48,18 +48,18 @@
         \label{sec:propuesta_1_disponibilidad}
 
         La degradación del log ya no arrastra a los endpoints de negocio: en el escenario de resistencia el sistema base
-        comenzaba a fallar a los 20 minutos, mientras que la propuesta 1 completó todas las requests durante los 45 minutos
+        comenzaba a fallar en el minuto 20, mientras que la propuesta 1 completó todas las requests durante los 45m
         (Figura~\ref{fig:comparacion_propuesta_1_sistema_base_soak_requests_state}).
 
         Sin embargo, se agrega una nueva dependencia en el arranque: la API de exchange no comienza a atender requests hasta
-        conectarse con el nodo de logs, y reintenta indefinidamente cada 1 segundo. Si el nodo de logs no está disponible, la
+        conectarse con el nodo de logs, y reintenta indefinidamente cada 1s. Si el nodo de logs no está disponible, la
         API tampoco lo está. Una vez iniciada, en cambio, una caída del nodo de logs no detiene a la API de exchange.
 
         \subsubsection{Confiabilidad}
         \label{sec:propuesta_1_confiabilidad}
 
         El nuevo formato mejora la persistencia del log: cada registro se agrega al final del archivo en lugar de reescribir el
-        archivo completo cada segundo, lo que elimina la ventana en la que un fallo durante la escritura corrompía todo el log.
+        archivo completo cada 1s, lo que elimina la ventana en la que un fallo durante la escritura corrompía todo el log (Código~\ref{lst:save}).
         La consulta solo envía hasta el último byte escrito al momento de recibirla y descarta una línea incompleta, por lo que
         el cliente siempre recibe un JSON válido.
 
@@ -89,7 +89,7 @@
         \subsubsection{Modificabilidad}
         \label{sec:propuesta_1_modificabilidad}
 
-        Se separan responsabilidades que antes estaban mezcladas en \texttt{state.js}: la API de exchange ya no conoce cómo se
+        Se separan responsabilidades que antes estaban mezcladas en \texttt{state.js} (Código~\ref{lst:acoplamiento}): la API de exchange ya no conoce cómo se
         almacena ni cómo se consulta el log, lo que permitiría cambiar el almacenamiento (por ejemplo, a una base de datos) sin
         tocarla. La interfaz pública de \texttt{/log} se mantiene sin cambios para los clientes. En contrapartida, el protocolo
         entre ambos nodos (JSON delimitado por saltos de línea sobre TCP) es ad hoc, y los nombres de host y puertos están
@@ -102,23 +102,23 @@
         recursos reservados. Según las mediciones, la API de exchange queda prácticamente ociosa, con un $14.2\%$ de CPU en el
         escenario de estrés (Figura~\ref{fig:comparacion_propuesta_1_sistema_base_stress_resources}), por lo que sus límites
         podrían reducirse. La arquitectura suma un componente y un conector nuevo, así como un orden de arranque a respetar,
-        aunque la complejidad agregada es menor que la de la propuesta 2.
+        aunque la complejidad agregada es menor que la de la propuesta 2 (Sección~\ref{sec:propuesta_2_simplicidad}).
 
     \subsection{Pruebas de carga}
     \label{sec:propuesta_1_pruebas_de_baseline}
 
-    Las pruebas de carga comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver \hyperref[sec:sistema_base_pruebas_de_baseline]{Pruebas de carga}.
+    Las pruebas de carga comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver Sección~\ref{sec:sistema_base_pruebas_de_baseline}.
 
-    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_1_baseline]{Apéndice}.
+    Se pueden encontrar los resultados completos en el Apéndice (Sección~\ref{sec:resultados_completos_propuesta_1_baseline}).
 
     % Me parece que no aporta mucho esta seccion, con stress y soak se ve mejor el cambio, si dejaria los resultados en el apendice
 
     \subsection{Pruebas de estrés}
     \label{sec:propuesta_1_pruebas_de_stress}
 
-    Las pruebas de estrés comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver \hyperref[sec:sistema_base_pruebas_de_stress]{Pruebas de estrés}.
+    Las pruebas de estrés comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver Sección~\ref{sec:sistema_base_pruebas_de_stress}.
 
-    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_1_stress]{Apéndice}.
+    Se pueden encontrar los resultados completos en el Apéndice (Sección~\ref{sec:resultados_completos_propuesta_1_stress}).
 
         \subsubsection{Disponibilidad}
         \label{sec:propuesta_1_pruebas_de_stress_metricas_disponibilidad}
@@ -157,7 +157,7 @@
                     Comparativa de los resultados de latencia por endpoint entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de estrés.
                     Con diferencia el análisis más interesante, la propuesta 1 permitió como se esperaba mejorar la latencia en el endpoint \texttt{/exchange},
                     se puede notar que este no se ve afectado por la degradación del endpoint \texttt{/log}. Como sí ocurría en el caso base, donde alrededor del minuto 4,
-                    los tiempos de respuesta de \texttt{/exchange} incrementaban, en este caso, los tiempos de respuesta se mantienen estables en 1 segundo, acotado por la dependencia
+                    los tiempos de respuesta de \texttt{/exchange} incrementaban, en este caso, los tiempos de respuesta se mantienen estables en 1s, acotado por la dependencia
                     del servicio externo.
                     Por otro lado, los tiempos de respuesta de \texttt{/log} empeoraron, sin embargo es esperable, la mayor disponibilidad antes mencionada implica que se
                     registraron más transacciones, por lo que el tamaño del log necesariamente aumentó.
@@ -220,7 +220,10 @@
     \subsection{Pruebas de resistencia}
     \label{sec:propuesta_1_pruebas_de_soak}
 
-        Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_1_soak]{Apéndice}.
+        Las pruebas de resistencia comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver Sección~\ref{sec:sistema_base_pruebas_de_soak}.
+        Este es el escenario en el que esperamos ver el efecto de la táctica.
+
+        Se pueden encontrar los resultados completos en el Apéndice (Sección~\ref{sec:resultados_completos_propuesta_1_soak}).
 
         \subsubsection{Disponibilidad}
         \label{sec:propuesta_1_pruebas_de_soak_metricas_disponibilidad}
@@ -231,7 +234,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/requests_state}
                 \caption{
                     Comparativa de la disponibilidad ofrecida por la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
-                    El sistema base mostraba una degradación crítica a los 20 minutos, mientras que la propuesta 1 logró completar satisfactoriamente todas las requests durante los 45 minutos.
+                    El sistema base mostraba una degradación crítica en el minuto 20, mientras que la propuesta 1 logró completar satisfactoriamente todas las requests durante los 45m.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_requests_state}
             \end{figure}
@@ -245,7 +248,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/response_time}
                 \caption{
                     Comparativa de los resultados de latencia entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
-                    Consistente con los resultados de disponibilidad se muestra una gran mejora especialmente posterior al minuto 20. Sin embargo, la propuesta 1 sigue mostrando un principio de degradación a los 40 minutos, esperable dado el crecimiento del log.
+                    Consistente con los resultados de disponibilidad se muestra una gran mejora especialmente posterior al minuto 20. Sin embargo, la propuesta 1 sigue mostrando un principio de degradación en el minuto 40, esperable dado el crecimiento del log.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_response_time}
             \end{figure}
@@ -256,7 +259,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/endpoint_response_time}
                 \caption{
                     Comparativa de los resultados de latencia por endpoint entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
-                    Para el tiempo de respuesta desde la perspectiva del servidor, se muestra cómo en la propuesta 1 los tiempos del endpoint \texttt{/log} ya no “empujan” los tiempos del endpoint \texttt{/exchange}, sin embargo como ya se mencionó, el endpoint \texttt{/log} continúa degradando.
+                    Para el tiempo de respuesta desde la perspectiva del servidor, se muestra cómo en la propuesta 1 los tiempos del endpoint \texttt{/log} ya no “empujan” los tiempos del endpoint \texttt{/exchange}, sin embargo como ya se mencionó (Figura~\ref{fig:comparacion_propuesta_1_sistema_base_stress_endpoint_response_time}), el endpoint \texttt{/log} continúa degradando.
                     Los tiempos de respuesta de \texttt{/log} entre ambos casos lamentablemente no son comparables puesto que menor disponibilidad implica un menor crecimiento del propio log.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_endpoint_response_time}
@@ -313,5 +316,5 @@
     \subsection{Resultados y conclusiones}
     \label{sec:propuesta_1_resultados_y_conclusiones}
 
-    La propuesta 1 demostró ser capaz de aislar la degradación producida por la consulta de logs de las operaciones de negocio del sistema, permitiendo ofrecer una mejor disponibilidad a los usuarios comunes.
-    Por otro lado la consulta de logs sigue degradándose con el tiempo. Sin embargo, este desacoplamiento propuesto permitiría replicar el nodo de consulta para dar soporte de lectura de los logs a más usuarios, es decir, permitiendo escalabilidad horizontal.
+    La propuesta 1 demostró ser capaz de aislar la degradación producida por la consulta de logs de las operaciones de negocio del sistema, permitiendo ofrecer una mejor disponibilidad a los usuarios comunes (Figura~\ref{fig:comparacion_propuesta_1_sistema_base_soak_requests_state}).
+    Por otro lado la consulta de logs sigue degradándose con el tiempo. Sin embargo, este desacoplamiento propuesto permitiría replicar el nodo de consulta para dar soporte de lectura de los logs a más usuarios, es decir, permitiendo escalabilidad horizontal (Sección~\ref{sec:propuesta_1_escalabilidad}).

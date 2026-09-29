@@ -30,9 +30,9 @@
 
             Uno de los principales candidatos a explicar los reclamos es el endpoint
             \texttt{/exchange}. Una operación exitosa realiza dos transferencias
-            secuenciales de entre 200 y 400 milisegundos cada una, por lo que su tiempo
+            secuenciales de entre 200 y 400ms cada una, por lo que su tiempo
             de respuesta esperado es mayor que el de los endpoints que solo consultan
-            memoria. Esta hipótesis debe contrastarse con las pruebas de carga.
+            memoria. Esta hipótesis debe contrastarse con las pruebas de carga (Figura~\ref{fig:sistema_base_baseline_endpoint_response_time}).
 
             \begin{customenv}[frametitle=]
                 las tasas de cambio no tienen gap entre el valor de compra y de venta.
@@ -79,8 +79,8 @@
             \end{customenv}
 
             Confiar en validaciones realizadas exclusivamente por el cliente permite que
-            un consumidor invoque directamente la API con valores inesperados. Aunque el
-            enunciado supone autenticación y autorización previas, esos mecanismos no
+            un consumidor invoque directamente la API con valores inesperados (Código~\ref{lst:request_validation}). Aunque arVault
+            cuenta con un componente previo de autenticación y autorización, esos mecanismos no
             sustituyen la validación de tipos, rangos e invariantes de negocio. Una
             operación inválida puede provocar pérdidas monetarias y reputacionales.
 
@@ -105,8 +105,8 @@
 
             El propio README del servicio anticipa cambios concretos: reemplazar el
             almacenamiento en archivos (el fundador incluso propone migrar a Redis) y
-            mover la gestión de cuentas a otro servicio. Además, el enunciado indica que
-            los fondos se destinaron a agregar funcionalidad. La modificabilidad no
+            mover la gestión de cuentas a otro servicio. Además, arVault destinó
+            los primeros fondos a agregar funcionalidad. La modificabilidad no
             resuelve los reclamos actuales de los usuarios, por lo que no la consideramos
             clave, pero determina el costo de aplicar las mejoras que sí lo son.
 
@@ -140,7 +140,7 @@
             exigida por los inversores requiere demostrar que el servicio se comporta
             correctamente. El repositorio no incluye pruebas automatizadas: el script
             \texttt{test} del \texttt{package.json} es el generado por defecto
-            (\texttt{"Error: no test specified"}). Sin pruebas, cada corrección de los
+            (\texttt{Error: no test specified}). Sin pruebas, cada corrección de los
             problemas de confiabilidad identificados corre el riesgo de introducir
             regresiones.
 
@@ -211,17 +211,17 @@
 
         \begin{itemize}
             \item \textbf{Estado en memoria (positivo).} Las lecturas de cuentas y tasas no
-            acceden a disco: \texttt{GET /rates} responde en torno a 1 ms en P95
+            acceden a disco: \texttt{GET /rates} responde en torno a 1ms en P95
             (Figura~\ref{fig:sistema_base_baseline_endpoint_response_time}).
             \item \textbf{Transferencias secuenciales.} Cada cambio exitoso espera dos
-            transferencias de entre 200 y 400 ms, una después de la otra, por lo que
-            \texttt{/exchange} no puede responder en menos de 400 ms aun sin carga. Si
+            transferencias de entre 200 y 400ms, una después de la otra, por lo que
+            \texttt{/exchange} no puede responder en menos de 400ms aun sin carga. Si
             fueran independientes podrían solaparse, pero la segunda depende del resultado
-            de la primera.
+            de la primera (Código~\ref{lst:race_condition}).
             \item \textbf{Serialización síncrona de un log sin límite.} \texttt{/log}
-            serializa el arreglo completo con \texttt{res.json}, operación síncrona que
+            serializa el arreglo completo con \texttt{res.json} (Código~\ref{lst:log_growth}), operación síncrona que
             bloquea el event loop durante un tiempo proporcional al tamaño del log. A esto
-            se suma la reescritura completa del archivo cada segundo. En el escenario de
+            se suma la reescritura completa del archivo cada 1s. En el escenario de
             estrés, el CPU se satura y la latencia de \texttt{/exchange} comienza a crecer
             a partir del minuto 4
             (Figuras~\ref{fig:sistema_base_stress_resources} y~\ref{fig:sistema_base_stress_endpoint_response_time}).
@@ -243,7 +243,7 @@
             cambiar la arquitectura.
             \item \textbf{Costo creciente con el historial.} El costo de \texttt{/log} y de
             la persistencia crece con la cantidad de operaciones realizadas, de modo que
-            más usuarios aceleran la degradación aunque la carga por segundo se mantenga.
+            más usuarios aceleran la degradación aunque la carga por segundo se mantenga (Figura~\ref{fig:sistema_base_soak_endpoint_response_time}).
         \end{itemize}
 
         \subsubsection{Impacto en la Confiabilidad}
@@ -251,14 +251,14 @@
 
         \begin{itemize}
             \item \textbf{Verificación de saldo sin exclusión mutua.} La condición de
-            carrera del Listado~\ref{lst:race_condition} permite aprobar dos operaciones con
+            carrera del Código~\ref{lst:race_condition} permite aprobar dos operaciones con
             el mismo saldo.
             \item \textbf{Durabilidad diferida y escritura no atómica.} Las operaciones
             confirmadas al cliente pueden perderse si el proceso termina antes del
             siguiente guardado, y una interrupción durante la escritura puede dejar el
-            archivo corrupto (Listado~\ref{lst:save}).
+            archivo corrupto (Código~\ref{lst:save}).
             \item \textbf{Importes con \texttt{Number}.} El uso de punto flotante binario
-            para dinero (Listado~\ref{lst:floats}) puede acumular diferencias en los saldos.
+            para dinero (Código~\ref{lst:floats}) puede acumular diferencias en los saldos.
         \end{itemize}
 
         \subsubsection{Impacto en la Seguridad}
@@ -266,10 +266,10 @@
 
         \begin{itemize}
             \item \textbf{Validación por presencia.} La API acepta importes negativos,
-            tipos incorrectos y monedas inexistentes (Listado~\ref{lst:request_validation}).
+            tipos incorrectos y monedas inexistentes (Código~\ref{lst:request_validation}).
             Combinado con la falta de manejo de errores, una sola request malformada
             funciona como un ataque de denegación de servicio, como se evidencia en el
-            escenario de caos.
+            escenario de caos (Figura~\ref{fig:sistema_base_chaos_requests_state}).
             \item \textbf{Endpoints administrativos expuestos.} \texttt{/accounts/<id>/balance}
             y \texttt{PUT /rates} se publican a través del mismo nginx que los endpoints de
             los clientes. Si bien asumimos que el componente de autorización filtra quién
@@ -286,11 +286,11 @@
             permite ubicar rápidamente cada responsabilidad.
             \item \textbf{Abstracción de persistencia permeable.} Los getters de
             \texttt{state.js} devuelven referencias mutables que \texttt{exchange.js}
-            modifica directamente (Listado~\ref{lst:acoplamiento}). Reemplazar los archivos
+            modifica directamente (Código~\ref{lst:acoplamiento}). Reemplazar los archivos
             por una base de datos, como pide el fundador, obliga a modificar también la
             lógica de negocio.
             \item \textbf{Concentración de responsabilidades en \texttt{exchange.js}}
-            (Listado~\ref{lst:separacion_de_responsabilidades}), que aumenta el
+            (Código~\ref{lst:separacion_de_responsabilidades}), que aumenta el
             acoplamiento entre cálculo, validación, transferencia y registro.
         \end{itemize}
 
@@ -299,9 +299,9 @@
 
         \begin{itemize}
             \item \textbf{Estado global y dependencias fijas.} El estado se carga desde
-            archivos al iniciar el módulo y el servicio de transferencias se invoca
+            archivos al iniciar el módulo (Código~\ref{lst:acoplamiento}) y el servicio de transferencias se invoca
             directamente, sin inyección de dependencias. Probar la lógica de cambio de
-            forma aislada requiere preparar archivos reales y esperar los 200 a 400 ms de
+            forma aislada requiere preparar archivos reales y esperar los 200 a 400ms de
             cada transferencia simulada.
             \item \textbf{Ausencia de pruebas automatizadas}, como se mencionó en la
             Sección~\ref{sec:testeabilidad}.
@@ -312,8 +312,8 @@
 
         \begin{itemize}
             \item \textbf{Persistencia periódica completa.} Las cuentas y el log se
-            serializan y escriben completos cada segundo, aunque no haya habido cambios o
-            solo se haya agregado una operación.
+            serializan y escriben completos cada 1s, aunque no haya habido cambios o
+            solo se haya agregado una operación (Códigos~\ref{lst:log_growth} y~\ref{lst:save}).
             \item \textbf{Log completo en memoria.} El uso de memoria crece durante toda la
             prueba de resistencia hasta un máximo de $22.5\%$ del límite del contenedor
             (Figura~\ref{fig:sistema_base_soak_resources}), sin que exista una política de
@@ -335,7 +335,7 @@
             (Sección~\ref{sec:infraestructura}), por lo que recrear el contenedor descarta
             el estado.
             \item \textbf{Configuración fija en el código.} El puerto y los períodos de
-            persistencia no pueden ajustarse sin modificar el código y reconstruir la imagen.
+            persistencia (Código~\ref{lst:log_growth}) no pueden ajustarse sin modificar el código y reconstruir la imagen.
         \end{itemize}
 
         \subsubsection{Impacto en la Simplicidad}
@@ -365,13 +365,13 @@
             \item \textbf{Disponibilidad frágil:} una única request inválida deja el
             servicio fuera de línea de forma permanente, ya que se combinan la falta de
             validación, la falta de manejo de errores y la ausencia de cualquier mecanismo
-            de recuperación.
+            de recuperación (Sección~\ref{sec:sistema_base_pruebas_de_chaos}).
             \item \textbf{Degradación progresiva:} el log crece sin límite en el mismo
             proceso que atiende las operaciones de cambio, por lo que el servicio se
-            degrada con el uso aunque la carga no aumente. Es la explicación más probable
+            degrada con el uso aunque la carga no aumente (Sección~\ref{sec:sistema_base_pruebas_de_soak}). Es la explicación más probable
             de los reclamos de los usuarios sobre la función de cambio.
             \item \textbf{Correctitud de los saldos:} la condición de carrera, la
-            durabilidad diferida y el uso de punto flotante comprometen la integridad del
+            durabilidad diferida y el uso de punto flotante (Sección~\ref{sec:impacto_en_la_confiabilidad}) comprometen la integridad del
             dinero de los usuarios, lo cual es inaceptable para una auditoría.
         \end{enumerate}
 

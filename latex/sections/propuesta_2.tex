@@ -2,19 +2,19 @@
 \label{sec:propuesta_2}
 
     El escenario de caos del sistema base (Sección~\ref{sec:sistema_base_pruebas_de_chaos}) mostró que una única request inválida
-    alcanza para tirar el proceso de la API y que, a partir de ese momento, el servicio queda indisponible hasta que alguien lo
+    alcanza para tirar el proceso de la API y que, a partir de ese momento, el servicio queda no disponible hasta que alguien lo
     levante manualmente: no existe ningún mecanismo de detección ni de recuperación de fallas.
-    Si bien la causa raíz (la falta de validación de las requests) debe corregirse, no es posible garantizar que no existan
+    Si bien la causa raíz (la falta de validación de las requests, ver Código~\ref{lst:request_validation}) debe corregirse, no es posible garantizar que no existan
     otras fallas que terminen el proceso. Por eso la propuesta 2 no apunta a evitar la falla, sino a acotar el tiempo que el
     servicio permanece caído cuando esta ocurre.
 
     Para ello aplicamos las siguientes tácticas de disponibilidad:
 
     \begin{itemize}
-        \item \textbf{Heartbeat (detección de fallas):} la API envía cada 1 segundo un datagrama UDP a cada uno de los watchdogs indicando que está viva.
-        \item \textbf{Monitor / watchdog (detección de fallas):} se agrega un componente independiente de la API que, si no recibe un heartbeat de la API durante 3 segundos, la considera caída.
+        \item \textbf{Heartbeat (detección de fallas):} la API envía cada 1s un datagrama UDP a cada uno de los watchdogs indicando que está viva.
+        \item \textbf{Monitor / watchdog (detección de fallas):} se agrega un componente independiente de la API que, si no recibe un heartbeat de la API durante 3s, la considera caída.
         \item \textbf{Restart (recuperación):} al detectar la caída, el watchdog reinicia el contenedor de la API a través de la API de Docker (montando \texttt{/var/run/docker.sock}).
-        \item \textbf{Redundancia activa del monitor:} para que el watchdog no sea un nuevo punto único de falla, se despliegan tres instancias. Solo una de ellas (el líder) actúa sobre la API; el líder se elige mediante el algoritmo \textit{Bully} y el resto le envía heartbeats. Si el líder deja de responder durante 3 segundos, se inicia una nueva elección.
+        \item \textbf{Redundancia activa del monitor:} para que el watchdog no sea un nuevo punto único de falla, se despliegan tres instancias. Solo una de ellas (el líder) actúa sobre la API; el líder se elige mediante el algoritmo \textit{Bully} y el resto le envía heartbeats. Si el líder deja de responder durante 3s, se inicia una nueva elección.
     \end{itemize}
 
     Cabe destacar que esta propuesta se implementó sobre el sistema base y no sobre la propuesta 1, de modo que los resultados
@@ -23,7 +23,7 @@
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\columnwidth]{figures/diagramas/componentes_y_conectores_propuesta_2}
-        \caption{ Diagrama Components \& Connectors de la propuesta 2. }
+        \caption{ Diagrama Components \& Connectors de la propuesta 2. Respecto al sistema base agrega tres watchdogs (un líder y dos seguidores) que monitorean la API mediante heartbeats y la reinician a través de Docker. }
         \label{fig:propuesta_2_componentes_y_conectores}
     \end{figure}
 
@@ -33,17 +33,17 @@
         \subsubsection{Disponibilidad}
         \label{sec:propuesta_2_disponibilidad}
 
-        Es el QA que la propuesta busca mejorar. Frente a fallas que terminan el proceso (\textit{crash}), el tiempo de
-        indisponibilidad pasa de ser indefinido a estar acotado por el tiempo de detección (hasta 3 segundos de timeout más
-        1 segundo del período de chequeo) sumado al tiempo de reinicio del contenedor. Como se verá en las
-        \hyperref[sec:propuesta_2_pruebas_de_chaos]{pruebas de caos}, esto se traduce en caídas de pocos segundos en lugar de la
+        Es el QA que la propuesta busca mejorar. Frente a fallas que terminan el proceso (\textit{crash}), el tiempo durante
+        el cual el servicio no está disponible pasa de ser indefinido a estar acotado por el tiempo de detección (hasta 3s de timeout más
+        1s del período de chequeo) sumado al tiempo de reinicio del contenedor. Como se verá en las
+        pruebas de caos (Sección~\ref{sec:propuesta_2_pruebas_de_chaos}), esto se traduce en caídas de pocos segundos en lugar de la
         pérdida total del servicio.
 
         Sin embargo, el heartbeat solo indica que el proceso está vivo y que su event loop avanza, no que responda en tiempo
         aceptable. Una degradación de performance como la causada por el log (Sección~\ref{sec:sistema_base_pruebas_de_soak})
         no es detectada, y por lo tanto no esperamos mejoras en los escenarios de estrés y resistencia.
 
-        El valor de 3 segundos para el timeout es un tradeoff: reducirlo disminuye el tiempo de recuperación, pero aumenta
+        El valor de 3s para el timeout es un tradeoff: reducirlo disminuye el tiempo de recuperación, pero aumenta
         el riesgo de falsos positivos. Dado que el heartbeat se envía desde el mismo event loop que atiende las requests, una
         operación síncrona larga (por ejemplo, serializar un log muy grande) podría retrasarlo y provocar el reinicio de una API
         que en realidad seguía funcionando, descartando todas las requests en curso.
@@ -51,22 +51,22 @@
         \subsubsection{Confiabilidad}
         \label{sec:propuesta_2_confiabilidad}
 
-        El reinicio no resuelve la pérdida de datos. El estado se mantiene en memoria y se persiste a disco cada 1 segundo
-        (ver Listado~\ref{lst:save}), por lo que ante un crash se pierden las operaciones realizadas desde el último guardado,
+        El reinicio no resuelve la pérdida de datos. El estado se mantiene en memoria y se persiste a disco cada 1s
+        (ver Código~\ref{lst:save}), por lo que ante un crash se pierden las operaciones realizadas desde el último guardado,
         además de las requests que estaban siendo procesadas. Como se utiliza \texttt{docker restart} y no se recrea el
         contenedor, el sistema de archivos se conserva y la API retoma desde el último estado guardado. La evidencia de esto
         se observa en la Figura~\ref{fig:comparacion_propuesta_2_sistema_base_chaos_endpoint_response_time}, donde el tiempo de
         respuesta de \texttt{/log} sigue creciendo después de cada reinicio en lugar de volver a cero.
 
-        Además, la táctica no corrige la causa de la falla: la request inválida sigue tirando el proceso cada vez que llega.
+        Además, la táctica no corrige la causa de la falla: la request inválida sigue tirando el proceso cada vez que llega (Figura~\ref{fig:comparacion_propuesta_2_sistema_base_chaos_requests_state}).
         La propuesta mitiga el efecto, pero la validación de las requests sigue siendo necesaria.
 
         \subsubsection{Performance}
         \label{sec:propuesta_2_performance}
 
-        El único trabajo agregado a la API es el envío de tres datagramas UDP por segundo, que consideramos despreciable frente
+        El único trabajo agregado a la API es el envío de 3 datagramas UDP/s, que consideramos despreciable frente
         al procesamiento de las requests. Los watchdogs corren en contenedores separados, por lo que no compiten directamente
-        con la API, aunque sí comparten el host. En las pruebas de estrés y resistencia no se observan diferencias atribuibles
+        con la API, aunque sí comparten el host. En las pruebas de estrés (Sección~\ref{sec:propuesta_2_pruebas_de_stress}) y resistencia (Sección~\ref{sec:propuesta_2_pruebas_de_soak}) no se observan diferencias atribuibles
         a la táctica.
 
         \subsubsection{Seguridad}
@@ -97,17 +97,17 @@
     \subsection{Pruebas de carga}
     \label{sec:propuesta_2_pruebas_de_baseline}
 
-    Las pruebas de carga comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver \hyperref[sec:sistema_base_pruebas_de_baseline]{Pruebas de carga}.
+    Las pruebas de carga comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver Sección~\ref{sec:sistema_base_pruebas_de_baseline}.
 
-    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_2_baseline]{Apéndice}.
+    Se pueden encontrar los resultados completos en el Apéndice (Sección~\ref{sec:resultados_completos_propuesta_2_baseline}).
 
     \subsection{Pruebas de estrés}
     \label{sec:propuesta_2_pruebas_de_stress}
 
-    Las pruebas de estrés comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver \hyperref[sec:sistema_base_pruebas_de_stress]{Pruebas de estrés}.
+    Las pruebas de estrés comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver Sección~\ref{sec:sistema_base_pruebas_de_stress}.
     En este escenario el sistema se degrada por sobrecarga pero el proceso no termina, por lo que esperamos que el watchdog no intervenga.
 
-    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_2_stress]{Apéndice}.
+    Se pueden encontrar los resultados completos en el Apéndice (Sección~\ref{sec:resultados_completos_propuesta_2_stress}).
 
         \subsubsection{Disponibilidad}
         \label{sec:propuesta_2_pruebas_de_stress_metricas_disponibilidad}
@@ -135,8 +135,8 @@
                 \caption{
                     Comparativa de los resultados de latencia entre la propuesta 2 (izquierda) y el sistema base (derecha) frente a un escenario de estrés.
                     Ambos se mantienen estables hasta el minuto 4 y luego se degradan con la misma forma.
-                    La propuesta 2 muestra promedios algo mayores (P50 de $1.26s$ frente a $1.03s$), pero consideramos que la diferencia no es atribuible a la táctica,
-                    ya que el único trabajo agregado a la API es el envío de tres datagramas UDP por segundo y el uso de CPU es equivalente en ambos casos (Figura~\ref{fig:comparacion_propuesta_2_sistema_base_stress_resources}).
+                    La propuesta 2 muestra promedios algo mayores (P50 de 1.26s frente a 1.03s), pero consideramos que la diferencia no es atribuible a la táctica,
+                    ya que el único trabajo agregado a la API es el envío de 3 datagramas UDP/s y el uso de CPU es equivalente en ambos casos (Figura~\ref{fig:comparacion_propuesta_2_sistema_base_stress_resources}).
                 }
                 \label{fig:comparacion_propuesta_2_sistema_base_stress_response_time}
             \end{figure}
@@ -199,10 +199,10 @@
     \subsection{Pruebas de resistencia}
     \label{sec:propuesta_2_pruebas_de_soak}
 
-    Las pruebas de resistencia comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver \hyperref[sec:sistema_base_pruebas_de_soak]{Pruebas de resistencia}.
+    Las pruebas de resistencia comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver Sección~\ref{sec:sistema_base_pruebas_de_soak}.
     Al igual que en el escenario de estrés, la degradación se debe al crecimiento del log y no a una caída del proceso.
 
-    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_2_soak]{Apéndice}.
+    Se pueden encontrar los resultados completos en el Apéndice (Sección~\ref{sec:resultados_completos_propuesta_2_soak}).
 
         \subsubsection{Disponibilidad}
         \label{sec:propuesta_2_pruebas_de_soak_metricas_disponibilidad}
@@ -229,7 +229,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/response_time}
                 \caption{
                     Comparativa de los resultados de latencia entre la propuesta 2 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
-                    Los resultados son prácticamente idénticos: P50 promedio de $1.42s$ frente a $1.41s$ y P95 de $2.46s$ frente a $2.47s$.
+                    Los resultados son prácticamente idénticos: P50 promedio de 1.42s frente a 1.41s y P95 de 2.46s frente a 2.47s.
                 }
                 \label{fig:comparacion_propuesta_2_sistema_base_soak_response_time}
             \end{figure}
@@ -240,7 +240,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/endpoint_response_time}
                 \caption{
                     Comparativa de los resultados de latencia por endpoint entre la propuesta 2 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
-                    En ambos casos el tiempo de respuesta de \texttt{/log} crece durante toda la prueba y arrastra a \texttt{/exchange}, que supera el segundo a partir del minuto 20.
+                    En ambos casos el tiempo de respuesta de \texttt{/log} crece durante toda la prueba y arrastra a \texttt{/exchange}, que supera 1s a partir del minuto 20.
                 }
                 \label{fig:comparacion_propuesta_2_sistema_base_soak_endpoint_response_time}
             \end{figure}
@@ -256,7 +256,7 @@
                     Comparativa de los resultados del uso de recursos entre la propuesta 2 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
                     El uso de CPU es equivalente ($73.1\%$ frente a $73.2\%$ promedio) y alcanza la saturación a partir del minuto 20 en ambos casos.
                     Nuevamente el uso de CPU nunca cae a cero, por lo que no hubo reinicios.
-                    Esto evidencia la principal limitación de la táctica: el sistema pasó más de 20 minutos degradado sin que el watchdog lo detectara, ya que el heartbeat solo verifica que el proceso esté vivo.
+                    Esto evidencia la principal limitación de la táctica: el sistema pasó más de 20m degradado sin que el watchdog lo detectara, ya que el heartbeat solo verifica que el proceso esté vivo.
                 }
                 \label{fig:comparacion_propuesta_2_sistema_base_soak_resources}
             \end{figure}
@@ -292,12 +292,10 @@
     \subsection{Pruebas de caos}
     \label{sec:propuesta_2_pruebas_de_chaos}
 
-    Las pruebas de caos comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver \hyperref[sec:sistema_base_pruebas_de_chaos]{Pruebas de caos}.
-    Se mantiene una tasa constante de 40 requests por segundo durante 8 minutos, con una request inválida (\texttt{baseCurrency: 'XXX'}) que, al no ser validada, termina el proceso de la API.
-    Por la aleatoriedad del escenario, en esta ejecución la request inválida apareció tres veces, cerca de los minutos 0:50, 2:35 y 5:40.
+    Las pruebas de caos comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver Sección~\ref{sec:sistema_base_pruebas_de_chaos}.
     Este es el escenario en el que esperamos ver el efecto de la táctica.
 
-    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_2_chaos]{Apéndice}.
+    Se pueden encontrar los resultados completos en el Apéndice (Sección~\ref{sec:resultados_completos_propuesta_2_chaos}).
 
         \subsubsection{Disponibilidad}
         \label{sec:propuesta_2_pruebas_de_chaos_metricas_disponibilidad}
@@ -309,7 +307,7 @@
                 \caption{
                     Comparativa de la disponibilidad ofrecida por la propuesta 2 (izquierda) y el sistema base (derecha) frente a un escenario de caos.
                     El sistema base cae en el minuto 3:15 y no vuelve a completar ninguna request durante el resto de la prueba.
-                    La propuesta 2 sufre tres caídas pero se recupera de cada una: las fallas se limitan a picos puntuales de a lo sumo $51$ requests en una ventana de 10 segundos y el sistema vuelve inmediatamente a completar alrededor de $400$ requests por ventana, es decir, las 40 requests por segundo generadas.
+                    La propuesta 2 sufre tres caídas pero se recupera de cada una: las fallas se limitan a picos puntuales de a lo sumo $51$ requests en una ventana de 10s y el sistema vuelve inmediatamente a completar alrededor de $400$ requests por ventana, es decir, las 40 requests/s generadas.
                     Luego de cada caída se observa un pico de requests completadas (hasta $426$), correspondiente a las requests acumuladas durante la caída.
                 }
                 \label{fig:comparacion_propuesta_2_sistema_base_chaos_requests_state}
@@ -324,9 +322,9 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/chaos/response_time}
                 \caption{
                     Comparativa de los resultados de latencia entre la propuesta 2 (izquierda) y el sistema base (derecha) frente a un escenario de caos.
-                    En el sistema base, luego de la caída, la latencia queda dominada por el timeout de 10 segundos.
-                    En la propuesta 2 cada caída se refleja en un pico de latencia de entre $3.2s$ y $4.8s$ (P99), consistente con el tiempo de detección configurado (3 segundos sin heartbeat más hasta 1 segundo del período de chequeo) sumado al reinicio del contenedor.
-                    Fuera de esos picos la latencia se mantiene estable, con un P50 promedio de $526ms$.
+                    En el sistema base, luego de la caída, la latencia queda dominada por el timeout de 10s.
+                    En la propuesta 2 cada caída se refleja en un pico de latencia de entre 3.2s y 4.8s (P99), consistente con el tiempo de detección configurado (3s sin heartbeat más hasta 1s del período de chequeo) sumado al reinicio del contenedor.
+                    Fuera de esos picos la latencia se mantiene estable, con un P50 promedio de 526ms.
                 }
                 \label{fig:comparacion_propuesta_2_sistema_base_chaos_response_time}
             \end{figure}
@@ -391,14 +389,14 @@
     \label{sec:propuesta_2_resultados_y_conclusiones}
 
     La propuesta 2 cumple su objetivo frente a fallas que terminan el proceso: en el escenario de caos el sistema pasa de quedar
-    indisponible de forma permanente a recuperarse en pocos segundos, y el volumen operado aumenta un $152\%$. El tiempo de
-    recuperación observado es consistente con los parámetros configurados.
+    no disponible de forma permanente a recuperarse en pocos segundos, y el volumen operado aumenta un $152\%$ (Figura~\ref{fig:comparacion_propuesta_2_sistema_base_chaos_currency}). El tiempo de
+    recuperación observado es consistente con los parámetros configurados (Figura~\ref{fig:comparacion_propuesta_2_sistema_base_chaos_response_time}).
 
     Por otro lado, los escenarios de estrés y resistencia no muestran diferencias frente al sistema base. Esto es esperable, ya
     que el heartbeat verifica que el proceso esté vivo y no que responda en tiempo aceptable: el sistema puede estar degradado
-    durante más de 20 minutos sin que el watchdog intervenga. Para cubrir este caso sería necesario un chequeo de salud a nivel
+    durante más de 20m sin que el watchdog intervenga (Figura~\ref{fig:comparacion_propuesta_2_sistema_base_soak_resources}). Para cubrir este caso sería necesario un chequeo de salud a nivel
     de aplicación (por ejemplo, medir el tiempo de respuesta de un endpoint), o bien atacar la causa de la degradación como lo
-    hace la propuesta 1. Ambas propuestas son complementarias.
+    hace la propuesta 1 (Sección~\ref{sec:propuesta_1}). Ambas propuestas son complementarias.
 
     Los costos de la táctica son una arquitectura más compleja, con un algoritmo distribuido y tres componentes nuevos, y un
     impacto negativo en la seguridad por el acceso de los watchdogs al socket de Docker. Además, la táctica no evita la
