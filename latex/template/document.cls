@@ -478,7 +478,7 @@
 %----------------------------------------------------------
 
 \RequirePackage{listings}
-\newenvironment{code}{\captionsetup{type=lstlisting}}{}
+\newenvironment{code}{\par\noindent\begin{minipage}{\linewidth}\captionsetup{type=lstlisting}}{\end{minipage}\par}
 
 % Defined colors for listings environment
 
