@@ -174,15 +174,6 @@
         concentran en la API. El costo es un aumento del código de la API y de la cantidad de casos que deben contemplarse al
         modificarla.
 
-    \subsection{Pruebas de carga}
-    \label{sec:propuesta_3_pruebas_de_baseline}
-
-    Las pruebas de carga comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver Sección~\ref{sec:sistema_base_pruebas_de_baseline}.
-
-    \todo{Describir brevemente los resultados o eliminar la subsección y dejar solo la referencia al apéndice.}
-
-    Se pueden encontrar los resultados completos en el Apéndice (Sección~\ref{sec:resultados_completos_propuesta_3_baseline}).
-
     \subsection{Pruebas de estrés}
     \label{sec:propuesta_3_pruebas_de_stress}
 
@@ -376,4 +367,20 @@
     \subsection{Resultados y conclusiones}
     \label{sec:propuesta_3_resultados_y_conclusiones}
 
-    \todo{Completar con los resultados. Ideas: P3 previene las caídas que P2 recupera y elimina la carrera sobre los saldos, sin costo de performance ni componentes nuevos; no resuelve la degradación del log (P1) ni las caídas por otras causas (P2), por lo que las tres propuestas son complementarias.}
+    La propuesta 3 ataca la causa de las fallas que las propuestas anteriores no resuelven. La validación de entradas y el
+    manejo de excepciones impiden que una request inválida altere los saldos o termine el proceso
+    (Tabla~\ref{tab:propuesta_3_validacion}), y la reserva de saldo elimina la condición de carrera: diez cambios
+    concurrentes que en el sistema base dejaban la cuenta interna en $-700$ USD se resuelven con un único cambio aprobado
+    (Tabla~\ref{tab:propuesta_3_concurrencia}).
+    \todo{Agregar el resultado del escenario de caos (caídas, requests completadas y volumen frente al base y a la propuesta 2).}
+
+    A diferencia de las propuestas 1 y 2, no agrega componentes, conectores ni recursos, y no se espera un impacto en la
+    performance, ya que solo suma comprobaciones en memoria.
+    \todo{Confirmar con estrés y resistencia, o aclarar que no se ejecutaron y por qué.}
+
+    La propuesta no reemplaza a las anteriores. No resuelve la degradación producida por el log, que sigue arrastrando a
+    \texttt{/exchange} (propuesta 1), ni las caídas del proceso por causas ajenas a las requests (propuesta 2), ni la pérdida
+    de datos por la persistencia diferida o los residuos del punto flotante. Además, la reserva de saldo depende de que el
+    estado viva en un único proceso: al migrarlo a una base de datos externa o replicar la API, la verificación y el
+    descuento deben reemplazarse por una operación atómica del motor. Las tres propuestas son complementarias y, en
+    conjunto, atacan los tres problemas señalados en la Sección~\ref{sec:critica}.
