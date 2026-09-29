@@ -9,6 +9,7 @@ import {
   setRate,
   getLog,
   exchange,
+  REJECTIONS,
 } from "./exchange.js";
 import {
   validateExchangeRequest,
@@ -21,6 +22,13 @@ await exchangeInit();
 
 const app = express();
 const port = 3000;
+
+//HTTP status for each business rejection: lack of funds is a client error, transfer failures are dependency failures
+const REJECTION_STATUS = {
+  [REJECTIONS.NOT_ENOUGH_FUNDS]: 409,
+  [REJECTIONS.WITHDRAW_FAILED]: 502,
+  [REJECTIONS.DEPOSIT_FAILED]: 502,
+};
 
 app.use(logEndpoint);
 app.use(express.json());
@@ -75,20 +83,43 @@ app.get("/log", (req, res) => {
 
 // EXCHANGE endpoint
 
-app.post("/exchange", async (req, res) => {
+app.post("/exchange", async (req, res, next) => {
   const validationError = validateExchangeRequest(req.body);
   if (validationError) {
     return res.status(400).json({ error: "Malformed request", obs: validationError });
   }
 
-  const exchangeRequest = { ...req.body };
-  const exchangeResult = await exchange(exchangeRequest);
+  //express 4 does not catch rejected promises, so errors must be forwarded to the error handler explicitly
+  try {
+    const exchangeRequest = { ...req.body };
+    const exchangeResult = await exchange(exchangeRequest);
 
-  if (exchangeResult.ok) {
-    res.status(200).json(exchangeResult);
-  } else {
-    res.status(500).json(exchangeResult);
+    if (exchangeResult.ok) {
+      res.status(200).json(exchangeResult);
+    } else {
+      res.status(REJECTION_STATUS[exchangeResult.obs] ?? 500).json(exchangeResult);
+    }
+  } catch (err) {
+    next(err);
   }
+});
+
+// ERROR handler
+
+//contains any unexpected error to the request that produced it, instead of terminating the process
+app.use((err, req, res, next) => {
+  //errors raised by express itself (e.g. an unparseable JSON body) carry a 4xx status
+  if (err.status >= 400 && err.status < 500) {
+    return res.status(err.status).json({ error: "Malformed request" });
+  }
+
+  console.error(`Unexpected error on ${req.method} ${req.path}:`, err);
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  res.status(500).json({ error: "Internal server error" });
 });
 
 app.listen(port, () => {

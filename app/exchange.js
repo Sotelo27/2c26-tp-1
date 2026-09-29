@@ -7,6 +7,13 @@ let accounts;
 let rates;
 let log;
 
+//reasons why an exchange can be rejected, reported in the obs field of the result
+export const REJECTIONS = {
+  NOT_ENOUGH_FUNDS: "Not enough funds on counter currency account",
+  WITHDRAW_FAILED: "Could not withdraw from clients' account",
+  DEPOSIT_FAILED: "Could not transfer to clients' account",
+};
+
 //call to initialize the exchange service
 export async function init() {
   await stateInit();
@@ -102,15 +109,15 @@ export async function exchange(exchangeRequest) {
       } else {
         //could not transfer to clients' counter account, return base amount to client
         await transfer(baseAccount.id, clientBaseAccountId, baseAmount);
-        exchangeResult.obs = "Could not transfer to clients' account";
+        exchangeResult.obs = REJECTIONS.DEPOSIT_FAILED;
       }
     } else {
       //could not withdraw from clients' account
-      exchangeResult.obs = "Could not withdraw from clients' account";
+      exchangeResult.obs = REJECTIONS.WITHDRAW_FAILED;
     }
   } else {
     //not enough funds on internal counter account
-    exchangeResult.obs = "Not enough funds on counter currency account";
+    exchangeResult.obs = REJECTIONS.NOT_ENOUGH_FUNDS;
   }
 
   //log the transaction and return it
