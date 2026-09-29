@@ -73,10 +73,21 @@
         \subsubsection{Escalabilidad}
         \label{sec:propuesta_1_escalabilidad}
 
-        El desacoplamiento permite escalar de forma independiente la API de exchange y el nodo de logs según la carga de cada
-        uno. Replicar el nodo de logs para atender más consultas requeriría que las réplicas compartan el archivo (por ejemplo,
-        mediante un volumen) o un almacenamiento externo, ya que actualmente el archivo vive dentro del contenedor. La escritura
-        sigue concentrada en un único nodo.
+        El desacoplamiento permite asignar recursos de forma independiente a la API de exchange y al nodo de logs según la carga
+        de cada uno: como se vio en el escenario de estrés, la API queda casi ociosa mientras el nodo de logs concentra el
+        consumo (Figura~\ref{fig:comparacion_propuesta_1_sistema_base_stress_resources}). La API de exchange, en cambio, sigue
+        sin poder replicarse, ya que mantiene las cuentas y las tasas en memoria (Sección~\ref{sec:impacto_en_la_escalabilidad}).
+
+        El desacoplamiento es además una condición previa para escalar horizontalmente la consulta del log, pero la
+        implementación actual no lo permite sin cambios. Replicar el nodo de logs requeriría:
+
+        \begin{itemize}
+            \item que las réplicas compartan el archivo (por ejemplo, mediante un volumen) o un almacenamiento externo, ya que
+            actualmente el archivo vive dentro de cada contenedor;
+            \item modificar la configuración de nginx, cuyo upstream apunta a un único contenedor (\texttt{exchange-log-api-1});
+            \item modificar la API de exchange, que abre una única conexión TCP con el nodo de logs al arrancar, por lo que
+            todas las escrituras llegarían a una sola réplica.
+        \end{itemize}
 
         \subsubsection{Seguridad}
         \label{sec:propuesta_1_seguridad}
@@ -351,4 +362,8 @@
     \label{sec:propuesta_1_resultados_y_conclusiones}
 
     La propuesta 1 demostró ser capaz de aislar la degradación producida por la consulta de logs de las operaciones de negocio del sistema, permitiendo ofrecer una mejor disponibilidad a los usuarios comunes (Figura~\ref{fig:comparacion_propuesta_1_sistema_base_soak_requests_state}).
-    Por otro lado la consulta de logs sigue degradándose con el tiempo. Sin embargo, este desacoplamiento propuesto permitiría replicar el nodo de consulta para dar soporte de lectura de los logs a más usuarios, es decir, permitiendo escalabilidad horizontal (Sección~\ref{sec:propuesta_1_escalabilidad}).
+    Por otro lado, la consulta de logs sigue degradándose con el tiempo. El desacoplamiento es un primer paso para escalar
+    horizontalmente la lectura del log, pero para lograrlo las réplicas del nodo de logs deberían compartir el almacenamiento,
+    y nginx y la API de exchange deberían poder distribuir las lecturas y las escrituras entre ellas
+    (Sección~\ref{sec:propuesta_1_escalabilidad}). Como se mencionó en la Sección~\ref{sec:propuesta_1}, la solución de fondo
+    es paginar la consulta.
