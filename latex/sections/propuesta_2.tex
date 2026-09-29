@@ -98,6 +98,25 @@
     \label{sec:propuesta_2_pruebas_de_baseline}
 
     Las pruebas de carga comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver Sección~\ref{sec:sistema_base_pruebas_de_baseline}.
+    Con esta carga el sistema base no presenta fallas ni caídas, por lo que el watchdog no debería intervenir y el escenario
+    permite aislar el costo de la táctica en condiciones normales.
+
+    Ambos sistemas completaron todas las requests sin fallas, con un promedio de 394 y 397 requests completadas por ventana de 10s respectivamente.
+    Los tiempos de respuesta son prácticamente idénticos: el P95 de \texttt{/exchange} medido en el servidor es de 719ms frente a 718ms,
+    y el P95 y P99 vistos desde el cliente son de 712ms frente a 712ms y 761ms frente a 759ms.
+    El uso de recursos de la API también es equivalente, con un promedio de CPU del $9.68\%$ frente a $9.28\%$ y de memoria del $1.26\%$ frente a $1.25\%$.
+    Esto confirma que el envío de los heartbeats no tiene un costo observable sobre la API (Sección~\ref{sec:propuesta_2_performance}).
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\columnwidth]{figures/propuesta_2/baseline/endpoint_response_time}%
+        \includegraphics[width=0.5\columnwidth]{figures/sistema_base/baseline/endpoint_response_time}
+        \caption{
+            Comparativa de los resultados de latencia por endpoint entre la propuesta 2 (izquierda) y el sistema base (derecha) frente al escenario de carga.
+            Las series de ambos sistemas se superponen: \texttt{/exchange} se mantiene estable en torno a 720ms (P95) y \texttt{/log} crece con el tamaño del log de la misma forma en ambos casos.
+        }
+        \label{fig:comparacion_propuesta_2_sistema_base_baseline_endpoint_response_time}
+    \end{figure}
 
     Se pueden encontrar los resultados completos en el Apéndice (Sección~\ref{sec:resultados_completos_propuesta_2_baseline}).
 
