@@ -1,0 +1,63 @@
+# Escenario de concurrencia: la cuenta interna en USD tiene saldo para ~121 cambios de 100000 ARS (~66 USD c/u),
+# pero se lanzan 2400. Con la condición de carrera del sistema base se aprueban más cambios de los que cubre el saldo
+# y la cuenta termina en negativo; con la reserva de saldo (propuesta 3) el saldo nunca baja de 0.
+
+before:
+  flow:
+    - put:
+        url: '/accounts/1/balance'
+        json: { balance: 1000000000000000 }
+    - put:
+        url: '/accounts/2/balance'
+        json: { balance: 8000 }
+    - put:
+        url: '/accounts/3/balance'
+        json: { balance: 1000000000000000 }
+    - put:
+        url: '/accounts/4/balance'
+        json: { balance: 1000000000000000 }
+
+after:
+  flow:
+    - get:
+        url: '/accounts'
+        capture:
+          json: '$[1].balance'
+          as: 'usdBalance'
+    - log: 'Saldo final de la cuenta interna USD (inicial 8000): {{ usdBalance }}'
+
+config:
+  plugins:
+    metrics-by-endpoint: {}
+
+  environments:
+    api:
+      target: 'http://localhost:5555'
+      plugins:
+        statsd:
+          host: localhost
+          port: 8125
+          prefix: "artillery-api"
+
+  pool: 1000
+
+  http:
+    timeout: 10
+
+  phases:
+    - name: Plain
+      duration: 60
+      arrivalRate: 40
+
+scenarios:
+  - name: exchange
+    weight: 1
+    flow:
+      - post:
+          url: '/exchange'
+          json:
+            baseCurrency: 'ARS'
+            counterCurrency: 'USD'
+            baseAccountId: 'cli-ARS'
+            counterAccountId: 'cli-USD'
+            baseAmount: 100000
