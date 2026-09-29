@@ -1,4 +1,4 @@
-\section{Propuesta 2}
+va\section{Propuesta 2}
 \label{sec:propuesta_2}
 
     El escenario de caos del sistema base (Sección~\ref{sec:sistema_base_pruebas_de_chaos}) mostró que una única request inválida
@@ -93,6 +93,58 @@
         líderes y ambos reiniciarían la API. Una alternativa más simple, como la política \texttt{restart: on-failure} de Docker,
         cubriría el caso de crash con menos componentes, pero no detectaría un proceso colgado y dejaría la recuperación atada
         al daemon de Docker del host.
+
+        \subsubsection{Costo y eficiencia}
+        \label{sec:propuesta_2_costo_y_eficiencia}
+
+        La propuesta agrega tres contenedores. A diferencia de la API, que tiene un límite de 1 CPU y 4GB de memoria, los
+        watchdogs no declaran límites de recursos en el \texttt{docker-compose.yml}. Como todo el sistema corre en un único
+        servidor (Sección~\ref{sec:eficiencia}), un watchdog con un consumo anómalo competiría por los recursos con la API sin
+        ninguna cota. Además, los watchdogs se construyen a partir de la misma imagen que la API (\texttt{build: ./app}), por lo
+        que cada uno incluye el código y el estado de la aplicación aunque solo ejecuta \texttt{watchdog.js}; y la dependencia
+        \texttt{dockerode}, que solo usa el watchdog, se agrega al \texttt{package.json} de la API.
+
+        De los tres watchdogs, solo el líder supervisa la API; los otros dos permanecen en espera y únicamente intercambian
+        heartbeats con él. Este es el costo de la redundancia del monitor: dos contenedores que no aportan trabajo mientras el
+        líder funcione, a cambio de que la supervisión sobreviva a su caída.
+
+        Sobre la API, el costo es el envío de 3 datagramas UDP/s. En el escenario de carga no se observa una diferencia en el
+        uso de recursos frente al sistema base ($9.68\%$ frente a $9.28\%$ de CPU promedio,
+        Sección~\ref{sec:propuesta_2_pruebas_de_baseline}), por lo que la táctica no reduce la eficiencia de la API.
+
+        \todo{Agregar captura de \texttt{docker stats} con el consumo de los tres watchdogs durante una prueba, ya que el dashboard solo grafica el contenedor de la API.}
+
+        \begin{table}[H]
+            \centering
+            \small
+            \setlength{\tabcolsep}{4pt}
+            \renewcommand{\arraystretch}{1.2}
+            \caption{Costo agregado por cada propuesta respecto del sistema base, según su \texttt{docker-compose.yml} y las mediciones de las pruebas.}
+            \label{tab:propuesta_2_comparacion_costo}
+            \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.18\textwidth}>{\raggedright\arraybackslash}p{0.36\textwidth}>{\raggedright\arraybackslash}p{0.36\textwidth}@{}}
+                \toprule
+                & \textbf{Propuesta 1} & \textbf{Propuesta 2} \\
+                \midrule
+                Contenedores agregados & 1 (\texttt{log-api}) & 3 (\texttt{watchdog-1} a \texttt{watchdog-3}) \\
+                \midrule
+                Límites de recursos & 1 CPU y 4GB, iguales a los de la API & Sin límites \\
+                \midrule
+                Conectores nuevos & TCP de la API al nodo de logs; HTTP de nginx al nodo de logs & UDP de la API a los watchdogs; UDP entre watchdogs (elección y heartbeats); API de Docker \\
+                \midrule
+                Dependencias de despliegue & La API no atiende requests hasta conectarse con el nodo de logs & Acceso al socket de Docker del host \\
+                \midrule
+                Uso de CPU de la API & $14.2\%$ en estrés (el base satura el núcleo) & Equivalente al base ($9.68\%$ frente a $9.28\%$ en carga) \\
+                \midrule
+                QA que mejora & Performance y disponibilidad ante la degradación del log & Disponibilidad ante caídas del proceso \\
+                \bottomrule
+            \end{tabular}
+        \end{table}
+
+        En comparación con la propuesta 1 (Sección~\ref{sec:propuesta_1_costo_y_simplicidad}), la propuesta 2 agrega más
+        contenedores y conectores, pero reserva menos recursos de forma explícita, ya que sus contenedores no declaran límites. La
+        propuesta 1 duplica los recursos reservados, pero libera a la API: su uso de CPU cae del núcleo saturado al $14.2\%$ en el
+        escenario de estrés. La propuesta 2, en cambio, no cambia el consumo de la API, ya que no busca mejorar la performance sino
+        acotar el tiempo fuera de servicio.
 
     \subsection{Pruebas de carga}
     \label{sec:propuesta_2_pruebas_de_baseline}
