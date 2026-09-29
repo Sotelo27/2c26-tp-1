@@ -17,6 +17,23 @@
         \item \textbf{Redundancia activa del monitor:} para que el watchdog no sea un nuevo punto único de falla, se despliegan tres instancias. Solo una de ellas (el líder) actúa sobre la API; el líder se elige mediante el algoritmo \textit{Bully} y el resto le envía heartbeats. Si el líder deja de responder durante 3s, se inicia una nueva elección.
     \end{itemize}
 
+    Clasificamos la redundancia del monitor como activa, y no como pasiva, porque las tres instancias procesan las mismas
+    entradas en paralelo: la API envía su heartbeat a los tres watchdogs y cada uno actualiza su registro del último
+    heartbeat recibido, aunque solo el líder actúe sobre la API (Código~\ref{lst:p2_redundancia}). En una redundancia pasiva,
+    en cambio, solo la instancia principal procesaría las entradas y las demás recibirían actualizaciones periódicas de su
+    estado.
+
+    \begin{code}
+        \lstinputlisting[language=JavaScript]{./code/p2_redundancia.js}
+        \caption{Heartbeat de la API a los tres watchdogs y supervisión a cargo del líder en \texttt{app/heartbeat.js} y \texttt{app/watchdog.js}.}
+        \label{lst:p2_redundancia}
+    \end{code}
+
+    La consecuencia práctica es que, cuando un seguidor es elegido líder, ya conoce el estado de la API y puede comenzar a
+    supervisarla de inmediato, sin necesidad de sincronizar estado con el líder anterior. Si la redundancia fuera pasiva,
+    un seguidor que no hubiera recibido los heartbeats podría declarar caída a una API sana al asumir el liderazgo, o
+    demorar la detección de una caída real hasta reconstruir ese estado.
+
     Cabe destacar que esta propuesta se implementó sobre el sistema base y no sobre la propuesta 1, de modo que los resultados
     reflejen solo el efecto de estas tácticas y sean comparables con los del sistema base.
 
