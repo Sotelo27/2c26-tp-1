@@ -375,11 +375,12 @@
             dinero de los usuarios, lo cual es inaceptable para una auditoría.
         \end{enumerate}
 
-        Las propuestas de este trabajo atacan los dos primeros puntos: la
+        Las propuestas de este trabajo atacan los tres puntos: la
         propuesta 1 (Sección~\ref{sec:propuesta_1}) aísla el log de las operaciones de
-        negocio y la propuesta 2 (Sección~\ref{sec:propuesta_2}) agrega detección y
-        recuperación de fallas. Los problemas de correctitud requieren cambios en la
-        lógica de negocio (validación de entradas, exclusión mutua sobre los saldos,
-        representación decimal del dinero y persistencia transaccional) que recomendamos
-        como pasos siguientes, en particular al migrar el estado a una base de datos
-        externa.
+        negocio, la propuesta 2 (Sección~\ref{sec:propuesta_2}) agrega detección y
+        recuperación de fallas, y la propuesta 3 (Sección~\ref{sec:propuesta_3}) previene
+        las caídas por requests inválidas y elimina la condición de carrera sobre los saldos
+        mediante validación de entradas, manejo de excepciones y reserva de saldo. Quedan
+        pendientes la representación decimal del dinero y la persistencia transaccional,
+        que recomendamos como pasos siguientes, en particular al migrar el estado a una base
+        de datos externa.
