@@ -99,6 +99,13 @@
     \texttt{state.js} registra el fallo, pero no lo propaga ni permite que la API informe
     que el estado no pudo persistirse.
 
+    Para verificar la pérdida de datos, ejecutamos un cambio, que la API confirmó con HTTP 200,
+    y terminamos el proceso de forma abrupta antes del siguiente guardado. Antes de la
+    terminación, \texttt{/log} contenía la operación y los saldos internos reflejaban el cambio
+    (ARS $120000000 \to 120100000$, USD $60000 \to 59934$). Al reiniciar, el log volvió a estar
+    vacío y los saldos a sus valores iniciales: la operación se perdió aunque las
+    transferencias con el cliente ya se habían realizado.
+
     \begin{code}
         \lstinputlisting[language=JavaScript]{./code/save.js}
         \caption{Escritura directa y no atómica del estado en \texttt{app/state.js}.}
@@ -144,21 +151,21 @@
         \label{tab:hallazgos_codigo_base}
         \begin{tabular}{@{}>{\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\arraybackslash}p{0.13\textwidth}p{0.22\textwidth}>{\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\arraybackslash}p{0.12\textwidth}p{0.19\textwidth}p{0.19\textwidth}@{}}
             \toprule
-            \textbf{Hallazgo} & \textbf{Evidencia} & \textbf{QA afectados} & \textbf{Consecuencia posible} & \textbf{Validación propuesta} \\
+            \textbf{Hallazgo} & \textbf{Evidencia} & \textbf{QA afectados} & \textbf{Consecuencia posible} & \textbf{Evidencia de ejecución} \\
             \midrule
-            Carrera concurrente & La verificación de saldo precede a dos operaciones asíncronas y el descuento ocurre después (Código~\ref{lst:race_condition}). & Reliability, Security & Dos solicitudes pueden aprobarse con el mismo saldo y producir un balance negativo. & Ejecutar dos cambios concurrentes de 80 unidades contra un saldo interno de 100 y observar respuestas y saldo final. \\
+            Carrera concurrente & La verificación de saldo precede a dos operaciones asíncronas y el descuento ocurre después (Código~\ref{lst:race_condition}). & Reliability, Security & Dos solicitudes pueden aprobarse con el mismo saldo y producir un balance negativo. & Diez cambios concurrentes de 80 USD contra un saldo de 100 USD: se aprueban todos y el saldo queda en $-700$ (Tabla~\ref{tab:propuesta_3_concurrencia}). \\
             \midrule
-            Estado mutable expuesto & Los getters de \texttt{state.js} retornan objetos que \texttt{exchange.js} conserva y modifica. & Modificabilidad, Testability, Reliability & Las actualizaciones eluden una interfaz de repositorio y dificultan sustituir o simular la persistencia. & Probar la lógica con un repositorio simulado y registrar qué dependencias deben reemplazarse. \\
+            Estado mutable expuesto & Los getters de \texttt{state.js} retornan objetos que \texttt{exchange.js} conserva y modifica. & Modificabilidad, Testability, Reliability & Las actualizaciones eluden una interfaz de repositorio y dificultan sustituir o simular la persistencia. & No aplica: se evidencia en el código (Código~\ref{lst:acoplamiento}). \\
             \midrule
-            Log sin límite & Cada operación ejecuta \texttt{log.push}; \texttt{/log} retorna el arreglo completo (Código~\ref{lst:log_growth}). & Performance, Scalability, Availability & Aumentan memoria, tamaño de respuesta y tiempo de serialización con cada operación. & Ejecutar lotes crecientes y medir memoria, bytes y latencia de \texttt{/log}. \\
+            Log sin límite & Cada operación ejecuta \texttt{log.push}; \texttt{/log} retorna el arreglo completo (Código~\ref{lst:log_growth}). & Performance, Scalability, Availability & Aumentan memoria, tamaño de respuesta y tiempo de serialización con cada operación. & La latencia de \texttt{/log} crece durante toda la prueba de resistencia (Figura~\ref{fig:sistema_base_soak_endpoint_response_time}). \\
             \midrule
-            Reescritura completa & \texttt{scheduleSave} serializa y escribe el log completo cada 1s. & Performance, Efficiency, Reliability & El costo de I/O crece con el historial y una interrupción puede dejar el archivo incompleto. & Medir tamaño, tiempo de escritura y actividad de I/O para distintos volúmenes de log. \\
+            Reescritura completa & \texttt{scheduleSave} serializa y escribe el log completo cada 1s. & Performance, Efficiency, Reliability & El costo de I/O crece con el historial y una interrupción puede dejar el archivo incompleto. & El uso de CPU y memoria crece con carga constante (Figura~\ref{fig:sistema_base_soak_resources}). \\
             \midrule
-            Durabilidad diferida & Los cambios residen en memoria hasta el siguiente intervalo y la escritura no es atómica. & Reliability, Availability & Una terminación abrupta puede perder operaciones confirmadas o impedir cargar el JSON. & Terminar la API dentro de la ventana de persistencia, reiniciarla y comparar estado y log. \\
+            Durabilidad diferida & Los cambios residen en memoria hasta el siguiente intervalo y la escritura no es atómica. & Reliability, Availability & Una terminación abrupta puede perder operaciones confirmadas o impedir cargar el JSON. & Un cambio confirmado con HTTP 200 y seguido de una terminación abrupta desaparece del log y de los saldos al reiniciar (Sección~\ref{sec:codigo}). \\
             \midrule
-            Dinero con \texttt{Number} & El importe se obtiene mediante $baseAmount \cdot exchangeRate$ sin redondeo explícito (Código~\ref{lst:floats}). & Reliability, Security & Pueden aparecer residuos decimales y acumularse diferencias en los saldos. & Utilizar valores como 0.1 y 0.2 y comparar contra un cálculo decimal exacto. \\
+            Dinero con \texttt{Number} & El importe se obtiene mediante $baseAmount \cdot exchangeRate$ sin redondeo explícito (Código~\ref{lst:floats}). & Reliability, Security & Pueden aparecer residuos decimales y acumularse diferencias en los saldos. & Con tasa $0.1$, cambiar 3 ARS entrega $0.30000000000000004$ USD (Sección~\ref{sec:codigo}). \\
             \midrule
-            Validación incompleta & La API solo verifica truthiness y acepta valores negativos o combinaciones incoherentes (Código~\ref{lst:request_validation}). & Security, Reliability, Testability & Entradas inválidas pueden alterar saldos o provocar excepciones no controladas. & Crear casos con importes negativos, tipos incorrectos, monedas inexistentes y cuentas incompatibles. \\
+            Validación incompleta & La API solo verifica truthiness y acepta valores negativos o combinaciones incoherentes (Código~\ref{lst:request_validation}). & Security, Reliability, Testability & Entradas inválidas pueden alterar saldos o provocar excepciones no controladas. & Importes negativos o como texto alteran los saldos y una moneda inexistente termina el proceso (Tabla~\ref{tab:propuesta_3_validacion}). \\
             \bottomrule
         \end{tabular}
     \end{table}
