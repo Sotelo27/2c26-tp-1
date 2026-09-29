@@ -20,8 +20,6 @@
         intermedio, eliminando la condición de carrera del Código~\ref{lst:race_condition}.
     \end{itemize}
 
-    \todo{Confirmar el alcance final: si se agrega redondeo explícito de importes (Código~\ref{lst:floats}), sumarlo como táctica.}
-
     Al igual que la propuesta 2, esta propuesta se implementó sobre el sistema base, de modo que los resultados solo reflejan
     el efecto de estas tácticas y sean comparables contra el sistema base.
 
@@ -29,7 +27,37 @@
     Connectors es el mismo que el del sistema base (Figura~\ref{fig:sistema_base_componentes_y_conectores}). Los cambios se
     limitan al código de la API.
 
-    \todo{Agregar los fragmentos de código de la implementación (validación, manejo de errores y reserva de saldo) como bloques \texttt{code} en \texttt{latex/code/}.}
+    La validación se concentra en un módulo nuevo, \texttt{validation.js}, con una función por endpoint que retorna el primer
+    error encontrado o \texttt{null} si la request es válida. Una moneda se considera soportada solo si existe una cuenta
+    interna en ella, y un par solo si existe su tasa. Las cuentas de los clientes pertenecen al servicio de transferencias,
+    por lo que de ellas solo puede validarse el formato.
+
+    \begin{code}
+        \lstinputlisting[language=JavaScript]{./code/p3_validation.js}
+        \caption{Validación de \texttt{/exchange} en \texttt{app/validation.js} y su uso en \texttt{app/app.js}.}
+        \label{lst:p3_validation}
+    \end{code}
+
+    El handler de \texttt{/exchange} captura los errores y los deriva a un manejador global, ya que Express 4 no captura
+    los rechazos de promesas. El manejador responde HTTP 500 sin terminar el proceso. Los rechazos de negocio se informan
+    con un código acorde: 409 cuando la cuenta interna no tiene fondos y 502 cuando falla el servicio de transferencias.
+
+    \begin{code}
+        \lstinputlisting[language=JavaScript]{./code/p3_error_handling.js}
+        \caption{Manejo de excepciones en \texttt{app/app.js}.}
+        \label{lst:p3_error_handling}
+    \end{code}
+
+    Finalmente, la reserva de saldo mueve el descuento de la cuenta interna al momento de la verificación. Como Node.js
+    ejecuta el código de la aplicación en un único hilo, la verificación y el descuento no pueden intercalarse con otra
+    request al no existir un \texttt{await} entre ambos, por lo que no es necesario un lock. Si la operación no se completa,
+    ya sea por un rechazo o por una excepción, el bloque \texttt{finally} libera la reserva.
+
+    \begin{code}
+        \lstinputlisting[language=JavaScript]{./code/p3_reservation.js}
+        \caption{Reserva de saldo en \texttt{app/exchange.js}. Comparar con el Código~\ref{lst:race_condition}.}
+        \label{lst:p3_reservation}
+    \end{code}
 
     \subsection{Impacto en los QA}
     \label{sec:propuesta_3_impacto_en_los_qa}
@@ -53,13 +81,18 @@
         Es el otro QA que la propuesta busca mejorar. La reserva de saldo garantiza que dos operaciones concurrentes no puedan
         aprobarse con el mismo saldo, por lo que la cuenta interna no puede quedar en negativo.
 
-        \todo{Completar con la evidencia del escenario de concurrencia (Sección~\ref{sec:propuesta_3_pruebas_de_concurrencia}).}
+        En el escenario de concurrencia (Sección~\ref{sec:propuesta_3_pruebas_de_concurrencia}), diez cambios concurrentes
+        que el sistema base aprobaba en su totalidad, dejando la cuenta interna en $-700$ USD, se resuelven en la propuesta 3
+        con un único cambio aprobado y la cuenta en $19.99$ USD (Tabla~\ref{tab:propuesta_3_concurrencia}).
 
         Como contrapartida, mientras una operación está en curso el saldo reservado no está disponible para otras, por lo que
         una operación que luego falla puede provocar el rechazo de otra que sí tenía fondos. Consideramos preferible rechazar
         una operación válida antes que aprobar una que deje un saldo negativo.
 
-        La propuesta no resuelve la durabilidad diferida ni la escritura no atómica del estado (Código~\ref{lst:save}).
+        La propuesta no resuelve la durabilidad diferida ni la escritura no atómica del estado (Código~\ref{lst:save}),
+        ni el uso de \texttt{Number} para los importes (Código~\ref{lst:floats}), que sigue produciendo residuos como el
+        mostrado en la Sección~\ref{sec:codigo}. Ambos problemas requieren cambiar la representación y la persistencia del estado, lo que recomendamos
+        abordar junto con la migración a una base de datos externa.
 
         \subsubsection{Seguridad}
         \label{sec:propuesta_3_seguridad}
@@ -68,7 +101,38 @@
         provoque una denegación de servicio con una request malformada, que en el sistema base alcanzaba para tirar el
         servicio (Sección~\ref{sec:sistema_base_pruebas_de_chaos}).
 
-        \todo{Agregar evidencia de ejecución: request con importe negativo y con moneda inexistente, base vs propuesta 3.}
+        Para evidenciarlo, ejecutamos las mismas requests inválidas contra ambos sistemas, partiendo del estado inicial
+        de \texttt{app/state/} en cada caso (Tabla~\ref{tab:propuesta_3_validacion}). En el sistema base, un importe
+        negativo ejecuta el cambio en sentido inverso (la cuenta interna en ARS entrega 100000 y la de USD recibe 66), y un
+        importe enviado como texto supera la validación y convierte el saldo en un string por concatenación
+        (\texttt{"120000000100000"}), corrompiendo la cuenta para todas las operaciones siguientes. En la propuesta 3 todas
+        las requests se rechazan con HTTP 400 sin modificar el estado.
+
+        \begin{table}[H]
+            \centering
+            \small
+            \setlength{\tabcolsep}{4pt}
+            \renewcommand{\arraystretch}{1.2}
+            \caption{Resultado de requests inválidas sobre el sistema base y la propuesta 3.}
+            \label{tab:propuesta_3_validacion}
+            \begin{tabular}{@{}p{0.2\textwidth}p{0.36\textwidth}p{0.3\textwidth}@{}}
+                \toprule
+                \textbf{Request} & \textbf{Sistema base} & \textbf{Propuesta 3} \\
+                \midrule
+                \texttt{baseAmount: -100000} & 200; ARS interno $120000000 \to 119900000$, USD interno $60000 \to 60066$ & 400; saldos sin cambios \\
+                \midrule
+                \texttt{baseAmount: "100000"} & 200; saldo ARS interno pasa a ser el string \texttt{"120000000100000"} & 400; saldos sin cambios \\
+                \midrule
+                Misma moneda (USD/USD) & 500 & 400 \\
+                \midrule
+                \texttt{PUT /rates} con \texttt{rate: -1} & 200; la tasa USD/ARS queda en $-1$ & 400; tasa sin cambios \\
+                \midrule
+                Moneda \texttt{XXX} & Sin respuesta; el proceso termina y no responde requests posteriores & 400; el proceso sigue respondiendo \\
+                \bottomrule
+            \end{tabular}
+        \end{table}
+
+        \todo{Adjuntar captura de la ejecución (terminal o Postman) en el entorno de pruebas.}
 
         \subsubsection{Performance}
         \label{sec:propuesta_3_performance}
@@ -82,12 +146,26 @@
         \subsubsection{Modificabilidad}
         \label{sec:propuesta_3_modificabilidad}
 
-        \todo{Discutir: las reglas de validación quedan acopladas a las monedas y cuentas existentes; agregar una moneda requiere actualizar la validación. Mencionar si la validación queda centralizada en un módulo.}
+        La validación queda centralizada en \texttt{validation.js} y separada de la lógica de cambio, por lo que modificar
+        una regla no requiere tocar \texttt{exchange.js}. Las monedas soportadas no están fijas en el código sino que se
+        derivan de las cuentas internas y las tasas existentes, de modo que agregar una moneda no requiere modificar la
+        validación. Por otro lado, la validación depende de \texttt{exchange.js} para consultar cuentas y tasas, y los códigos
+        HTTP de los rechazos se asocian al texto del motivo (\texttt{REJECTIONS}), por lo que agregar un nuevo motivo de
+        rechazo requiere actualizar también \texttt{app.js}.
+
+        La reserva de saldo, en cambio, depende de que Node.js ejecute el código en un único hilo. Si el estado se mueve a
+        una base de datos externa o se replica la API (como requeriría escalar horizontalmente), la verificación y el
+        descuento dejan de ser atómicos y deben reemplazarse por una operación atómica o una transacción del motor.
 
         \subsubsection{Testeabilidad}
         \label{sec:propuesta_3_testeabilidad}
 
-        \todo{Discutir: la validación separada de la lógica de cambio puede probarse de forma aislada; los códigos de respuesta 4xx/5xx permiten distinguir errores del cliente de fallas del servidor.}
+        Los validadores son funciones que reciben el cuerpo de la request y retornan un mensaje, por lo que pueden probarse
+        de forma aislada sin levantar el servidor ni esperar las transferencias. Además, los códigos de respuesta permiten
+        distinguir en las pruebas, y en las métricas, los errores del cliente (4xx) de los rechazos por falta de fondos (409)
+        y de las fallas del servidor o sus dependencias (5xx). En el sistema base todos se informaban como 500.
+        La propuesta no agrega pruebas automatizadas, por lo que la ausencia señalada en la
+        Sección~\ref{sec:testeabilidad} se mantiene.
 
         \subsubsection{Simplicidad}
         \label{sec:propuesta_3_simplicidad}
@@ -238,15 +316,46 @@
     \subsection{Pruebas de concurrencia}
     \label{sec:propuesta_3_pruebas_de_concurrencia}
 
-    \todo{Describir el escenario (\texttt{perf/race.yaml}): saldo inicial de la cuenta interna, cantidad y monto de los \texttt{/exchange} concurrentes, y por qué el saldo total solicitado supera al disponible.}
+    Este escenario tiene como objetivo evidenciar la condición de carrera identificada en el Código~\ref{lst:race_condition},
+    por lo que se ejecuta tanto sobre el sistema base como sobre la propuesta 3. Lo realizamos de dos formas
+    complementarias.
 
-    Este escenario se ejecuta tanto sobre el sistema base como sobre la propuesta 3, ya que tiene como objetivo evidenciar la
-    condición de carrera identificada en el Código~\ref{lst:race_condition}.
+    La primera (\texttt{perf/race.sh}) es una prueba acotada que permite verificar el saldo exacto: se fija el saldo de la
+    cuenta interna en USD en 100 y se envían $N$ cambios concurrentes de 121213 ARS, equivalentes a unos 80 USD cada uno.
+    Como el saldo alcanza para un solo cambio, el resultado correcto es que se apruebe uno, se rechace el resto y el saldo
+    final sea de unos 20 USD.
+
+    La segunda (\texttt{perf/race.yaml}) reproduce la situación con carga sostenida para observarla en el dashboard:
+    se fija el saldo de la cuenta interna en USD en 8000 y se envían 40 cambios/s de 100000 ARS (unos 66 USD cada uno)
+    durante 60s. El saldo alcanza para unos 121 cambios de los 2400 enviados. Dado que cada cambio demora entre 400 y 800ms,
+    en todo momento hay entre 16 y 32 cambios en curso que pueden haber verificado el mismo saldo.
 
         \subsubsection{Saldo de la cuenta interna}
         \label{sec:propuesta_3_pruebas_de_concurrencia_saldo}
 
-        \todo{Mostrar \texttt{GET /accounts} antes y después en ambos sistemas. Esperado: saldo negativo en el base, nunca negativo en la propuesta 3.}
+        \begin{table}[H]
+            \centering
+            \small
+            \renewcommand{\arraystretch}{1.2}
+            \caption{Resultado de \texttt{perf/race.sh} con un saldo inicial de 100 USD en la cuenta interna.}
+            \label{tab:propuesta_3_concurrencia}
+            \begin{tabular}{@{}llll@{}}
+                \toprule
+                \textbf{Sistema} & \textbf{Concurrentes} & \textbf{Respuestas} & \textbf{Saldo final (USD)} \\
+                \midrule
+                Base         & 2  & 2 $\times$ 200                   & $-60.00116$ \\
+                Propuesta 3  & 2  & 1 $\times$ 200, 1 $\times$ 409   & $19.99942$ \\
+                Base         & 10 & 10 $\times$ 200                  & $-700.0058$ \\
+                Propuesta 3  & 10 & 1 $\times$ 200, 9 $\times$ 409   & $19.99942$ \\
+                \bottomrule
+            \end{tabular}
+        \end{table}
+
+        En el sistema base se aprueban todos los cambios y la cuenta interna termina en negativo en proporción a la cantidad
+        de requests concurrentes: arVault entrega dólares que no tiene. En la propuesta 3 se aprueba un único cambio, el
+        resto se rechaza con HTTP 409 y el saldo final es el mismo independientemente de la concurrencia.
+
+        \todo{Adjuntar captura de \texttt{./race.sh} en el entorno de pruebas para ambos sistemas.}
 
         \subsubsection{Estado de las requests}
         \label{sec:propuesta_3_pruebas_de_concurrencia_requests}
@@ -258,7 +367,8 @@
                 \includegraphics[width=0.5\columnwidth]{figures/placeholder}
                 \caption{
                     Comparativa del estado de las requests entre la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
-                    \todo{Completar. Esperado: en el base se aprueban más operaciones que las que cubre el saldo; en la propuesta 3 las excedentes se rechazan.}
+                    Notar que el panel clasifica las respuestas 4xx como \textit{Limited}: en la propuesta 3 los cambios sin fondos se informan como 409, mientras que en el sistema base se informaban como 500 (\textit{Failed}).
+                    \todo{Completar. Esperado: en el base se aprueban más de los $\sim$121 cambios que cubre el saldo; en la propuesta 3 las excedentes se rechazan. Complementar con el volumen neto en USD, que en el base debería superar los 8000.}
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_race_requests_state}
             \end{figure}
