@@ -358,6 +358,27 @@
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_net_currency}
             \end{figure}
 
+    \subsection{Pruebas de caos}
+    \label{sec:propuesta_1_pruebas_de_chaos}
+
+    No ejecutamos el escenario de caos sobre la propuesta 1, ya que la táctica no modifica ninguno de los elementos que
+    determinan su resultado en el sistema base (Sección~\ref{sec:sistema_base_pruebas_de_chaos}):
+
+    \begin{itemize}
+        \item la validación de \texttt{/exchange} en \texttt{app.js} sigue siendo por presencia (Código~\ref{lst:request_validation}),
+        por lo que la request con la moneda inexistente \texttt{XXX} es aceptada;
+        \item \texttt{exchange.js} sigue accediendo a \texttt{rates[baseCurrency][counterCurrency]} sin verificar que la moneda
+        exista, lo que lanza una excepción;
+        \item el handler de \texttt{/exchange} sigue siendo una función \texttt{async} sin \texttt{try/catch}, por lo que la
+        excepción termina el proceso (Sección~\ref{sec:impacto_en_la_disponibilidad});
+        \item el \texttt{docker-compose.yml} de la propuesta no agrega una política de reinicio ni un health check para la API.
+    \end{itemize}
+
+    Por lo tanto, esperamos el mismo resultado que en el sistema base: la API termina con la primera request inválida y no
+    vuelve a atender requests durante el resto de la prueba. El nodo de logs no cambia este resultado, ya que la
+    propuesta solo lo desacopla de las operaciones de negocio y no interviene en el procesamiento de \texttt{/exchange}.
+    La recuperación frente a este tipo de fallas es el objetivo de la propuesta 2 (Sección~\ref{sec:propuesta_2}).
+
     \subsection{Resultados y conclusiones}
     \label{sec:propuesta_1_resultados_y_conclusiones}
 
