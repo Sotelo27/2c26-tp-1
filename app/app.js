@@ -10,6 +10,12 @@ import {
   getLog,
   exchange,
 } from "./exchange.js";
+import {
+  validateExchangeRequest,
+  validateRateRequest,
+  validateBalanceRequest,
+  accountExists,
+} from "./validation.js";
 
 await exchangeInit();
 
@@ -29,13 +35,18 @@ app.put("/accounts/:id/balance", (req, res) => {
   const accountId = req.params.id;
   const { balance } = req.body;
 
-  if (!accountId || !balance) {
-    return res.status(400).json({ error: "Malformed request" });
-  } else {
-    setAccountBalance(accountId, balance);
-
-    res.json(getAccounts());
+  const validationError = validateBalanceRequest(req.body);
+  if (validationError) {
+    return res.status(400).json({ error: "Malformed request", obs: validationError });
   }
+
+  if (!accountExists(accountId)) {
+    return res.status(404).json({ error: "Account not found" });
+  }
+
+  setAccountBalance(accountId, balance);
+
+  res.json(getAccounts());
 });
 
 // RATE endpoints
@@ -45,10 +56,9 @@ app.get("/rates", (req, res) => {
 });
 
 app.put("/rates", (req, res) => {
-  const { baseCurrency, counterCurrency, rate } = req.body;
-
-  if (!baseCurrency || !counterCurrency || !rate) {
-    return res.status(400).json({ error: "Malformed request" });
+  const validationError = validateRateRequest(req.body);
+  if (validationError) {
+    return res.status(400).json({ error: "Malformed request", obs: validationError });
   }
 
   const newRateRequest = { ...req.body };
@@ -66,22 +76,9 @@ app.get("/log", (req, res) => {
 // EXCHANGE endpoint
 
 app.post("/exchange", async (req, res) => {
-  const {
-    baseCurrency,
-    counterCurrency,
-    baseAccountId,
-    counterAccountId,
-    baseAmount,
-  } = req.body;
-
-  if (
-    !baseCurrency ||
-    !counterCurrency ||
-    !baseAccountId ||
-    !counterAccountId ||
-    !baseAmount
-  ) {
-    return res.status(400).json({ error: "Malformed request" });
+  const validationError = validateExchangeRequest(req.body);
+  if (validationError) {
+    return res.status(400).json({ error: "Malformed request", obs: validationError });
   }
 
   const exchangeRequest = { ...req.body };
