@@ -1,22 +1,22 @@
 \section{Propuesta 1}
 \label{sec:propuesta_1}
 
-    El sistema presenta una degradacion principalmente por el manejo indevido del log.
-    Destacamos que la posibilidad de permitir consultar el log de manera completa es la principal causa de degradacion.
-    Este escala con el numero de operacion, lo que provoca un aumento en el uso de recursos para mantenerlo, y un aumento en los tiempos de respuesta para consultarlo.
-    Esto arrastra la degradacion a los otros endpoints, entre ellos \texttt{/exchange}, el principalmente mencionado por los usuarios.
+    El sistema presenta una degradación principalmente por el manejo indebido del log.
+    Destacamos que la posibilidad de permitir consultar el log de manera completa es la principal causa de degradación.
+    Este escala con el número de operación, lo que provoca un aumento en el uso de recursos para mantenerlo, y un aumento en los tiempos de respuesta para consultarlo.
+    Esto arrastra la degradación a los otros endpoints, entre ellos \texttt{/exchange}, el principalmente mencionado por los usuarios.
 
-    Destacamos que un endpoint que permite consultarlo todo por definicion no es escalable, recomendamos la implementacion de paginacion.
-    Sinembargo, asumimos que esta es un requerimiento de negocio y que las mejoras propuestas no deben alterar la firma del sistema para con los usuarios.
-    Se propone desacoplar el log para que la degradacion de este no afecte a los endpoints de negocio del sistema.
-    Proponemos agregar un nodo dedicado, analogo a exchange-api para el manejo del log.
-    Algunas optimizaciones de la implementacion que consideramos que vale la pena mencionar son:
+    Destacamos que un endpoint que permite consultarlo todo por definición no es escalable, recomendamos la implementación de paginación.
+    Sin embargo, asumimos que este es un requerimiento de negocio y que las mejoras propuestas no deben alterar la firma del sistema para con los usuarios.
+    Se propone desacoplar el log para que la degradación de este no afecte a los endpoints de negocio del sistema.
+    Proponemos agregar un nodo dedicado, análogo a exchange-api para el manejo del log.
+    Algunas optimizaciones de la implementación que consideramos que vale la pena mencionar son:
 
     \begin{itemize}
         \item Remplazamos el uso del formato .json para el almacenamiento a .ndjson, de esta manera podemos agregar los registros al final sin reescribir todo el archivo.
-        \item El archivo ya no se carga en memoria, se stremea el cliente directamente desde disco en batches. Destacamos que agregamos los caracteres [ al inicio y ] al final del stream para mantener la firma original con respecto al formato .json.
-        \item Solo enviamos hasta el ultimo byte valido disponible al momento de recibida la consulta y verificamos que la ultima entrada sea valida (evita race condition con la escritura).
-        \item Exchange api loguea directamente al nuevo nodo dedicado mediante una conexion TCP dedicada.
+        \item El archivo ya no se carga en memoria, se streamea el cliente directamente desde disco en batches. Destacamos que agregamos los caracteres [ al inicio y ] al final del stream para mantener la firma original con respecto al formato .json.
+        \item Solo enviamos hasta el último byte válido disponible al momento de recibida la consulta y verificamos que la última entrada sea válida (evita race condition con la escritura).
+        \item Exchange api loguea directamente al nuevo nodo dedicado mediante una conexión TCP dedicada.
     \end{itemize}
 
     \begin{figure}[H]
@@ -107,18 +107,18 @@
     \subsection{Pruebas de carga}
     \label{sec:propuesta_1_pruebas_de_baseline}
 
-    Las pruebas de carga comparten la misma configuracion con el sistema base de tal forma que los resultados sean comparables, ver \hyperref[sec:sistema_base_pruebas_de_baseline]{Pruebas de carga}.
+    Las pruebas de carga comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver \hyperref[sec:sistema_base_pruebas_de_baseline]{Pruebas de carga}.
 
-    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_1_baseline]{Apendice}.
+    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_1_baseline]{Apéndice}.
 
     % Me parece que no aporta mucho esta seccion, con stress y soak se ve mejor el cambio, si dejaria los resultados en el apendice
 
     \subsection{Pruebas de estrés}
     \label{sec:propuesta_1_pruebas_de_stress}
 
-    Las pruebas de estrés comparten la misma configuracion con el sistema base de tal forma que los resultados sean comparables, ver \hyperref[sec:sistema_base_pruebas_de_stress]{Pruebas de estres}.
+    Las pruebas de estrés comparten la misma configuración con el sistema base de tal forma que los resultados sean comparables, ver \hyperref[sec:sistema_base_pruebas_de_stress]{Pruebas de estrés}.
 
-    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_1_stress]{Apendice}.
+    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_1_stress]{Apéndice}.
 
         \subsubsection{Disponibilidad}
         \label{sec:propuesta_1_pruebas_de_stress_metricas_disponibilidad}
@@ -143,8 +143,8 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/stress/response_time}
                 \caption{
                     Comparativa de los resultados de latencia entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de estrés.
-                    Se observa que la propuesta 1 mejoro el promedio de latencia para P50.
-                    Tambien se observa que empeoro en P95 y P99.
+                    Se observa que la propuesta 1 mejoró el promedio de latencia para P50.
+                    También se observa que empeoró en P95 y P99.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_stress_response_time}
             \end{figure}
@@ -155,13 +155,13 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/stress/endpoint_response_time}
                 \caption{
                     Comparativa de los resultados de latencia por endpoint entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de estrés.
-                    Con diferencia el analisis mas interesante, la propuesta 1 permitio como se esperaba mejorar la latencia en el endpoint \texttt{/exchange},
-                    se puede notar que este no se ve afectado por la degradacion del endpoint \texttt{/log}. Como si ocurria en el caso base, donde al rededor del minuto 4,
+                    Con diferencia el análisis más interesante, la propuesta 1 permitió como se esperaba mejorar la latencia en el endpoint \texttt{/exchange},
+                    se puede notar que este no se ve afectado por la degradación del endpoint \texttt{/log}. Como sí ocurría en el caso base, donde alrededor del minuto 4,
                     los tiempos de respuesta de \texttt{/exchange} incrementaban, en este caso, los tiempos de respuesta se mantienen estables en 1 segundo, acotado por la dependencia
                     del servicio externo.
-                    Por otro lado, los tiempos de respuesta de \texttt{/log} empeoraron, sinembargo es esperable, la mayor disponibilidad antes mencionada implica que se
-                    registraron mas transacciones, por lo que el tamaño del log necesariamente aumento.
-                    Esto explica el aumento de los tiempos de respuesta visto desde el lado del cliente antes mencionados, sinembargo, las metricas se ven ensuciadas
+                    Por otro lado, los tiempos de respuesta de \texttt{/log} empeoraron, sin embargo es esperable, la mayor disponibilidad antes mencionada implica que se
+                    registraron más transacciones, por lo que el tamaño del log necesariamente aumentó.
+                    Esto explica el aumento de los tiempos de respuesta visto desde el lado del cliente antes mencionados, sin embargo, las métricas se ven ensuciadas
                     al mezclar todos los endpoints.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_stress_endpoint_response_time}
@@ -181,10 +181,10 @@
                 \end{minipage}
                 \caption{
                     Comparativa de los resultados del uso de recursos entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de estrés.
-                    Destacar que consideramos la comparacion con respecto a ambos nodos, el nodo de exchange y el de logs.
+                    Destacar que consideramos la comparación con respecto a ambos nodos, el nodo de exchange y el de logs.
                     Se puede observar que el nodo de logs mantiene la carga con respecto a la del sistema base, incluso la aumenta.
-                    Esto es esperable con el aumento de la disponibilidad, mas request completadas implican mas entradas en el log.
-                    Sinembargo, el nodo de exchange apenas llego a un $14.2\%$ de uso de CPU y $1.42\%$ de uso de memoria.
+                    Esto es esperable con el aumento de la disponibilidad, más requests completadas implican más entradas en el log.
+                    Sin embargo, el nodo de exchange apenas llegó a un $14.2\%$ de uso de CPU y $1.42\%$ de uso de memoria.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_stress_resources}
             \end{figure}
@@ -212,7 +212,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/stress/net_currency}
                 \caption{
                     Comparativa de los resultados de volumen neto operado en cada moneda entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de estrés.
-                    Analogamente al volumen operado, se observa que el volumen neto tambien es mayor en la propuesta 1 frente al sistema base.
+                    Análogamente al volumen operado, se observa que el volumen neto también es mayor en la propuesta 1 frente al sistema base.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_stress_net_currency}
             \end{figure}
@@ -220,7 +220,7 @@
     \subsection{Pruebas de resistencia}
     \label{sec:propuesta_1_pruebas_de_soak}
 
-        Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_1_soak]{Apendice}.
+        Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_propuesta_1_soak]{Apéndice}.
 
         \subsubsection{Disponibilidad}
         \label{sec:propuesta_1_pruebas_de_soak_metricas_disponibilidad}
@@ -230,8 +230,8 @@
                 \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/requests_state}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/requests_state}
                 \caption{
-                    Comparativa de la disponibilidad ofrecida por la propuesta 1 (izquierda) y el sistema base (derecha) frente a un scenario de resistencia.
-                    El sistema base mostraba una degradacion critica a los 20 minutos, mientras que la propuesta 1 logro completar satisfactoriamente todas las request durante los 45 minutos.
+                    Comparativa de la disponibilidad ofrecida por la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
+                    El sistema base mostraba una degradación crítica a los 20 minutos, mientras que la propuesta 1 logró completar satisfactoriamente todas las requests durante los 45 minutos.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_requests_state}
             \end{figure}
@@ -244,8 +244,8 @@
                 \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/response_time}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/response_time}
                 \caption{
-                    Comparativa de los resultados de latencia entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un scenario de resistencia.
-                    Consistente con los resultados de disponibilidad se muestra una gran mejora especialmente posterior al minuto 20. Sinembargo, la propuesta 1 sigue mostrando una principio de degradacion a los 40 minutos, esperable dado el crecimiento del log.
+                    Comparativa de los resultados de latencia entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
+                    Consistente con los resultados de disponibilidad se muestra una gran mejora especialmente posterior al minuto 20. Sin embargo, la propuesta 1 sigue mostrando un principio de degradación a los 40 minutos, esperable dado el crecimiento del log.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_response_time}
             \end{figure}
@@ -255,8 +255,8 @@
                 \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/endpoint_response_time}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/endpoint_response_time}
                 \caption{
-                    Comparativa de los resultados de latencia por endpoint entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un scenario de resistencia.
-                    Para el tiempo de respuesta desde la perspectiva del servidor, se muestra como en la propuesta 1 los tiempos del endpoint \texttt{/log} ya no “empujan” los tiempos del endpoint \texttt{/exchange}, sinembargo como ya se menciono, el endpoint \texttt{/log} continua degradando.
+                    Comparativa de los resultados de latencia por endpoint entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
+                    Para el tiempo de respuesta desde la perspectiva del servidor, se muestra cómo en la propuesta 1 los tiempos del endpoint \texttt{/log} ya no “empujan” los tiempos del endpoint \texttt{/exchange}, sin embargo como ya se mencionó, el endpoint \texttt{/log} continúa degradando.
                     Los tiempos de respuesta de \texttt{/log} entre ambos casos lamentablemente no son comparables puesto que menor disponibilidad implica un menor crecimiento del propio log.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_endpoint_response_time}
@@ -275,9 +275,9 @@
                     \includegraphics[width=\linewidth]{figures/sistema_base/soak/resources}
                 \end{minipage}
                 \caption{
-                    Comparativa de los resultados del uso de recursos entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un scenario de resistencia.
-                    Destacar que ambos casos no son directamente comparables, la propuesta 1 dispone de dos contenedores/nodos independientes cada uno con los mismo recursos que el nodo monolitico del escenario base.
-                    Se observa que para el nodo de exchange-api los recursos son practicamente ociosos con apenas un uso del $6.4\%$ de CPU y $0.8\%$ en memoria. Tambien se observa en los recursos del nodo de logs, un uso mas constante de la memoria, esperable al stremear los datos desde disco y no conservar todos los logs en memoria.
+                    Comparativa de los resultados del uso de recursos entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
+                    Destacar que ambos casos no son directamente comparables, la propuesta 1 dispone de dos contenedores/nodos independientes cada uno con los mismos recursos que el nodo monolítico del escenario base.
+                    Se observa que para el nodo de exchange-api los recursos son prácticamente ociosos con apenas un uso del $6.4\%$ de CPU y $0.8\%$ en memoria. También se observa en los recursos del nodo de logs, un uso más constante de la memoria, esperable al streamear los datos desde disco y no conservar todos los logs en memoria.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_resources}
             \end{figure}
@@ -290,7 +290,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/currency}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/currency}
                 \caption{
-                    Comparativa de los resultados de volumen operado en cada moneda entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un scenario de resistencia.
+                    Comparativa de los resultados de volumen operado en cada moneda entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
                     Se observa que la propuesta 1 obtuvo un mayor volumen total siendo este $4.31M$ frente al $3.59M$ del sistema base, es decir una mejora del $20.06\%$.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_currency}
@@ -304,8 +304,8 @@
                 \includegraphics[width=0.5\columnwidth]{figures/propuesta_1/soak/net_currency}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/net_currency}
                 \caption{
-                    Comparativa de los resultados de volumen neto operado en cada moneda entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un scenario de resistencia.
-                    Analogamente al volumen operado, se observa que el volumen neto tambien es mayor en la propuesta 1 frente al sistema base en la misma proporcion.
+                    Comparativa de los resultados de volumen neto operado en cada moneda entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
+                    Análogamente al volumen operado, se observa que el volumen neto también es mayor en la propuesta 1 frente al sistema base en la misma proporción.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_net_currency}
             \end{figure}
@@ -313,5 +313,5 @@
     \subsection{Resultados y conclusiones}
     \label{sec:propuesta_1_resultados_y_conclusiones}
 
-    La propuesta 1 demostro ser capaz de aislar la degradacion producida por la consulta de logs de las opeeraciones de negocio del sistema, permitiendo ofrecer una mejor disponibilidad a los usuarios comunes.
-    Por otro lado la consulta de logs sigue degradandose con el tiempo. Sinembargo, este desacoplamiento propuesto permitiria replicar el nodo de consulta para dar soporte de lectura de los a mas usuarios, es decir, permitiendo escalabilidad horizontal.
+    La propuesta 1 demostró ser capaz de aislar la degradación producida por la consulta de logs de las operaciones de negocio del sistema, permitiendo ofrecer una mejor disponibilidad a los usuarios comunes.
+    Por otro lado la consulta de logs sigue degradándose con el tiempo. Sin embargo, este desacoplamiento propuesto permitiría replicar el nodo de consulta para dar soporte de lectura de los logs a más usuarios, es decir, permitiendo escalabilidad horizontal.

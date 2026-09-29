@@ -13,11 +13,11 @@
             Habilidad del sistema para reparar o enmascarar fallas de manera tal que el período fuera de servicio no exceda un determinado valor durante un lapso de tiempo especificado.
 
             \begin{customenv}[frametitle=]
-                La startup arVault es una fintech que opera una billetera digital
+                La startup arVault es una fintech que opera una billetera digital, de reciente creación.
             \end{customenv}
 
-            Al ser una billetera digital, el servicio permite manipular el dinero de los usuarios. Un servicio con baja o nula disponibilidad implicaria que los usuarios no pueden acceder a su propio dinero.
-            Adicionalmente, el modelo de negocio se basa en que los usuarios operen, si el servicio no es disponible para permitir estas operaciones, se estan perdiendo potenciales ganancias.
+            Al ser una billetera digital, el servicio permite manipular el dinero de los usuarios. Un servicio con baja o nula disponibilidad implicaría que los usuarios no pueden acceder a su propio dinero.
+            Adicionalmente, el modelo de negocio se basa en que los usuarios operen, si el servicio no está disponible para permitir estas operaciones, se están perdiendo potenciales ganancias.
 
         \subsubsection{Performance}
         \label{sec:performance}
@@ -150,7 +150,7 @@
             Define la facilidad de gestión y monitoreo del sistema por parte de sus administradores.
 
             \begin{customenv}[frametitle=]
-                Actualiza el saldo de una cuenta. No me gusta cómo está hecho esto, otro servicio debería ocuparse de esto
+                Actualiza el saldo de una cuenta. No me gusta cómo está hecho esto, otro servicio debería ocuparse de esto (el que hace las transferencias?)
             \end{customenv}
 
             Las cuentas internas y las tasas se administran a través de endpoints HTTP
@@ -166,7 +166,7 @@
             Facilidad con la que la arquitectura de un sistema puede ser entendida, razonada y explicada.
 
             \begin{customenv}[frametitle=]
-                Su fundador, un desarrollador aficionado y entusiasta [...] se concentró en implementar rápidamente (bajo la consigna \textit{fake it until you make it}) un núcleo de servicios
+                Su fundador, un desarrollador aficionado y entusiasta [...] se concentró en implementar rápidamente (bajo la consigna \textit{fake it until you make it}) un núcleo de servicios que le permitieran conseguir más fondos a través de inversores.
             \end{customenv}
 
             El sistema fue desarrollado por una sola persona sin experiencia profesional
@@ -215,7 +215,7 @@
             (Figura~\ref{fig:sistema_base_baseline_endpoint_response_time}).
             \item \textbf{Transferencias secuenciales.} Cada cambio exitoso espera dos
             transferencias de entre 200 y 400 ms, una después de la otra, por lo que
-            \texttt{/exchange} no puede responder en menos de 400 ms aún sin carga. Si
+            \texttt{/exchange} no puede responder en menos de 400 ms aun sin carga. Si
             fueran independientes podrían solaparse, pero la segunda depende del resultado
             de la primera.
             \item \textbf{Serialización síncrona de un log sin límite.} \texttt{/log}

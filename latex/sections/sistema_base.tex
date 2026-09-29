@@ -4,14 +4,14 @@
     \subsection{Pruebas de carga}
     \label{sec:sistema_base_pruebas_de_baseline}
 
-        La prueba de carga se realizo usando una tasa constante de 40 usuarios durante 240s (4 minutos).
+        La prueba de carga se realizó usando una tasa constante de 40 usuarios durante 240s (4 minutos).
         Cada usuario realiza un solo request, es decir se mantiene un throughput constante de 40 requests por segundo.
-        No se realizo warm-up ni ramp para no ensuciar las metricas de promedios.
-        Tampoco se realizaron recargas de saldo intermedias, se utilizo una carga inicial suficiente para cubrir toda la prueba.
+        No se realizó warm-up ni ramp para no ensuciar las métricas de promedios.
+        Tampoco se realizaron recargas de saldo intermedias, se utilizó una carga inicial suficiente para cubrir toda la prueba.
 
-        Adicionalmente, aprovechando que siendo este el sistema inicial no se plantea una comparativa, decidimos para ilustrar el formato de los gráficos y explicar los criterios compartidos entre todos los escenarios.
+        Adicionalmente, aprovechando que siendo este el sistema inicial no se plantea una comparativa, decidimos usarla para ilustrar el formato de los gráficos y explicar los criterios compartidos entre todos los escenarios.
 
-        Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_sistema_base_baseline]{Apendice}.
+        Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_sistema_base_baseline]{Apéndice}.
 
         \begin{figure}[H]
             \centering
@@ -21,12 +21,12 @@
             \hfill
             \begin{minipage}[c]{0.45\columnwidth}
                 \caption{
-                    Para un primer diagnostico del sistema se decidio utilizar todos los endpoints.
+                    Para un primer diagnóstico del sistema se decidió utilizar todos los endpoints.
                     Se asignaron 20 requests por segundo a \texttt{/exchange} por ser el endpoint principal en el contexto de negocio.
-                    Se asignaron 8 requests por segundo a \texttt{/log} por las hipotesis planteadas sobre su significativo impaco en la disponibilidad y latencia del sistema.
-                    Se asignaron 3 request por segundo al resto de endpoints.
-                    Para todos los graficos salvo se indique lo contrario el eje $x$ muestra el tiempo transcurrido de la prueba y cada punto agrupa una ventana de 10 segundos.
-                    Adicionalmente en las leyendas de la derecha se muestran estadisticas relevantes al escenario, como por ejemplo el promedio, el ultimo valor y/o el maximo.
+                    Se asignaron 8 requests por segundo a \texttt{/log} por las hipótesis planteadas sobre su significativo impacto en la disponibilidad y latencia del sistema.
+                    Se asignaron 3 requests por segundo al resto de endpoints.
+                    Para todos los gráficos salvo se indique lo contrario el eje $x$ muestra el tiempo transcurrido de la prueba y cada punto agrupa una ventana de 10 segundos.
+                    Adicionalmente en las leyendas de la derecha se muestran estadísticas relevantes al escenario, como por ejemplo el promedio, el último valor y/o el máximo.
                 }
                 \label{fig:sistema_base_baseline_scenarios}
             \end{minipage}
@@ -43,9 +43,9 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Para evaluar la disponibilidad del sistema monitoreamos el estado de las request.
+                        Para evaluar la disponibilidad del sistema monitoreamos el estado de las requests.
                         Completed indica cuántas requests finalizaron correctamente en la ventana de 10 segundos, mientras que Pending indica cuántas seguían en curso.
-                        En 4 minutos con una carga de 40 request por segundo, se puede observar que el sistema no presento inconvenientes.
+                        En 4 minutos con una carga de 40 requests por segundo, se puede observar que el sistema no presentó inconvenientes.
                     }
                     \label{fig:sistema_base_baseline_requests_state}
                 \end{minipage}
@@ -62,9 +62,9 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Para evaluar la latencia del sistema optamos por utilizar dos metodologias, la primera monitorear los tiempos de respuestas desde la perspectiva del cliente a travez de Artillery.
-                        Optamos por realizar el monitoreo en P50, P95 Y P99, sinembargo una consideracion importante para esta metodlogia es que no distingue entre endpoints.
-                        Una consecuencia de esto ultimo es por ejemplo los saltos en P50 donde dependiendo si la ventana contiene mayormente requests rapidas o del endpoint \texttt{/exchange}, la mediana se desplaza entre ambos grupos.
+                        Para evaluar la latencia del sistema optamos por utilizar dos metodologías, la primera monitorear los tiempos de respuestas desde la perspectiva del cliente a través de Artillery.
+                        Optamos por realizar el monitoreo en P50, P95 y P99, sin embargo una consideración importante para esta metodología es que no distingue entre endpoints.
+                        Una consecuencia de esto último es por ejemplo los saltos en P50 donde dependiendo si la ventana contiene mayormente requests rápidas o del endpoint \texttt{/exchange}, la mediana se desplaza entre ambos grupos.
                     }
                     \label{fig:sistema_base_baseline_response_time}
                 \end{minipage}
@@ -78,12 +78,12 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        La siguiente metodologia adoptada fue medir los tiempos de respuesta por endpoint desde la perspectiva del servidor.
-                        Se realizo agregando la recoleccion de metricas directamente en el servidor.
-                        Si bien en contraposicion a la metodologia anterior si podemos discernir entre endpoints, optamos por representarlo solo para P95 para no saturar la representacion.
-                        Para el eje $y$ optamos por una escala logaritmica por la gran discrepancia entre los tiempos.
-                        Una observacion que veniamos anticipando es que los endpoints se agrupan en tres clases, \texttt{/exchange} lento por sus dependnecias externas pero contante, \texttt{/log} que crece junto con el tamaño del propio log y los restantes los cuales son considerablemente mas rapidos.
-                        En proxpimos escenarios nos vamos a limitar a monitorear un endpoint de cada grupo, es decir \texttt{/exchange}, \texttt{/log} y optamos por \texttt{GET /rates} como representante de los endpoints rapidos, de esta forma simplificar la representacion.
+                        La siguiente metodología adoptada fue medir los tiempos de respuesta por endpoint desde la perspectiva del servidor.
+                        Se realizó agregando la recolección de métricas directamente en el servidor.
+                        Si bien en contraposición a la metodología anterior sí podemos discernir entre endpoints, optamos por representarlo solo para P95 para no saturar la representación.
+                        Para el eje $y$ optamos por una escala logarítmica por la gran discrepancia entre los tiempos.
+                        Una observación que veníamos anticipando es que los endpoints se agrupan en tres clases, \texttt{/exchange} lento por sus dependencias externas pero constante, \texttt{/log} que crece junto con el tamaño del propio log y los restantes los cuales son considerablemente más rápidos.
+                        En próximos escenarios nos vamos a limitar a monitorear un endpoint de cada grupo, es decir \texttt{/exchange}, \texttt{/log} y optamos por \texttt{GET /rates} como representante de los endpoints rápidos, de esta forma simplificar la representación.
                     }
                     \label{fig:sistema_base_baseline_endpoint_response_time}
                 \end{minipage}
@@ -102,7 +102,7 @@
                         Para evaluar el uso de recursos del sistema, monitoreamos el uso del CPU y de la memoria.
                         El uso del CPU se lee sobre el eje $y$ al lado izquierdo mientras que el uso de la memoria al lado derecho.
                         Nuevamente, mantiene el formato de tiempo en el eje $x$ con ventanas de 10 segundos.
-                        Una primera observacion es que tanto el uso de CPU como el de memoria crece con el tiempo, se especula debido al crecimiento del log.
+                        Una primera observación es que tanto el uso de CPU como el de memoria crece con el tiempo, se especula debido al crecimiento del log.
                     }
                     \label{fig:sistema_base_baseline_resources}
                 \end{minipage}
@@ -119,10 +119,10 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Como la primera metrica de negocio, se evaluo el volumen operado por cada moneda.
-                        Para esto se agrego la recoleccion de metricas directamente en el servidor.
-                        Optamos por representar cada moneda con su respectivo valor en dolares, a la cotizacion vigente en cada operacion, para que los valores sean comparables.
-                        Los volumenes de diferentes monedas operados en un mismo punto se apilan para representar el total operado en ese punto.
+                        Como la primera métrica de negocio, se evaluó el volumen operado por cada moneda.
+                        Para esto se agregó la recolección de métricas directamente en el servidor.
+                        Optamos por representar cada moneda con su respectivo valor en dólares, a la cotización vigente en cada operación, para que los valores sean comparables.
+                        Los volúmenes de diferentes monedas operados en un mismo punto se apilan para representar el total operado en ese punto.
                         Se mantiene el formato de tiempo en el eje $x$ pero se redujo la ventana a 1 segundo.
                     }
                     \label{fig:sistema_base_baseline_currency}
@@ -140,9 +140,9 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Para la segunda metrica de negocio, se evaluo el volumen neto operado por cada moneda.
-                        Nuevamente, a travez de la recoleccion de metricas directamente en el servidor.
-                        De igual modo, con cada moneda en su respectivo valor en dolares.
+                        Para la segunda métrica de negocio, se evaluó el volumen neto operado por cada moneda.
+                        Nuevamente, a través de la recolección de métricas directamente en el servidor.
+                        De igual modo, con cada moneda en su respectivo valor en dólares.
                         A diferencia del volumen operado, las ventas se representan como valores negativos y las compras con valores positivos.
                         Se mantiene el formato de tiempo en el eje $x$ y la ventana de 1 segundo.
                     }
@@ -153,11 +153,11 @@
     \subsection{Pruebas de estrés}
     \label{sec:sistema_base_pruebas_de_stress}
 
-        La prueba de estrés se realizo incrementando progresivamente la carga desde 40 hasta 180 en saltos de 20, cada salto con una duracion de 45s, el tiempo total de la prueba es de 450s (7.5 minutos).
-        Se realizo un warm-up inicial de 5 usuarios durante 30s. Ademas, al final de la prueba se dejo una instancia de recovery de nuevamente 5 usuarios esta vez durante 60s.
+        La prueba de estrés se realizó incrementando progresivamente la carga desde 40 hasta 180 en saltos de 20, cada salto con una duración de 45s, el tiempo total de la prueba es de 450s (7.5 minutos).
+        Se realizó un warm-up inicial de 5 usuarios durante 30s. Además, al final de la prueba se dejó una instancia de recovery de nuevamente 5 usuarios esta vez durante 60s.
         Tampoco se realizaron recargas de saldo intermedias y se mantuvo el mismo uso de endpoints para que los resultados sean comparables.
 
-        Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_sistema_base_stress]{Apendice}.
+        Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_sistema_base_stress]{Apéndice}.
 
         \subsubsection{Disponibilidad}
         \label{sec:sistema_base_pruebas_de_stress_metricas_disponibilidad}
@@ -170,8 +170,8 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Se observa que el servidor bajo el crecimiento de la carga encuentra su punto de quiebre al rededor del minuto 4:30.
-                        A partir de ese momento, la disponibilidad del sistema se ve comprometida y se continuan compleando solicitudes pero otras fallan.
+                        Se observa que el servidor bajo el crecimiento de la carga encuentra su punto de quiebre alrededor del minuto 4:30.
+                        A partir de ese momento, la disponibilidad del sistema se ve comprometida y se continúan completando solicitudes pero otras fallan.
                     }
                     \label{fig:sistema_base_stress_requests_state}
                 \end{minipage}
@@ -188,7 +188,7 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Se observa como previo a la perdida de disponibilidad antes mencionada (4:30) el servidor ya empieza a presentar una degradacion en los tiempos de respuesta desde el minuto 4.
+                        Se observa cómo previo a la pérdida de disponibilidad antes mencionada (4:30) el servidor ya empieza a presentar una degradación en los tiempos de respuesta desde el minuto 4.
                     }
                     \label{fig:sistema_base_stress_response_time}
                 \end{minipage}
@@ -202,7 +202,7 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Se observa como el crecimiento en los tiempos de rspuesta de \texttt{/log}, dado por el crecimiento del log, impacta directamente en la latencia del endpoint \texttt{/exchange}.
+                        Se observa cómo el crecimiento en los tiempos de respuesta de \texttt{/log}, dado por el crecimiento del log, impacta directamente en la latencia del endpoint \texttt{/exchange}.
                     }
                     \label{fig:sistema_base_stress_endpoint_response_time}
                 \end{minipage}
@@ -219,9 +219,9 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Se observa que el cuello de botella del servidor es el CPU, ya que alcanza su maxima capacidad en el minuto 4, junto con el comienzo de la degradacion del servidor.
-                        Igualmente aunque en menor medida la memoria tambien muestra signos de crecimiento.
-                        Ambos factores generados por el crecimiento del log, lo que aumenta el costo de serializacion para el CPU y el uso de memoria para almacenar los datos.
+                        Se observa que el cuello de botella del servidor es el CPU, ya que alcanza su máxima capacidad en el minuto 4, junto con el comienzo de la degradación del servidor.
+                        Igualmente aunque en menor medida la memoria también muestra signos de crecimiento.
+                        Ambos factores generados por el crecimiento del log, lo que aumenta el costo de serialización para el CPU y el uso de memoria para almacenar los datos.
                     }
                     \label{fig:sistema_base_stress_resources}
                 \end{minipage}
@@ -238,7 +238,7 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Se observa como se degrada el volumen operado a partir de minuto 4, esto implica potenciales perdidas economicas tanto para usuarios como para la plataforma.
+                        Se observa cómo se degrada el volumen operado a partir del minuto 4, esto implica potenciales pérdidas económicas tanto para usuarios como para la plataforma.
                     }
                     \label{fig:sistema_base_stress_currency}
                 \end{minipage}
@@ -255,7 +255,7 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Para el volumen neto, se observan los mismo resultados expuestos para el volumen operado por moneda.
+                        Para el volumen neto, se observan los mismos resultados expuestos para el volumen operado por moneda.
                     }
                     \label{fig:sistema_base_stress_net_currency}
                 \end{minipage}
@@ -264,11 +264,11 @@
     \subsection{Pruebas de resistencia}
     \label{sec:sistema_base_pruebas_de_soak}
 
-        La prueba de resistencia se realizo usando una tasa constante de 40 usuarios durante 2700s (45 minutos).
-        Se realizo un warm-up inicial de 5 usuarios durante 60s. Ademas, al final de la prueba se dejo una instancia de recovery de nuevamente 5 usuarios esta vez durante 120s (2 minutos).
+        La prueba de resistencia se realizó usando una tasa constante de 40 usuarios durante 2700s (45 minutos).
+        Se realizó un warm-up inicial de 5 usuarios durante 60s. Además, al final de la prueba se dejó una instancia de recovery de nuevamente 5 usuarios esta vez durante 120s (2 minutos).
         Tampoco se realizaron recargas de saldo intermedias y se mantuvo el mismo uso de endpoints para que los resultados sean comparables.
 
-        Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_sistema_base_soak]{Apendice}.
+        Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_sistema_base_soak]{Apéndice}.
 
         \subsubsection{Disponibilidad}
         \label{sec:sistema_base_pruebas_de_soak_metricas_disponibilidad}
@@ -281,9 +281,9 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        A diferencia con el escenario de estres, en este caso se observa que la perdida de disponibilidad no es producto del aumento de la carga si no que tambien se produce la misma degradacion bajo un escenario prolongado de carga continua.
-                        Las primeras request fallidas empiezan a ocurrir posterior al minuto 20.
-                        A partir de ahi se observa un incremento sostenido en la cantidad de fallos hasta la fase de recuperacion al final de la prueba.
+                        A diferencia del escenario de estrés, en este caso se observa que la pérdida de disponibilidad no es producto del aumento de la carga sino que también se produce la misma degradación bajo un escenario prolongado de carga continua.
+                        Las primeras requests fallidas empiezan a ocurrir posterior al minuto 20.
+                        A partir de ahí se observa un incremento sostenido en la cantidad de fallos hasta la fase de recuperación al final de la prueba.
                     }
                     \label{fig:sistema_base_soak_requests_state}
                 \end{minipage}
@@ -300,8 +300,8 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Se observa como nuevamente el aumento en la latencia desde la perspectiva del cliente es en el minuto 20, previo a la aparicion de las primeras request fallidas.
-                        Coherente con una degradacion progresiva y no un error abrupto.
+                        Se observa cómo nuevamente el aumento en la latencia desde la perspectiva del cliente es en el minuto 20, previo a la aparición de las primeras requests fallidas.
+                        Coherente con una degradación progresiva y no un error abrupto.
                     }
                     \label{fig:sistema_base_soak_response_time}
                 \end{minipage}
@@ -315,7 +315,7 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        En cuanto a la latencia por endpoint se observan los mismo sintomas que los descritos en la prueba de estres.
+                        En cuanto a la latencia por endpoint se observan los mismos síntomas que los descritos en la prueba de estrés.
                         El endpoint \texttt{/log} perjudica la latencia del endpoint \texttt{/exchange} conforme el tamaño del log aumenta y con este su tiempo de respuesta.
                         Este comportamiento se evidencia a partir del minuto 20, consistente con las conclusiones de disponibilidad y latencia antes mencionadas.
                     }
@@ -334,8 +334,8 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Se observa un incremento en el uso de recursos, especialmente de CPU, alcanzando este el maximo disponible a los 20 minutos.
-                        El uso de memoria tambien siguio incrementando con respecto a las obervaciones en las pruebas de carga, llegando hasta un maximo de $22.5\%$ de la memoria disponible.
+                        Se observa un incremento en el uso de recursos, especialmente de CPU, alcanzando este el máximo disponible a los 20 minutos.
+                        El uso de memoria también siguió incrementando con respecto a las observaciones en las pruebas de carga, llegando hasta un máximo de $22.5\%$ de la memoria disponible.
                     }
                     \label{fig:sistema_base_soak_resources}
                 \end{minipage}
@@ -352,7 +352,7 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Se observa una degradacion en el volumen operado a partir de los 20 minutos con respecto a los minutos previos.
+                        Se observa una degradación en el volumen operado a partir de los 20 minutos con respecto a los minutos previos.
                     }
                     \label{fig:sistema_base_soak_currency}
                 \end{minipage}
@@ -369,7 +369,7 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Se observa una tendencia similar en el volumen neto operado, con una disminucion notable a partir de los 20 minutos.
+                        Se observa una tendencia similar en el volumen neto operado, con una disminución notable a partir de los 20 minutos.
                     }
                     \label{fig:sistema_base_soak_net_currency}
                 \end{minipage}
@@ -378,15 +378,15 @@
     \subsection{Pruebas de caos}
     \label{sec:sistema_base_pruebas_de_chaos}
 
-    La prueba de carga se realizo usando una tasa constante de 40 usuarios durante 480s (8 minutos).
-    El reparto de request se mantiene igual que en la prueba de resistencia.
-    Adicionalmente se agrega un request malintencionado sabiendo que no hay un buen manejo de errores.
+    La prueba de caos se realizó usando una tasa constante de 40 usuarios durante 480s (8 minutos).
+    El reparto de requests se mantiene igual que en la prueba de resistencia.
+    Adicionalmente se agrega una request malintencionada sabiendo que no hay un buen manejo de errores.
     Este tiene una probabilidad suficiente para aparecer entre 2 o 3 veces a lo largo de la prueba.
     Cada usuario realiza un solo request, es decir se mantiene un throughput constante de 40 requests por segundo.
-    No se realizo warm-up ni ramp porque no aportaban informacion relevante para esta prueba.
-    Tampoco se realizaron recargas de saldo intermedias, se utilizo una carga inicial suficiente para cubrir toda la prueba.
+    No se realizó warm-up ni ramp porque no aportaban información relevante para esta prueba.
+    Tampoco se realizaron recargas de saldo intermedias, se utilizó una carga inicial suficiente para cubrir toda la prueba.
 
-    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_sistema_base_chaos]{Apendice}.
+    Se pueden encontrar los resultados completos en el \hyperref[sec:resultados_completos_sistema_base_chaos]{Apéndice}.
 
         \subsubsection{Disponibilidad}
         \label{sec:sistema_base_pruebas_de_chaos_metricas_disponibilidad}
@@ -399,9 +399,9 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Se observa como el sistema cae cerca del minuto 3:15 el la primera request invalida.
-                        A partir de ese momento las request no se completan y esperan un timeout completo de 10s.
-                        Se verifica que el sistema no se recupera como se menciono en la Sección~\ref{sec:arquitectura}.
+                        Se observa cómo el sistema cae cerca del minuto 3:15 en la primera request inválida.
+                        A partir de ese momento las requests no se completan y esperan un timeout completo de 10s.
+                        Se verifica que el sistema no se recupera como se mencionó en la Sección~\ref{sec:arquitectura}.
                     }
                     \label{fig:sistema_base_chaos_requests_state}
                 \end{minipage}
@@ -418,7 +418,7 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Posterior a la caida se observa el aumento en los tiempos de respuesta siendo estas devueltas por nginx como errores 502 en lugar de por el porpio servidor.
+                        Posterior a la caída se observa el aumento en los tiempos de respuesta siendo estas devueltas por nginx como errores 502 en lugar de por el propio servidor.
                     }
                     \label{fig:sistema_base_chaos_response_time}
                 \end{minipage}
@@ -432,8 +432,8 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        No se observan metricas posteriores al momento de la caida.
-                        Esto de bede a que el mecanismo para recolectar las metricas es parte del propio servidor y deja de funcionar cuando el servidor cae.
+                        No se observan métricas posteriores al momento de la caída.
+                        Esto se debe a que el mecanismo para recolectar las métricas es parte del propio servidor y deja de funcionar cuando el servidor cae.
                     }
                     \label{fig:sistema_base_chaos_endpoint_response_time}
                 \end{minipage}
@@ -451,7 +451,7 @@
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
                         De igual manera, se dejan de reportar las métricas de uso de recursos posterior a la caída del servidor.
-                        Esto se debe a la caida del propio proceso.
+                        Esto se debe a la caída del propio proceso.
                     }
                     \label{fig:sistema_base_chaos_resources}
                 \end{minipage}
@@ -468,7 +468,7 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Posterior a la caida y como consecuencia de esta se deja de operar, el total se estanca en \$298K por moneda en 8 minutos.
+                        Posterior a la caída y como consecuencia de esta se deja de operar, el total se estanca en \$298K por moneda en 8 minutos.
                     }
                     \label{fig:sistema_base_chaos_currency}
                 \end{minipage}
@@ -485,7 +485,7 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Analogamente, posterior a la caida y como consecuencia de esta se deja de operar y el volumen neto se estanca.
+                        Análogamente, posterior a la caída y como consecuencia de esta se deja de operar y el volumen neto se estanca.
                     }
                     \label{fig:sistema_base_chaos_net_currency}
                 \end{minipage}
@@ -494,6 +494,6 @@
     \subsection{Resultados y conclusiones}
     \label{sec:sistema_base_resultados_y_conclusiones}
 
-    Los resultados obtenidos del escenario de carga nos indican que podemos clasificar los endpoints en tres categorias lo que nos permitira simplificar nuestro analisis.
-    Adicionalmente, los resultados del escenario de estres y resistencia nos indican que el sistema presenta una degradacion significativa por la mala genstion del log. Esta observacion motivara la propuesta 1.
-    Finalmente, los resultados del escenario de caos nos indican que el sistema base no provee mecanismos de recuperacion. Esta observacion motivara la propuesta 2.
+    Los resultados obtenidos del escenario de carga nos indican que podemos clasificar los endpoints en tres categorías lo que nos permitirá simplificar nuestro análisis.
+    Adicionalmente, los resultados del escenario de estrés y resistencia nos indican que el sistema presenta una degradación significativa por la mala gestión del log. Esta observación motivará la propuesta 1.
+    Finalmente, los resultados del escenario de caos nos indican que el sistema base no provee mecanismos de recuperación. Esta observación motivará la propuesta 2.
