@@ -87,33 +87,42 @@ export async function exchange(exchangeRequest) {
 
   //check if we have funds on the counter currency account
   if (counterAccount.balance >= counterAmount) {
-    //try to transfer from clients' base account
-    if (await transfer(clientBaseAccountId, baseAccount.id, baseAmount)) {
-      //try to transfer to clients' counter account
-      if (
-        await transfer(counterAccount.id, clientCounterAccountId, counterAmount)
-      ) {
-        //all good, update balances
-        baseAccount.balance += baseAmount;
-        counterAccount.balance -= counterAmount;
-        exchangeResult.ok = true;
-        exchangeResult.counterAmount = counterAmount;
+    //reserve the funds right after the check, with no await in between, so concurrent
+    //exchanges cannot approve themselves against the same balance
+    counterAccount.balance -= counterAmount;
 
-        const baseAmountUsd = toUsd(baseCurrency, baseAmount);
-        const counterAmountUsd = toUsd(counterCurrency, counterAmount);
+    let transferred = false;
 
-        logVolume(baseCurrency, baseAmountUsd);
-        logVolume(counterCurrency, counterAmountUsd);
-        logNet(baseCurrency, baseAmountUsd);
-        logNet(counterCurrency, -counterAmountUsd);
-      } else {
-        //could not transfer to clients' counter account, return base amount to client
-        await transfer(baseAccount.id, clientBaseAccountId, baseAmount);
-        exchangeResult.obs = REJECTIONS.DEPOSIT_FAILED;
+    try {
+      transferred = await transferFunds(
+        exchangeResult,
+        clientBaseAccountId,
+        clientCounterAccountId,
+        baseAccount,
+        counterAccount,
+        baseAmount,
+        counterAmount
+      );
+    } finally {
+      //the exchange did not complete (rejected or failed with an error), release the reservation
+      if (!transferred) {
+        counterAccount.balance += counterAmount;
       }
-    } else {
-      //could not withdraw from clients' account
-      exchangeResult.obs = REJECTIONS.WITHDRAW_FAILED;
+    }
+
+    if (transferred) {
+      //all good, update the base balance (the counter one was already reserved)
+      baseAccount.balance += baseAmount;
+      exchangeResult.ok = true;
+      exchangeResult.counterAmount = counterAmount;
+
+      const baseAmountUsd = toUsd(baseCurrency, baseAmount);
+      const counterAmountUsd = toUsd(counterCurrency, counterAmount);
+
+      logVolume(baseCurrency, baseAmountUsd);
+      logVolume(counterCurrency, counterAmountUsd);
+      logNet(baseCurrency, baseAmountUsd);
+      logNet(counterCurrency, -counterAmountUsd);
     }
   } else {
     //not enough funds on internal counter account
@@ -124,6 +133,34 @@ export async function exchange(exchangeRequest) {
   log.push(exchangeResult);
 
   return exchangeResult;
+}
+
+// internal - move the funds between the clients' accounts and ours, returns true if both transfers succeeded
+async function transferFunds(
+  exchangeResult,
+  clientBaseAccountId,
+  clientCounterAccountId,
+  baseAccount,
+  counterAccount,
+  baseAmount,
+  counterAmount
+) {
+  //try to transfer from clients' base account
+  if (!(await transfer(clientBaseAccountId, baseAccount.id, baseAmount))) {
+    //could not withdraw from clients' account
+    exchangeResult.obs = REJECTIONS.WITHDRAW_FAILED;
+    return false;
+  }
+
+  //try to transfer to clients' counter account
+  if (!(await transfer(counterAccount.id, clientCounterAccountId, counterAmount))) {
+    //could not transfer to clients' counter account, return base amount to client
+    await transfer(baseAccount.id, clientBaseAccountId, baseAmount);
+    exchangeResult.obs = REJECTIONS.DEPOSIT_FAILED;
+    return false;
+  }
+
+  return true;
 }
 
 // internal - call transfer service to execute transfer between accounts
