@@ -65,7 +65,7 @@
         \label{lst:acoplamiento}
     \end{code}
 
-    El endpoint de cambio también contiene una condición de carrera. La comprobación
+    El endpoint \texttt{/exchange} también contiene una condición de carrera. La comprobación
     de saldo se ejecuta antes de dos operaciones asíncronas. Mientras una solicitud se
     encuentra suspendida en un \texttt{await}, otra puede comprobar el mismo saldo y
     aprobar la operación. Ambas solicitudes pueden completar los descuentos y dejar
@@ -79,7 +79,7 @@
     \end{code}
 
     El registro de operaciones tampoco tiene una política de retención. Cada resultado
-    se agrega a un arreglo en memoria y \texttt{GET\,/log} devuelve el arreglo completo.
+    se agrega a un arreglo en memoria y \texttt{/log} devuelve el arreglo completo.
     A medida que aumenta la cantidad de operaciones, crecen el consumo de memoria, el
     tamaño de la respuesta y el trabajo necesario para serializar el estado. Además,
     el arreglo completo se convierte a JSON y se reescribe cada segundo, por lo que el
@@ -147,7 +147,7 @@
         \midrule
         Estado mutable expuesto & Los getters de \texttt{state.js} retornan objetos que \texttt{exchange.js} conserva y modifica. & Modificabilidad, Testability, Reliability & Las actualizaciones eluden una interfaz de repositorio y dificultan sustituir o simular la persistencia. & Probar la lógica con un repositorio simulado y registrar qué dependencias deben reemplazarse. \\
         \midrule
-        Log sin límite & Cada operación ejecuta \texttt{log.push}; \texttt{GET\,/log} retorna el arreglo completo (Listado~\ref{lst:log_growth}). & Performance, Scalability, Availability & Aumentan memoria, tamaño de respuesta y tiempo de serialización con cada operación. & Ejecutar lotes crecientes y medir memoria, bytes y latencia de \texttt{GET\,/log}. \\
+        Log sin límite & Cada operación ejecuta \texttt{log.push}; \texttt{/log} retorna el arreglo completo (Listado~\ref{lst:log_growth}). & Performance, Scalability, Availability & Aumentan memoria, tamaño de respuesta y tiempo de serialización con cada operación. & Ejecutar lotes crecientes y medir memoria, bytes y latencia de \texttt{/log}. \\
         \midrule
         Reescritura completa & \texttt{scheduleSave} serializa y escribe el log completo cada segundo. & Performance, Efficiency, Reliability & El costo de I/O crece con el historial y una interrupción puede dejar el archivo incompleto. & Medir tamaño, tiempo de escritura y actividad de I/O para distintos volúmenes de log. \\
         \midrule

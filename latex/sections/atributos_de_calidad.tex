@@ -75,7 +75,7 @@
             Capacidad del sistema de prevenir acciones maliciosas o accidentales fuera del uso esperado.
 
             \begin{customenv}[frametitle=]
-                No se valida que haya saldo en la cuenta del cliente; se espera que lo haga la UI.
+                No se valida que haya saldo en la cuenta del cliente, se espera que lo haga la UI y que no permita la operación.
             \end{customenv}
 
             Confiar en validaciones realizadas exclusivamente por el cliente permite que
@@ -196,7 +196,7 @@
             a completarse ninguna request durante el resto de la prueba
             (Figura~\ref{fig:sistema_base_chaos_requests_state}).
             \item \textbf{Errores no controlados en handlers asíncronos.} El handler de
-            \texttt{POST /exchange} es una función \texttt{async} sin \texttt{try/catch}.
+            \texttt{/exchange} es una función \texttt{async} sin \texttt{try/catch}.
             Express 4 no captura el rechazo de la promesa, y Node.js 24 (la versión de la
             imagen) termina el proceso ante un rechazo no manejado. Por eso una excepción
             aislada, como la de una moneda inexistente, afecta a todos los usuarios.
@@ -218,7 +218,7 @@
             \texttt{/exchange} no puede responder en menos de 400 ms aún sin carga. Si
             fueran independientes podrían solaparse, pero la segunda depende del resultado
             de la primera.
-            \item \textbf{Serialización síncrona de un log sin límite.} \texttt{GET /log}
+            \item \textbf{Serialización síncrona de un log sin límite.} \texttt{/log}
             serializa el arreglo completo con \texttt{res.json}, operación síncrona que
             bloquea el event loop durante un tiempo proporcional al tamaño del log. A esto
             se suma la reescritura completa del archivo cada segundo. En el escenario de
@@ -270,7 +270,7 @@
             Combinado con la falta de manejo de errores, una sola request malformada
             funciona como un ataque de denegación de servicio, como se evidencia en el
             escenario de caos.
-            \item \textbf{Endpoints administrativos expuestos.} \texttt{PUT /accounts/<id>/balance}
+            \item \textbf{Endpoints administrativos expuestos.} \texttt{/accounts/<id>/balance}
             y \texttt{PUT /rates} se publican a través del mismo nginx que los endpoints de
             los clientes. Si bien asumimos que el componente de autorización filtra quién
             puede invocarlos, la API no aplica ninguna defensa propia ni deja registro de

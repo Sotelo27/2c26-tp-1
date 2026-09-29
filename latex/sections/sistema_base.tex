@@ -22,8 +22,8 @@
             \begin{minipage}[c]{0.45\columnwidth}
                 \caption{
                     Para un primer diagnostico del sistema se decidio utilizar todos los endpoints.
-                    Se asignaron 20 requests por segundo a exchange por ser el endpoint principal en el contexto de negocio.
-                    Se asignaron 8 requests por segundo a log por las hipotesis planteadas sobre su significativo impaco en la disponibilidad y latencia del sistema.
+                    Se asignaron 20 requests por segundo a \texttt{/exchange} por ser el endpoint principal en el contexto de negocio.
+                    Se asignaron 8 requests por segundo a \texttt{/log} por las hipotesis planteadas sobre su significativo impaco en la disponibilidad y latencia del sistema.
                     Se asignaron 3 request por segundo al resto de endpoints.
                     Para todos los graficos salvo se indique lo contrario el eje $x$ muestra el tiempo transcurrido de la prueba y cada punto agrupa una ventana de 10 segundos.
                     Adicionalmente en las leyendas de la derecha se muestran estadisticas relevantes al escenario, como por ejemplo el promedio, el ultimo valor y/o el maximo.
@@ -64,7 +64,7 @@
                     \caption{
                         Para evaluar la latencia del sistema optamos por utilizar dos metodologias, la primera monitorear los tiempos de respuestas desde la perspectiva del cliente a travez de Artillery.
                         Optamos por realizar el monitoreo en P50, P95 Y P99, sinembargo una consideracion importante para esta metodlogia es que no distingue entre endpoints.
-                        Una consecuencia de esto ultimo es por ejemplo los saltos en P50 donde dependiendo si la ventana contiene mayormente requests rapidas o del endpoint exchange, la mediana se desplaza entre ambos grupos.
+                        Una consecuencia de esto ultimo es por ejemplo los saltos en P50 donde dependiendo si la ventana contiene mayormente requests rapidas o del endpoint \texttt{/exchange}, la mediana se desplaza entre ambos grupos.
                     }
                     \label{fig:sistema_base_baseline_response_time}
                 \end{minipage}
@@ -82,8 +82,8 @@
                         Se realizo agregando la recoleccion de metricas directamente en el servidor.
                         Si bien en contraposicion a la metodologia anterior si podemos discernir entre endpoints, optamos por representarlo solo para P95 para no saturar la representacion.
                         Para el eje $y$ optamos por una escala logaritmica por la gran discrepancia entre los tiempos.
-                        Una observacion que veniamos anticipando es que los endpoints se agrupan en tres clases, exchange lento por sus dependnecias externas pero contante, log que crece junto con el tamaño del propio log y los restantes los cuales son considerablemente mas rapidos.
-                        En proxpimos escenarios nos vamos a limitar a monitorear un endpoint de cada grupo, es decir exchange, log y optamos por rates como representante de los endpoints rapidos, de esta forma simplificar la representacion.
+                        Una observacion que veniamos anticipando es que los endpoints se agrupan en tres clases, \texttt{/exchange} lento por sus dependnecias externas pero contante, \texttt{/log} que crece junto con el tamaño del propio log y los restantes los cuales son considerablemente mas rapidos.
+                        En proxpimos escenarios nos vamos a limitar a monitorear un endpoint de cada grupo, es decir \texttt{/exchange}, \texttt{/log} y optamos por \texttt{GET /rates} como representante de los endpoints rapidos, de esta forma simplificar la representacion.
                     }
                     \label{fig:sistema_base_baseline_endpoint_response_time}
                 \end{minipage}
@@ -153,7 +153,7 @@
     \subsection{Pruebas de estrés}
     \label{sec:sistema_base_pruebas_de_stress}
 
-        La prueba de estrés se realizo incrementando progresivamente la carga desde 40 hasta 180 en saltos de 20, cada salto con una duracion de 45s, el tiempo total de la prueba es de 450s (7,5 minutos).
+        La prueba de estrés se realizo incrementando progresivamente la carga desde 40 hasta 180 en saltos de 20, cada salto con una duracion de 45s, el tiempo total de la prueba es de 450s (7.5 minutos).
         Se realizo un warm-up inicial de 5 usuarios durante 30s. Ademas, al final de la prueba se dejo una instancia de recovery de nuevamente 5 usuarios esta vez durante 60s.
         Tampoco se realizaron recargas de saldo intermedias y se mantuvo el mismo uso de endpoints para que los resultados sean comparables.
 
@@ -202,7 +202,7 @@
                 \hfill
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
-                        Se observa como el crecimiento en los tiempos de rspuesta del log, dado por el crecimiento del mismo, impacta directamente en la latencia del endpoint de exchange.
+                        Se observa como el crecimiento en los tiempos de rspuesta de \texttt{/log}, dado por el crecimiento del log, impacta directamente en la latencia del endpoint \texttt{/exchange}.
                     }
                     \label{fig:sistema_base_stress_endpoint_response_time}
                 \end{minipage}
@@ -316,7 +316,7 @@
                 \begin{minipage}[c]{0.45\columnwidth}
                     \caption{
                         En cuanto a la latencia por endpoint se observan los mismo sintomas que los descritos en la prueba de estres.
-                        El endpoint de log perjudica la latencia del endpoint de exchange conforme el tamaño del log aumenta y con este su tiempo de respuesta.
+                        El endpoint \texttt{/log} perjudica la latencia del endpoint \texttt{/exchange} conforme el tamaño del log aumenta y con este su tiempo de respuesta.
                         Este comportamiento se evidencia a partir del minuto 20, consistente con las conclusiones de disponibilidad y latencia antes mencionadas.
                     }
                     \label{fig:sistema_base_soak_endpoint_response_time}

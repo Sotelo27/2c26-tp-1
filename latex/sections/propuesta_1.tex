@@ -4,7 +4,7 @@
     El sistema presenta una degradacion principalmente por el manejo indevido del log.
     Destacamos que la posibilidad de permitir consultar el log de manera completa es la principal causa de degradacion.
     Este escala con el numero de operacion, lo que provoca un aumento en el uso de recursos para mantenerlo, y un aumento en los tiempos de respuesta para consultarlo.
-    Esto arrastra la degradacion a los otros endpoints, entre ellos exchange, el principalmente mencionado por los usuarios.
+    Esto arrastra la degradacion a los otros endpoints, entre ellos \texttt{/exchange}, el principalmente mencionado por los usuarios.
 
     Destacamos que un endpoint que permite consultarlo todo por definicion no es escalable, recomendamos la implementacion de paginacion.
     Sinembargo, asumimos que esta es un requerimiento de negocio y que las mejoras propuestas no deben alterar la firma del sistema para con los usuarios.
@@ -41,7 +41,7 @@
         Como se verá en las \hyperref[sec:propuesta_1_pruebas_de_stress]{pruebas de estrés}, la latencia de \texttt{/exchange}
         se mantiene estable mientras \texttt{/log} se degrada
         (Figura~\ref{fig:comparacion_propuesta_1_sistema_base_stress_endpoint_response_time}). Por otro lado, la consulta del log
-        sigue siendo $O(n)$ sobre la cantidad de operaciones, por lo que \texttt{/log} continúa degradándose con el tiempo, y los
+        sigue siendo $\mathcal{O}(n)$ sobre la cantidad de operaciones, por lo que \texttt{/log} continúa degradándose con el tiempo, y los
         percentiles altos vistos desde el cliente empeoran al procesarse más operaciones.
 
         \subsubsection{Disponibilidad}
@@ -83,7 +83,7 @@
 
         El puerto TCP 3002 del nodo de logs acepta registros de cualquier cliente dentro de la red de Docker, sin autenticación
         ni validación del contenido. Cualquier contenedor comprometido podría insertar registros falsos en el log de
-        transacciones, lo que afecta su integridad. El puerto no se publica al host y nginx solo expone \texttt{GET /log}, por
+        transacciones, lo que afecta su integridad. El puerto no se publica al host y nginx solo expone \texttt{/log}, por
         lo que el riesgo queda acotado a la red interna.
 
         \subsubsection{Modificabilidad}
@@ -129,7 +129,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/stress/requests_state}
                 \caption{
                     Comparativa de la disponibilidad ofrecida por la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de estrés.
-                    La propuesta 1 obtuvo un incremento en el promedio de respuestas satisfactorias de 225 respuestas adicionales, lo que representa un aumento del $33,23\%$ frente al caso base.
+                    La propuesta 1 obtuvo un incremento en el promedio de respuestas satisfactorias de 225 respuestas adicionales, lo que representa un aumento del $33.23\%$ frente al caso base.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_stress_requests_state}
             \end{figure}
@@ -155,11 +155,11 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/stress/endpoint_response_time}
                 \caption{
                     Comparativa de los resultados de latencia por endpoint entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un escenario de estrés.
-                    Con diferencia el analisis mas interesante, la propuesta 1 permitio como se esperaba mejorar la latencia en el endpoint de exchange,
-                    se puede notar que este no se ve afectado por la degradacion del endpoint de logs. Como si ocurria en el caso base, donde al rededor del minuto 4,
-                    los tiempos de respuesta de exchange incrementaban, en este caso, los tiempos de respuesta se mantienen estables en 1 segundo, acotado por la dependencia
+                    Con diferencia el analisis mas interesante, la propuesta 1 permitio como se esperaba mejorar la latencia en el endpoint \texttt{/exchange},
+                    se puede notar que este no se ve afectado por la degradacion del endpoint \texttt{/log}. Como si ocurria en el caso base, donde al rededor del minuto 4,
+                    los tiempos de respuesta de \texttt{/exchange} incrementaban, en este caso, los tiempos de respuesta se mantienen estables en 1 segundo, acotado por la dependencia
                     del servicio externo.
-                    Por otro lado, los tiempos de respuesta de /log empeoraron, sinembargo es esperable, la mayor disponibilidad antes mencionada implica que se
+                    Por otro lado, los tiempos de respuesta de \texttt{/log} empeoraron, sinembargo es esperable, la mayor disponibilidad antes mencionada implica que se
                     registraron mas transacciones, por lo que el tamaño del log necesariamente aumento.
                     Esto explica el aumento de los tiempos de respuesta visto desde el lado del cliente antes mencionados, sinembargo, las metricas se ven ensuciadas
                     al mezclar todos los endpoints.
@@ -256,8 +256,8 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/endpoint_response_time}
                 \caption{
                     Comparativa de los resultados de latencia por endpoint entre la propuesta 1 (izquierda) y el sistema base (derecha) frente a un scenario de resistencia.
-                    Para el tiempo de respuesta desde la perspectiva del servidor, se muestra como en la propuesta 1 los tiempos del endpoint de logs ya no “empujan” los tiempos del endpoint exchange, sinembargo como ya se menciono, el endpoint de logs continua degradando.
-                    Los tiempos de respuesta de log entre ambos casos lamentablemente no son comparables puesto que menor disponibilidad implica un menor crecimiento del propio log.
+                    Para el tiempo de respuesta desde la perspectiva del servidor, se muestra como en la propuesta 1 los tiempos del endpoint \texttt{/log} ya no “empujan” los tiempos del endpoint \texttt{/exchange}, sinembargo como ya se menciono, el endpoint \texttt{/log} continua degradando.
+                    Los tiempos de respuesta de \texttt{/log} entre ambos casos lamentablemente no son comparables puesto que menor disponibilidad implica un menor crecimiento del propio log.
                 }
                 \label{fig:comparacion_propuesta_1_sistema_base_soak_endpoint_response_time}
             \end{figure}
