@@ -479,11 +479,16 @@
     concurrentes que en el sistema base dejaban la cuenta interna en $-700$ USD se resuelven con un único cambio aprobado
     (Tabla~\ref{tab:propuesta_3_concurrencia}).
     
-    \todo{Agregar el resultado del escenario de caos (caídas, requests completadas y volumen frente al base y a la propuesta 2).}
+    En la prueba de caos la propuesta 3 no se cayó: tuvo en promedio 397 requests completadas, una request limitada y ninguna fallida.
+    El sistema base tuvo 237 requests fallidas en promedio, mientras que la propuesta 2 tuvo 2.65 debido a las caídas y
+    recuperaciones. La propuesta 3 también alcanzó un volumen de 767K USD por moneda, frente a 298K del sistema base y 750K
+    de la propuesta 2.
 
     A diferencia de las propuestas 1 y 2, no agrega contenedores, conectores entre procesos ni recursos, y no se espera un impacto en la performance, ya que solo suma comprobaciones en memoria.
     
-    \todo{Confirmar con estrés y resistencia, o aclarar que no se ejecutaron y por qué.}
+    Las pruebas de estrés y resistencia confirmaron que el costo de la propuesta es similar al del sistema base. En estrés,
+    el uso promedio fue de $55.3\%$ de CPU y $3.40\%$ de memoria, frente a $53.6\%$ y $3.18\%$ del sistema base. En la prueba
+    de resistencia se mantuvo la misma degradación producida por el crecimiento del log, que esta propuesta no busca resolver.
 
     La propuesta no reemplaza a las anteriores. No resuelve la degradación producida por el log, que sigue arrastrando a
     \texttt{/exchange} (propuesta 1), ni las caídas del proceso por causas ajenas a las requests (propuesta 2), ni la pérdida
