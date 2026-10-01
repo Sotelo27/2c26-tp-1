@@ -137,7 +137,25 @@
             \end{tabular}
         \end{table}
 
-        \todo{Adjuntar captura de la ejecución (terminal o Postman) en el entorno de pruebas.}
+        Para verificarlo en el entorno de pruebas, enviamos desde Postman una request con la moneda
+        \texttt{XXX}. La API respondió HTTP 400 con el mensaje \texttt{Unsupported currency XXX}
+        (Figura~\ref{fig:propuesta_3_validacion_postman_400}). Luego consultamos \texttt{/rates} y
+        obtuvimos HTTP 200, por lo que la API siguió disponible después del rechazo
+        (Figura~\ref{fig:propuesta_3_validacion_postman_rates}).
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=1\columnwidth]{figures/propuesta_3/validacion_postman_400}
+            \caption{La propuesta 3 rechaza con HTTP 400 una moneda no soportada.}
+            \label{fig:propuesta_3_validacion_postman_400}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=1\columnwidth]{figures/propuesta_3/validacion_postman_rates}
+            \caption{La API continúa respondiendo luego de rechazar la request inválida.}
+            \label{fig:propuesta_3_validacion_postman_rates}
+        \end{figure}
 
         \subsubsection{Performance}
         \label{sec:propuesta_3_performance}
