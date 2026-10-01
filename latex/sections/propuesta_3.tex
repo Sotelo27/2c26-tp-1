@@ -74,8 +74,7 @@
         Es uno de los QA que la propuesta busca mejorar. A diferencia de la propuesta 2, que detecta la falla y se recupera, esta
         propuesta la previene: una request inválida es rechazada antes de acceder a tasas o cuentas inexistentes, y un error no
         previsto queda contenido en la request que lo produjo en lugar de terminar el proceso.
-
-        \todo{Completar con la evidencia del escenario de caos (Sección~\ref{sec:propuesta_3_pruebas_de_chaos}).}
+        Ver Sección~\ref{sec:propuesta_3_pruebas_de_chaos_metricas_disponibilidad}.
 
         La táctica solo cubre las fallas originadas por el procesamiento de una request. Una terminación del proceso por otras
         causas (falta de memoria, error del runtime o del host) sigue dejando el servicio caído, por lo que es complementaria
@@ -146,8 +145,7 @@
         La validación agrega comprobaciones en memoria de costo constante por request, que consideramos despreciables frente a
         los 400 a 800ms de las transferencias. La reserva de saldo no agrega esperas, ya que no utiliza un lock. No se espera que
         la propuesta mejore la degradación producida por el log, que se mantiene igual que en el sistema base.
-
-        \todo{Confirmar con las pruebas de estrés y resistencia (Secciones~\ref{sec:propuesta_3_pruebas_de_stress} y~\ref{sec:propuesta_3_pruebas_de_soak}).}
+        Ver Secciones~\ref{sec:propuesta_3_pruebas_de_stress_metricas_recursos} y~\ref{sec:propuesta_3_pruebas_de_soak_metricas_latencia}.
 
         \subsubsection{Modificabilidad}
         \label{sec:propuesta_3_modificabilidad}
@@ -196,7 +194,8 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/stress/endpoint_response_time}
                 \caption{
                     Comparativa de los resultados de latencia por endpoint entre la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de estrés.
-                    \todo{Completar.}
+                    Se observan los mismos y ya conocidos problemas de degradación por el endpoint \texttt{/log}.
+                    Esperable ya que no es un problema que la propuesta busque resolver.
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_stress_endpoint_response_time}
             \end{figure}
@@ -210,7 +209,8 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/stress/resources}
                 \caption{
                     Comparativa de los resultados del uso de recursos entre la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de estrés.
-                    \todo{Completar.}
+                    Se observan promedios de uso de CPU y de memoria muy similares.
+                    La propuesta mantiene el costo de uso de recursos.
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_stress_resources}
             \end{figure}
@@ -232,7 +232,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/requests_state}
                 \caption{
                     Comparativa de la disponibilidad ofrecida por la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
-                    \todo{Completar.}
+                    Ambos sistemas muestran una degradación similar a partir de los 20 minutos.
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_soak_requests_state}
             \end{figure}
@@ -246,7 +246,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/endpoint_response_time}
                 \caption{
                     Comparativa de los resultados de latencia por endpoint entre la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
-                    \todo{Completar.}
+                    Al igual como mencionamos en las pruebas de estrés, la situación no mejora con respecto a la degradación producida por el endpoint \texttt{/log}, esta vez, a lo largo del tiempo.
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_soak_endpoint_response_time}
             \end{figure}
@@ -269,9 +269,23 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/chaos/requests_state}
                 \caption{
                     Comparativa de la disponibilidad ofrecida por la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de caos.
-                    \todo{Completar. Comparar también con la propuesta 2 (Figura~\ref{fig:comparacion_propuesta_2_sistema_base_chaos_requests_state}): P2 se recupera de cada caída, P3 no cae.}
+                    La propuesta simplemente no falla ante las peticiones inválidas, permite al sistema seguir operando durante toda la prueba.
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_chaos_requests_state}
+            \end{figure}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/chaos/requests_state}%
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_2/chaos/requests_state}
+                \caption{
+                    Comparativa de la disponibilidad ofrecida por la propuesta 3 (izquierda) y la propuesta 2 (derecha) frente a un escenario de caos.
+                    Nos pareció interesante comparar esta propuesta con la propuesta 2 para el mismo escenario.
+                    La propuesta 3 no falla, la propuesta 2 falla y se recupera.
+                    Se ve que el promedio de respuestas completas por la propuesta 2 es inferior al de la propuesta 3.
+                    El gráfico muestra irregularidades más pronunciadas.
+                }
+                \label{fig:comparacion_propuesta_3_propuesta_2_chaos_requests_state}
             \end{figure}
 
         \subsubsection{Latencia}
@@ -283,9 +297,21 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/chaos/response_time}
                 \caption{
                     Comparativa de los resultados de latencia entre la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de caos.
-                    \todo{Completar. Esperado: sin picos, a diferencia de la propuesta 2.}
+                    Tener cuidado con la visualización con respecto a los ejes.
+                    Los resultados de la propuesta 3 son todos tiempos irrisorios de 800ms frente a los 8s de timeout del sistema una vez este esta caido.
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_chaos_response_time}
+            \end{figure}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/chaos/response_time}%
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_2/chaos/response_time}
+                \caption{
+                    Comparativa de los resultados de latencia entre la propuesta 3 (izquierda) y la propuesta 2 (derecha) frente a un escenario de caos.
+                    Frente al escenario dos se ven promedio ligeramente favorables, los de la propuesta 2 se ven perjudicados por las request que no pudo llegar a completar haciendo que la escala de su gráfico nuevamente sea mucho más amplia.
+                }
+                \label{fig:comparacion_propuesta_3_propuesta_2_chaos_response_time}
             \end{figure}
 
         \subsubsection{Volumen operado por moneda}
@@ -297,9 +323,20 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/chaos/currency}
                 \caption{
                     Comparativa de los resultados de volumen operado en cada moneda entre la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de caos.
-                    \todo{Completar con el total y el porcentaje frente al base (\$298K) y a la propuesta 2 (\$750K).}
+                    Nuevamente, con respecto al sistema base la propuesta permite operar durante toda la prueba logrando un volumen mayor.
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_chaos_currency}
+            \end{figure}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/chaos/currency}%
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_2/chaos/currency}
+                \caption{
+                    Comparativa de los resultados de volumen operado en cada moneda entre la propuesta 3 (izquierda) y la propuesta 2 (derecha) frente a un escenario de caos.
+                    Con respecto a la propuesta 2, esta muestra picos más altos, provocados por el acumulamiento de requests durante la recuperación. Adicionalmente la propuesta 3 muestra un ligeramente mayor volumen de operación.
+                }
+                \label{fig:comparacion_propuesta_3_propuesta_2_chaos_currency}
             \end{figure}
 
     \subsection{Pruebas de concurrencia}
@@ -358,7 +395,8 @@
                 \caption{
                     Comparativa de la disponibilidad ofrecida por la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
                     Notar que el panel clasifica las respuestas 4xx como \textit{Limited}: en la propuesta 3 los cambios sin fondos se informan como 409, mientras que en el sistema base se informaban como 500 (\textit{Failed}).
-                    \todo{Completar. Esperado: en el base se aprueban más de los $\sim$121 cambios que cubre el saldo; en la propuesta 3 las excedentes se rechazan. Complementar con el volumen neto en USD, que en el base debería superar los 8000.}
+                    Como nuestra hipótesis indicaba el número de operaciones en el sistema base supera las 121 operaciones de cambio esperadas.
+                    Mientras que en la propuesta 3 acota perfectamente el número de operaciones completadas.
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_race_requests_state}
             \end{figure}
@@ -372,7 +410,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/race/response_time}
                 \caption{
                     Comparativa de los resultados de latencia entre la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
-                    \todo{Completar.}
+                    El cliente experimenta tiempos de respuesta prácticamente idénticos ya sea que su solicitud fue aceptada y ejecutada, falló o fue denegada.
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_race_response_time}
             \end{figure}
@@ -383,7 +421,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/race/endpoint_response_time}
                 \caption{
                     Comparativa de los resultados de latencia por endpoint entre la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
-                    \todo{Completar.}
+                    Tantos las request aprobadas para la transferencia como las denegadas/falladas muestran tiempos iguales, lo que resulta en promedio de respuestas prácticamente iguales.
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_race_endpoint_response_time}
             \end{figure}
@@ -397,7 +435,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/race/resources}
                 \caption{
                     Comparativa de los resultados del uso de recursos entre la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
-                    \todo{Completar.}
+                    Ambos sistemas muestran un consumo de recursos prácticamente igual.
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_race_resources}
             \end{figure}
@@ -411,7 +449,9 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/race/currency}
                 \caption{
                     Comparativa de los resultados de volumen operado en cada moneda entre la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
-                    \todo{Completar.}
+                    Con diferencia, el resultado más interesante.
+                    El caso base operaba un volumen total de 9.64K, es decir 1.64K por encima de los 8K de saldo estipulados.
+                    Sin embargo, la propuesta solo opera hasta los 7.99K.
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_race_currency}
             \end{figure}
@@ -425,7 +465,7 @@
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/race/net_currency}
                 \caption{
                     Comparativa de los resultados de volumen neto operado en cada moneda entre la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
-                    \todo{Completar.}
+                    Análogamente a las métricas de volumen, se observa que la propuesta limitó el saldo operado a 7.99K es decir, dentro del saldo de 8K.
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_race_net_currency}
             \end{figure}
@@ -438,9 +478,11 @@
     (Tabla~\ref{tab:propuesta_3_validacion}), y la reserva de saldo elimina la condición de carrera: diez cambios
     concurrentes que en el sistema base dejaban la cuenta interna en $-700$ USD se resuelven con un único cambio aprobado
     (Tabla~\ref{tab:propuesta_3_concurrencia}).
+    
     \todo{Agregar el resultado del escenario de caos (caídas, requests completadas y volumen frente al base y a la propuesta 2).}
 
     A diferencia de las propuestas 1 y 2, no agrega contenedores, conectores entre procesos ni recursos, y no se espera un impacto en la performance, ya que solo suma comprobaciones en memoria.
+    
     \todo{Confirmar con estrés y resistencia, o aclarar que no se ejecutaron y por qué.}
 
     La propuesta no reemplaza a las anteriores. No resuelve la degradación producida por el log, que sigue arrastrando a
