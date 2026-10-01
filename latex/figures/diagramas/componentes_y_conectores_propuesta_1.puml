@@ -51,7 +51,7 @@ package "Servicio de Cambio de Monedas" {
         component "log.js" as LogLogica
     }
     rectangle " " as LogStorage {
-        database "log.json" as LogJson
+        database "log.ndjson" as LogJson
     }
 }
 

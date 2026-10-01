@@ -155,7 +155,7 @@
 
         La prueba de estrés se realizó incrementando progresivamente la carga desde 40 hasta 180 en saltos de 20, cada salto con una duración de 45s, el tiempo total de la prueba es de 450s (7.5m).
         Se realizó un warm-up inicial de 5 usuarios durante 30s. Además, al final de la prueba se dejó una instancia de recovery de nuevamente 5 usuarios esta vez durante 60s.
-        Tampoco se realizaron recargas de saldo intermedias y se mantuvo el mismo uso de endpoints (Figura~\ref{fig:sistema_base_baseline_scenarios}) para que los resultados sean comparables.
+        Tampoco se realizaron recargas de saldo intermedias y se simplifico el uso de endpoints dejando solo \texttt{/exchange}, \texttt{/log} y \texttt{/rates} luego de las conclusiones obtenidas en (Figura~\ref{fig:sistema_base_baseline_scenarios}).
 
         Se pueden encontrar los resultados completos en el Apéndice (Sección~\ref{sec:resultados_completos_sistema_base_stress}).
 
@@ -266,7 +266,7 @@
 
         La prueba de resistencia se realizó usando una tasa constante de 40 usuarios durante 2700s (45m).
         Se realizó un warm-up inicial de 5 usuarios durante 60s. Además, al final de la prueba se dejó una instancia de recovery de nuevamente 5 usuarios esta vez durante 120s (2m).
-        Tampoco se realizaron recargas de saldo intermedias y se mantuvo el mismo uso de endpoints (Figura~\ref{fig:sistema_base_baseline_scenarios}) para que los resultados sean comparables.
+        Tampoco se realizaron recargas de saldo intermedias y se simplifico el uso de endpoints dejando solo \texttt{/exchange}, \texttt{/log} y \texttt{/rates} luego de las conclusiones obtenidas en (Figura~\ref{fig:sistema_base_baseline_scenarios}).
 
         Se pueden encontrar los resultados completos en el Apéndice (Sección~\ref{sec:resultados_completos_sistema_base_soak}).
 

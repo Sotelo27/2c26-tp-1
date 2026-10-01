@@ -12,3 +12,16 @@
     redactados inicialmente en un documento de Google Docs a una estructura de secciones, figuras, tablas, bloques de código y referencias
     cruzadas. En estos casos la herramienta se utilizó únicamente para el cambio de formato; el contenido, el análisis y
     las conclusiones fueron elaborados por los integrantes.
+
+    \subsection{Librería para generar gráficos a partir de Graphite}
+    \label{sec:uso_de_ia_libreria_graficos}
+
+    Consideramos que adjuntar capturas de pantalla del dashboard podía resultar poco profesional, difícil de leer al no poder hacer zoom y difícil de automatizar (muchas veces por nuevas consideraciones que surgieron en el medio teníamos que agregar alguna métrica o algún cambio al dashboard e implicaba manualmente tomar todas las capturas).
+
+    Considerando que teníamos las series de datos en Graphite, cierta experiencia con numpy pandas y pyplot, decidimos recrear los paneles de Grafana directamente desde los datos.
+
+    Resultó que imitar los gráficos de Grafana implicaba muchas consideraciones (como por ejemplo cómo tratar los valores nulos, si como ceros o usar la última medición) que complicaron bastante esta idea. En ciertas partes de la librería usamos código generado por IA, consideramos que no era una parte fundamental del TP y no queríamos perder mucho tiempo en eso. Esto se limita al directorio \texttt{/perf/graficos}.
+
+    Igualmente \texttt{./dashboard} contiene todos los gráficos que usamos como referencia.
+    En el apéndice se incluyen igualmente las capturas junto a los renders para que se puedan corroborar.
+

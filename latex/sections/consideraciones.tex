@@ -1,0 +1,42 @@
+\section{Consideraciones}
+\label{sec:consideraciones}
+
+    \subsection{Organización del repositorio}
+    \label{sec:consideraciones_repositorio}
+
+        La rama \texttt{main} contiene el código del sistema base. Las ramas \texttt{propuesta\_1}, \texttt{propuesta\_2} y \texttt{propuesta\_3} contienen la implementación de la Propuesta 1, la Propuesta 2 y la Propuesta 3, respectivamente.
+
+    \subsection{Entorno de pruebas}
+    \label{sec:consideraciones_entorno}
+
+        Todas las pruebas se ejecutaron con el contenedor de la API limitado a 1 CPU y 4 GB de memoria, configurado en \texttt{deploy.resources.limits} del \texttt{docker-compose.yml}.
+
+    \subsection{Cambios en \texttt{run-scenario.sh}}
+    \label{sec:consideraciones_run_scenario}
+
+        El script original solo ejecutaba Artillery. Se lo extendió para que en cada corrida:
+
+    \begin{itemize}
+        \item Reconstruya y recree los contenedores de la API, nginx y los que agrega cada propuesta.
+        \item Espere a que la API responda antes de iniciar la carga.
+        \item Al finalizar, descargue de Graphite las series de Artillery, cAdvisor, volumen por moneda y tiempos de respuesta por endpoint correspondientes al intervalo de la prueba.
+    \end{itemize}
+
+        La invocación no cambia (\texttt{./run-scenario.sh <escenario> <entorno>} desde \texttt{perf/}).
+
+        Los datos de cada corrida se guardan en \texttt{perf/graficos/data/}, en un directorio \texttt{<rama>\_<escenario>\_<timestamp>}.
+
+    \subsection{Generación de gráficos}
+    \label{sec:consideraciones_graficos}
+
+        Los gráficos del informe se generan con matplotlib a partir de los datos exportados por \texttt{run-scenario.sh}.
+        Desde \texttt{perf/graficos/}:
+
+\begin{lstlisting}[language=bash]
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    python3 main.py <rama>_<escenario>_<timestamp>
+\end{lstlisting}
+
+        Las figuras se generan en PDF en \texttt{perf/graficos/figures/}, en un directorio con el mismo nombre, y desde ahí se copian a \texttt{latex/figures/}.
