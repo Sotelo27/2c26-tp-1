@@ -23,9 +23,15 @@
     Al igual que la propuesta 2, esta propuesta se implementó sobre el sistema base, de modo que los resultados solo reflejan
     el efecto de estas tácticas y sean comparables contra el sistema base.
 
-    Esta propuesta no altera la arquitectura: no agrega componentes ni conectores, por lo que el diagrama Components \&
-    Connectors es el mismo que el del sistema base (Figura~\ref{fig:sistema_base_componentes_y_conectores}). Los cambios se
-    limitan al código de la API.
+    Esta propuesta no agrega contenedores ni conectores entre procesos: los cambios se limitan al código de la API.
+    Dentro de \texttt{exchange-api} se agrega el componente \texttt{validation.js}, que la API REST invoca antes de delegar cada operación en \texttt{exchange.js} y que consulta a este último las cuentas y tasas existentes (Figura~\ref{fig:propuesta_3_componentes_y_conectores}).
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\columnwidth]{figures/diagramas/componentes_y_conectores_propuesta_3}
+        \caption{ Diagrama Components \& Connectors de la propuesta 3. Respecto al sistema base agrega el componente \texttt{validation.js} dentro de \texttt{exchange-api}, que valida cada request antes de que la API REST la delegue en \texttt{exchange.js}. }
+        \label{fig:propuesta_3_componentes_y_conectores}
+    \end{figure}
 
     La validación se concentra en un módulo nuevo, \texttt{validation.js}, con una función por endpoint que retorna el primer
     error encontrado o \texttt{null} si la request es válida. Una moneda se considera soportada solo si existe una cuenta
@@ -170,9 +176,8 @@
         \subsubsection{Simplicidad}
         \label{sec:propuesta_3_simplicidad}
 
-        Es la propuesta de menor complejidad: no agrega componentes, conectores ni dependencias de despliegue, y los cambios se
-        concentran en la API. El costo es un aumento del código de la API y de la cantidad de casos que deben contemplarse al
-        modificarla.
+        Es la propuesta de menor complejidad: no agrega contenedores, conectores entre procesos ni dependencias de despliegue, y su único módulo nuevo, \texttt{validation.js}, vive dentro de la API.
+        El costo es un aumento del código de la API y de la cantidad de casos que deben contemplarse al modificarla.
 
     \subsection{Pruebas de estrés}
     \label{sec:propuesta_3_pruebas_de_stress}
@@ -187,8 +192,7 @@
 
             \begin{figure}[H]
                 \centering
-                % TODO: reemplazar por figures/propuesta_3/stress/endpoint_response_time
-                \includegraphics[width=0.5\columnwidth]{figures/placeholder}%
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/stress/endpoint_response_time}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/stress/endpoint_response_time}
                 \caption{
                     Comparativa de los resultados de latencia por endpoint entre la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de estrés.
@@ -202,8 +206,7 @@
 
             \begin{figure}[H]
                 \centering
-                % TODO: reemplazar por figures/propuesta_3/stress/resources
-                \includegraphics[width=0.5\columnwidth]{figures/placeholder}%
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/stress/resources}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/stress/resources}
                 \caption{
                     Comparativa de los resultados del uso de recursos entre la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de estrés.
@@ -225,8 +228,7 @@
 
             \begin{figure}[H]
                 \centering
-                % TODO: reemplazar por figures/propuesta_3/soak/requests_state
-                \includegraphics[width=0.5\columnwidth]{figures/placeholder}%
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/soak/requests_state}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/requests_state}
                 \caption{
                     Comparativa de la disponibilidad ofrecida por la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
@@ -240,8 +242,7 @@
 
             \begin{figure}[H]
                 \centering
-                % TODO: reemplazar por figures/propuesta_3/soak/endpoint_response_time
-                \includegraphics[width=0.5\columnwidth]{figures/placeholder}%
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/soak/endpoint_response_time}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/soak/endpoint_response_time}
                 \caption{
                     Comparativa de los resultados de latencia por endpoint entre la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de resistencia.
@@ -264,8 +265,7 @@
 
             \begin{figure}[H]
                 \centering
-                % TODO: reemplazar por figures/propuesta_3/chaos/requests_state
-                \includegraphics[width=0.5\columnwidth]{figures/placeholder}%
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/chaos/requests_state}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/chaos/requests_state}
                 \caption{
                     Comparativa de la disponibilidad ofrecida por la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de caos.
@@ -279,8 +279,7 @@
 
             \begin{figure}[H]
                 \centering
-                % TODO: reemplazar por figures/propuesta_3/chaos/response_time
-                \includegraphics[width=0.5\columnwidth]{figures/placeholder}%
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/chaos/response_time}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/chaos/response_time}
                 \caption{
                     Comparativa de los resultados de latencia entre la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de caos.
@@ -294,8 +293,7 @@
 
             \begin{figure}[H]
                 \centering
-                % TODO: reemplazar por figures/propuesta_3/chaos/currency
-                \includegraphics[width=0.5\columnwidth]{figures/placeholder}%
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/chaos/currency}%
                 \includegraphics[width=0.5\columnwidth]{figures/sistema_base/chaos/currency}
                 \caption{
                     Comparativa de los resultados de volumen operado en cada moneda entre la propuesta 3 (izquierda) y el sistema base (derecha) frente a un escenario de caos.
@@ -320,6 +318,8 @@
     se fija el saldo de la cuenta interna en USD en 8000 y se envían 40 cambios/s de 100000 ARS (unos 66 USD cada uno)
     durante 60s. El saldo alcanza para unos 121 cambios de los 2400 enviados. Dado que cada cambio demora entre 400 y 800ms,
     en todo momento hay entre 16 y 32 cambios en curso que pueden haber verificado el mismo saldo.
+
+    Se pueden encontrar los resultados completos en el Apéndice (Secciones~\ref{sec:resultados_completos_sistema_base_race} y~\ref{sec:resultados_completos_propuesta_3_race}).
 
         \subsubsection{Saldo de la cuenta interna}
         \label{sec:propuesta_3_pruebas_de_concurrencia_saldo}
@@ -348,20 +348,86 @@
 
         \todo{Adjuntar captura de \texttt{./race.sh} en el entorno de pruebas para ambos sistemas.}
 
-        \subsubsection{Estado de las requests}
-        \label{sec:propuesta_3_pruebas_de_concurrencia_requests}
+        \subsubsection{Disponibilidad}
+        \label{sec:propuesta_3_pruebas_de_concurrencia_metricas_disponibilidad}
 
             \begin{figure}[H]
                 \centering
-                % TODO: reemplazar por figures/propuesta_3/race/requests_state y figures/sistema_base/race/requests_state
-                \includegraphics[width=0.5\columnwidth]{figures/placeholder}%
-                \includegraphics[width=0.5\columnwidth]{figures/placeholder}
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/race/requests_state}%
+                \includegraphics[width=0.5\columnwidth]{figures/sistema_base/race/requests_state}
                 \caption{
-                    Comparativa del estado de las requests entre la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
+                    Comparativa de la disponibilidad ofrecida por la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
                     Notar que el panel clasifica las respuestas 4xx como \textit{Limited}: en la propuesta 3 los cambios sin fondos se informan como 409, mientras que en el sistema base se informaban como 500 (\textit{Failed}).
                     \todo{Completar. Esperado: en el base se aprueban más de los $\sim$121 cambios que cubre el saldo; en la propuesta 3 las excedentes se rechazan. Complementar con el volumen neto en USD, que en el base debería superar los 8000.}
                 }
                 \label{fig:comparacion_propuesta_3_sistema_base_race_requests_state}
+            \end{figure}
+
+        \subsubsection{Latencia}
+        \label{sec:propuesta_3_pruebas_de_concurrencia_metricas_latencia}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/race/response_time}%
+                \includegraphics[width=0.5\columnwidth]{figures/sistema_base/race/response_time}
+                \caption{
+                    Comparativa de los resultados de latencia entre la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
+                    \todo{Completar.}
+                }
+                \label{fig:comparacion_propuesta_3_sistema_base_race_response_time}
+            \end{figure}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/race/endpoint_response_time}%
+                \includegraphics[width=0.5\columnwidth]{figures/sistema_base/race/endpoint_response_time}
+                \caption{
+                    Comparativa de los resultados de latencia por endpoint entre la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
+                    \todo{Completar.}
+                }
+                \label{fig:comparacion_propuesta_3_sistema_base_race_endpoint_response_time}
+            \end{figure}
+
+        \subsubsection{Uso de recursos}
+        \label{sec:propuesta_3_pruebas_de_concurrencia_metricas_recursos}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/race/resources}%
+                \includegraphics[width=0.5\columnwidth]{figures/sistema_base/race/resources}
+                \caption{
+                    Comparativa de los resultados del uso de recursos entre la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
+                    \todo{Completar.}
+                }
+                \label{fig:comparacion_propuesta_3_sistema_base_race_resources}
+            \end{figure}
+
+        \subsubsection{Volumen operado por moneda}
+        \label{sec:propuesta_3_pruebas_de_concurrencia_metricas_volumen_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/race/currency}%
+                \includegraphics[width=0.5\columnwidth]{figures/sistema_base/race/currency}
+                \caption{
+                    Comparativa de los resultados de volumen operado en cada moneda entre la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
+                    \todo{Completar.}
+                }
+                \label{fig:comparacion_propuesta_3_sistema_base_race_currency}
+            \end{figure}
+
+        \subsubsection{Volumen neto operado}
+        \label{sec:propuesta_3_pruebas_de_concurrencia_metricas_volumen_neto_operado_por_moneda}
+
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.5\columnwidth]{figures/propuesta_3/race/net_currency}%
+                \includegraphics[width=0.5\columnwidth]{figures/sistema_base/race/net_currency}
+                \caption{
+                    Comparativa de los resultados de volumen neto operado en cada moneda entre la propuesta 3 (izquierda) y el sistema base (derecha) frente al escenario de concurrencia.
+                    \todo{Completar.}
+                }
+                \label{fig:comparacion_propuesta_3_sistema_base_race_net_currency}
             \end{figure}
 
     \subsection{Resultados y conclusiones}
@@ -374,8 +440,7 @@
     (Tabla~\ref{tab:propuesta_3_concurrencia}).
     \todo{Agregar el resultado del escenario de caos (caídas, requests completadas y volumen frente al base y a la propuesta 2).}
 
-    A diferencia de las propuestas 1 y 2, no agrega componentes, conectores ni recursos, y no se espera un impacto en la
-    performance, ya que solo suma comprobaciones en memoria.
+    A diferencia de las propuestas 1 y 2, no agrega contenedores, conectores entre procesos ni recursos, y no se espera un impacto en la performance, ya que solo suma comprobaciones en memoria.
     \todo{Confirmar con estrés y resistencia, o aclarar que no se ejecutaron y por qué.}
 
     La propuesta no reemplaza a las anteriores. No resuelve la degradación producida por el log, que sigue arrastrando a

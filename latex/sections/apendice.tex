@@ -241,6 +241,66 @@
 
     \clearpage
 
+    \subsection{Resultados completos del escenario de concurrencia sobre el sistema base}
+    \label{sec:resultados_completos_sistema_base_race}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/sistema_base/race/scenarios}
+            \caption{ Escenarios del sistema base. }
+            \label{fig:resultados_completos_sistema_base_race_scenarios}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/sistema_base/race/requests_state}
+            \caption{ Estado de las requests del sistema base. }
+            \label{fig:resultados_completos_sistema_base_race_requests_state}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/sistema_base/race/response_time}
+            \caption{ Tiempo de respuesta del sistema base. }
+            \label{fig:resultados_completos_sistema_base_race_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/sistema_base/race/endpoint_response_time}
+            \caption{
+                Tiempo de respuesta por endpoint del sistema base.
+                El eje tiene una escala logarítmica.
+            }
+            \label{fig:resultados_completos_sistema_base_race_endpoint_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/sistema_base/race/resources}
+            \caption{
+                Estado de los recursos del sistema base.
+                El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
+            }
+            \label{fig:resultados_completos_sistema_base_race_resources}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/sistema_base/race/currency}
+            \caption{ Volumen operado en cada moneda en el sistema base. }
+            \label{fig:resultados_completos_sistema_base_race_currency}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/sistema_base/race/net_currency}
+            \caption{ Neto operado en cada moneda en el sistema base. }
+            \label{fig:resultados_completos_sistema_base_race_net_currency}
+        \end{figure}
+
+    \clearpage
+
     \subsection{Resultados completos del escenario de carga sobre la propuesta 1}
     \label{sec:resultados_completos_propuesta_1_baseline}
 
@@ -689,28 +749,242 @@
             \label{fig:resultados_completos_propuesta_2_chaos_net_currency}
         \end{figure}
 
+    \clearpage
+
     \subsection{Resultados completos del escenario de estrés sobre la propuesta 3}
     \label{sec:resultados_completos_propuesta_3_stress}
 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/stress/scenarios}
+            \caption{ Escenarios de la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_stress_scenarios}
+        \end{figure}
 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/stress/requests_state}
+            \caption{ Estado de las requests de la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_stress_requests_state}
+        \end{figure}
 
-        \todo{Descomentar las figuras de \texttt{figures/propuesta\_3/stress/}.}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/stress/response_time}
+            \caption{ Tiempo de respuesta de la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_stress_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/stress/endpoint_response_time}
+            \caption{
+                Tiempo de respuesta por endpoint de la propuesta 3.
+                El eje tiene una escala logarítmica.
+            }
+            \label{fig:resultados_completos_propuesta_3_stress_endpoint_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/stress/resources}
+            \caption{
+                Estado de los recursos de la propuesta 3.
+                El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
+            }
+            \label{fig:resultados_completos_propuesta_3_stress_resources}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/stress/currency}
+            \caption{ Volumen operado en cada moneda en la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_stress_currency}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/stress/net_currency}
+            \caption{ Neto operado en cada moneda en la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_stress_net_currency}
+        \end{figure}
+
+    \clearpage
 
     \subsection{Resultados completos del escenario de resistencia sobre la propuesta 3}
     \label{sec:resultados_completos_propuesta_3_soak}
 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/soak/scenarios}
+            \caption{ Escenarios de la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_soak_scenarios}
+        \end{figure}
 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/soak/requests_state}
+            \caption{ Estado de las requests de la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_soak_requests_state}
+        \end{figure}
 
-        \todo{Descomentar las figuras de \texttt{figures/propuesta\_3/soak/}.}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/soak/response_time}
+            \caption{ Tiempo de respuesta de la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_soak_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/soak/endpoint_response_time}
+            \caption{
+                Tiempo de respuesta por endpoint de la propuesta 3.
+                El eje tiene una escala logarítmica.
+            }
+            \label{fig:resultados_completos_propuesta_3_soak_endpoint_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/soak/resources}
+            \caption{
+                Estado de los recursos de la propuesta 3.
+                El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
+            }
+            \label{fig:resultados_completos_propuesta_3_soak_resources}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/soak/currency}
+            \caption{ Volumen operado en cada moneda en la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_soak_currency}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/soak/net_currency}
+            \caption{ Neto operado en cada moneda en la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_soak_net_currency}
+        \end{figure}
+
+    \clearpage
 
     \subsection{Resultados completos del escenario de caos sobre la propuesta 3}
     \label{sec:resultados_completos_propuesta_3_chaos}
 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/chaos/scenarios}
+            \caption{ Escenarios de la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_chaos_scenarios}
+        \end{figure}
 
-        \todo{Descomentar las figuras de \texttt{figures/propuesta\_3/chaos/}.}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/chaos/requests_state}
+            \caption{ Estado de las requests de la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_chaos_requests_state}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/chaos/response_time}
+            \caption{ Tiempo de respuesta de la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_chaos_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/chaos/endpoint_response_time}
+            \caption{
+                Tiempo de respuesta por endpoint de la propuesta 3.
+                El eje tiene una escala logarítmica.
+            }
+            \label{fig:resultados_completos_propuesta_3_chaos_endpoint_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/chaos/resources}
+            \caption{
+                Estado de los recursos de la propuesta 3.
+                El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
+            }
+            \label{fig:resultados_completos_propuesta_3_chaos_resources}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/chaos/currency}
+            \caption{ Volumen operado en cada moneda en la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_chaos_currency}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/chaos/net_currency}
+            \caption{ Neto operado en cada moneda en la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_chaos_net_currency}
+        \end{figure}
+
+    \clearpage
 
     \subsection{Resultados completos del escenario de concurrencia sobre la propuesta 3}
     \label{sec:resultados_completos_propuesta_3_race}
 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/race/scenarios}
+            \caption{ Escenarios de la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_race_scenarios}
+        \end{figure}
 
-        \todo{Descomentar las figuras de \texttt{figures/propuesta\_3/race/}.}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/race/requests_state}
+            \caption{ Estado de las requests de la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_race_requests_state}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/race/response_time}
+            \caption{ Tiempo de respuesta de la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_race_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/race/endpoint_response_time}
+            \caption{
+                Tiempo de respuesta por endpoint de la propuesta 3.
+                El eje tiene una escala logarítmica.
+            }
+            \label{fig:resultados_completos_propuesta_3_race_endpoint_response_time}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/race/resources}
+            \caption{
+                Estado de los recursos de la propuesta 3.
+                El eje izquierdo muestra el uso de CPU, el eje derecho muestra el uso de memoria.
+            }
+            \label{fig:resultados_completos_propuesta_3_race_resources}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/race/currency}
+            \caption{ Volumen operado en cada moneda en la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_race_currency}
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\columnwidth]{figures/propuesta_3/race/net_currency}
+            \caption{ Neto operado en cada moneda en la propuesta 3. }
+            \label{fig:resultados_completos_propuesta_3_race_net_currency}
+        \end{figure}
