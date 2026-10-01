@@ -22,6 +22,21 @@
 
     Resultó que imitar los gráficos de Grafana implicaba muchas consideraciones (como por ejemplo cómo tratar los valores nulos, si como ceros o usar la última medición) que complicaron bastante esta idea. En ciertas partes de la librería usamos código generado por IA, consideramos que no era una parte fundamental del TP y no queríamos perder mucho tiempo en eso. Esto se limita al directorio \texttt{/perf/graficos}.
 
-    Igualmente \texttt{./dashboard} contiene todos los gráficos que usamos como referencia.
-    En el apéndice se incluyen igualmente las capturas junto a los renders para que se puedan corroborar.
+    Igualmente \texttt{/perf/dashboard.json} contiene todos los gráficos que usamos como referencia.
+    En el apéndice se incluyen, a modo de ejemplo, capturas de algunas corridas junto a sus renders para que se puedan corroborar.
 
+    \subsection{Consulta de documentación de herramientas}
+    \label{sec:uso_de_ia_documentacion}
+
+    Usamos IA como un buscador más para orientarnos en herramientas que no conocíamos, como la configuración de escenarios de Artillery o las opciones y configuraciones de consulta de Graphite.
+
+    \subsection{Interpretación de errores}
+    \label{sec:uso_de_ia_errores}
+
+    Ante errores de Docker, de compilación de \LaTeX{} o de PlantUML, usamos IA para interpretar los mensajes y obtener posibles causas.
+
+    \subsection{Revisión de código como segunda opinión}
+    \label{sec:uso_de_ia_revision_de_codigo}
+
+    Una vez implementada cada propuesta, le pedimos a la IA que revisara los cambios en busca de errores.
+    Tratamos sus observaciones como las de un revisor más, las que consideramos válidas según nuestro criterio fueron corregidas (por nosotros) y el resto se descartó.

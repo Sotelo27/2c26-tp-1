@@ -121,13 +121,13 @@
     Las pruebas de carga utilizan la misma configuración que en el sistema base (Sección~\ref{sec:sistema_base_pruebas_de_baseline}), de modo que los resultados sean comparables.
     Con esta carga y esta duración el log todavía es chico, por lo que no esperamos que la degradación del sistema base llegue a manifestarse; el efecto principal de la táctica se observa en los escenarios de estrés y resistencia.
 
-    Ambos sistemas completaron todas las requests sin fallas, con un promedio de 385 requests completadas por ventana de 10s en la propuesta 1 y de 397 en el sistema base.
-    La diferencia se debe a la primera ventana de la propuesta 1, que registra solo 38 requests por corresponder al inicio de la prueba; a partir de la segunda ventana ambos sistemas completan alrededor de 400.
-    Los tiempos de respuesta de \texttt{/exchange} son equivalentes (P95 de 716ms frente a 718ms medido en el servidor, y P95 de 709ms frente a 712ms visto desde el cliente), ya que están acotados por las dos transferencias.
+    Ambos sistemas completaron todas las requests sin fallas, con un promedio de 397 requests completadas por ventana de 10s en la propuesta 1 y de 393 en el sistema base.
+    La diferencia se debe a la primera ventana de cada prueba, que queda incompleta por corresponder al inicio (318 requests en la propuesta 1 y 239 en el sistema base); a partir de la segunda ventana ambos sistemas completan alrededor de 400.
+    Los tiempos de respuesta de \texttt{/exchange} son equivalentes (P95 de 716ms frente a 718ms medido en el servidor, y P95 de 708ms frente a 712ms visto desde el cliente), ya que están acotados por las dos transferencias.
 
-    La diferencia aparece en \texttt{/log}, cuyo P95 promedio se reduce a la mitad (3.61ms frente a 6.97ms, con un máximo de 11ms frente a 22ms), y en el uso de recursos de la API, cuyo CPU promedio baja del $9.28\%$ al $4.02\%$ y su memoria del $1.25\%$ al $0.81\%$, al dejar de mantener, serializar y persistir el log.
-    El nodo de logs consume en promedio un $3.35\%$ de CPU, por lo que el consumo sumado de ambos nodos ($7.37\%$) es menor que el de la API del sistema base.
-    Su memoria crece durante la prueba, del $0.5\%$ al $3.67\%$; en el escenario de resistencia se observa que este crecimiento se da en los primeros minutos y luego se estabiliza en torno al $5\%$, sin crecer con el tamaño del log (Figura~\ref{fig:comparacion_propuesta_1_sistema_base_soak_resources}).
+    La diferencia aparece en \texttt{/log}, cuyo P95 promedio se reduce a la mitad (3.60ms frente a 7.12ms, con un máximo de 10ms frente a 21ms), y en el uso de recursos de la API, cuyo CPU promedio baja del $9.47\%$ al $3.83\%$ y su memoria del $1.27\%$ al $0.84\%$, al dejar de mantener, serializar y persistir el log.
+    El nodo de logs consume en promedio un $3.52\%$ de CPU, por lo que el consumo sumado de ambos nodos ($7.35\%$) es menor que el de la API del sistema base.
+    Su memoria crece durante la prueba, del $0.5\%$ al $3.72\%$; en el escenario de resistencia se observa que este crecimiento se da en los primeros minutos y luego se estabiliza en torno al $5\%$, sin crecer con el tamaño del log (Figura~\ref{fig:comparacion_propuesta_1_sistema_base_soak_resources}).
 
     \begin{figure}[H]
         \centering
@@ -135,7 +135,7 @@
         \includegraphics[width=0.5\columnwidth]{figures/sistema_base/baseline/endpoint_response_time}
         \caption{
             Comparativa de los resultados de latencia por endpoint entre la propuesta 1 (izquierda) y el sistema base (derecha) frente al escenario de carga.
-            \texttt{/exchange} se mantiene en torno a 720ms (P95) en ambos casos, mientras que \texttt{/log} crece más lentamente en la propuesta 1, con un promedio de 3.61ms frente a 6.97ms.
+            \texttt{/exchange} se mantiene en torno a 720ms (P95) en ambos casos, mientras que \texttt{/log} crece más lentamente en la propuesta 1, con un promedio de 3.60ms frente a 7.12ms.
         }
         \label{fig:comparacion_propuesta_1_sistema_base_baseline_endpoint_response_time}
     \end{figure}
@@ -151,7 +151,7 @@
         \end{minipage}
         \caption{
             Comparativa del uso de recursos entre la propuesta 1 (izquierda, arriba la API de exchange y abajo el nodo de logs) y el sistema base (derecha) frente al escenario de carga.
-            La API de exchange reduce su CPU promedio del $9.28\%$ al $4.02\%$, y el consumo sumado de ambos nodos ($7.37\%$) es menor que el del sistema base.
+            La API de exchange reduce su CPU promedio del $9.47\%$ al $3.83\%$, y el consumo sumado de ambos nodos ($7.35\%$) es menor que el del sistema base.
         }
         \label{fig:comparacion_propuesta_1_sistema_base_baseline_resources}
     \end{figure}

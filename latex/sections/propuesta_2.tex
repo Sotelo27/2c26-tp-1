@@ -126,7 +126,7 @@
         líder funcione, a cambio de que la supervisión sobreviva a su caída.
 
         Sobre la API, el costo es el envío de 3 datagramas UDP/s. En el escenario de carga no se observa una diferencia en el
-        uso de recursos frente al sistema base ($9.68\%$ frente a $9.28\%$ de CPU promedio,
+        uso de recursos frente al sistema base ($9.63\%$ frente a $9.47\%$ de CPU promedio,
         Sección~\ref{sec:propuesta_2_pruebas_de_baseline}), por lo que la táctica no reduce la eficiencia de la API.
 
         Durante la prueba de carga de 40 requests por segundo, los promedios de los tres watchdogs sumaron
@@ -165,7 +165,7 @@
                 \midrule
                 Dependencias de despliegue & La API no atiende requests hasta conectarse con el nodo de logs & Acceso al socket de Docker del host \\
                 \midrule
-                Uso de CPU de la API & $14.2\%$ en estrés (el base satura el núcleo) & Equivalente al base ($9.68\%$ frente a $9.28\%$ en carga) \\
+                Uso de CPU de la API & $14.2\%$ en estrés (el base satura el núcleo) & Equivalente al base ($9.63\%$ frente a $9.47\%$ en carga) \\
                 \midrule
                 QA que mejora & Performance y disponibilidad ante la degradación del log & Disponibilidad ante caídas del proceso \\
                 \bottomrule
@@ -185,10 +185,10 @@
     Con esta carga el sistema base no presenta fallas ni caídas, por lo que el watchdog no debería intervenir y el escenario
     permite aislar el costo de la táctica en condiciones normales.
 
-    Ambos sistemas completaron todas las requests sin fallas, con un promedio de 394 requests completadas por ventana de 10s en la propuesta 2 y de 397 en el sistema base.
-    Los tiempos de respuesta son prácticamente idénticos: el P95 de \texttt{/exchange} medido en el servidor es de 719ms frente a 718ms,
-    y, desde el cliente, el P95 es de 712ms en ambos casos y el P99 de 761ms frente a 759ms.
-    El uso de recursos de la API también es equivalente, con un promedio de CPU del $9.68\%$ frente a $9.28\%$ y de memoria del $1.26\%$ frente a $1.25\%$.
+    Ambos sistemas completaron todas las requests sin fallas, con un promedio de 388 requests completadas por ventana de 10s en la propuesta 2 y de 393 en el sistema base.
+    Los tiempos de respuesta son prácticamente idénticos: el P95 de \texttt{/exchange} medido en el servidor es de 716ms frente a 718ms,
+    y, desde el cliente, el P95 es de 708ms frente a 712ms y el P99 de 755ms frente a 761ms.
+    El uso de recursos de la API también es equivalente, con un promedio de CPU del $9.63\%$ frente a $9.47\%$ y de memoria del $1.32\%$ frente a $1.27\%$.
     Esto confirma que el envío de los heartbeats no tiene un costo observable sobre la API (Sección~\ref{sec:propuesta_2_performance}).
 
     \begin{figure}[H]
