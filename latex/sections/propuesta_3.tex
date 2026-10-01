@@ -401,7 +401,19 @@
         de requests concurrentes: arVault entrega dólares que no tiene. En la propuesta 3 se aprueba un único cambio, el
         resto se rechaza con HTTP 409 y el saldo final es el mismo independientemente de la concurrencia.
 
-        \todo{Adjuntar captura de \texttt{./race.sh} en el entorno de pruebas para ambos sistemas.}
+        La Figura~\ref{fig:propuesta_3_race_sh} muestra las dos ejecuciones con diez cambios
+        concurrentes. En el sistema base se aprobaron los diez y el saldo terminó en
+        $-700.0058$ USD. En la propuesta 3 se aprobó uno, se rechazaron nueve con HTTP 409 y
+        el saldo final fue $19.99942$ USD.
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=1\columnwidth]{figures/propuesta_3/race/race_sh_sistema_base}
+            \vspace{2mm}
+            \includegraphics[width=1\columnwidth]{figures/propuesta_3/race/race_sh_propuesta_3}
+            \caption{Ejecución de \texttt{race.sh} sobre el sistema base (arriba) y la propuesta 3 (abajo).}
+            \label{fig:propuesta_3_race_sh}
+        \end{figure}
 
         \subsubsection{Disponibilidad}
         \label{sec:propuesta_3_pruebas_de_concurrencia_metricas_disponibilidad}
