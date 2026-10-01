@@ -13,7 +13,7 @@
     Algunas optimizaciones de la implementación que consideramos que vale la pena mencionar son:
 
     \begin{itemize}
-        \item Remplazamos el uso del formato .json para el almacenamiento a .ndjson, de esta manera podemos agregar los registros al final sin reescribir todo el archivo.
+        \item Reemplazamos el uso del formato .json para el almacenamiento a .ndjson, de esta manera podemos agregar los registros al final sin reescribir todo el archivo.
         \item El archivo ya no se carga en memoria, se streamea el cliente directamente desde disco en batches. Destacamos que agregamos los caracteres [ al inicio y ] al final del stream para mantener la firma original con respecto al formato .json.
         \item Solo enviamos hasta el último byte válido disponible al momento de recibida la consulta y verificamos que la última entrada sea válida (evita race condition con la escritura).
         \item Exchange api loguea directamente al nuevo nodo dedicado mediante una conexión TCP dedicada.
