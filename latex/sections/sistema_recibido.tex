@@ -184,4 +184,31 @@
     para conservar sus series. Estas decisiones limitan la durabilidad y la
     reproducibilidad de las mediciones entre recreaciones del entorno.
 
-    \todo{Agregar evidencia de ejecución sobre recuperación, persistencia y funcionamiento de cAdvisor en el equipo de pruebas.}
+    Para comprobar este comportamiento, se modificó el saldo de la cuenta ARS a
+    $424242424242$ y se esperó a que el cambio se escribiera en
+    \texttt{accounts.json}. Luego de ejecutar \texttt{docker restart}, el identificador
+    del contenedor se mantuvo y tanto la API como el archivo conservaron el nuevo saldo.
+    En cambio, al recrear la API con \texttt{docker compose up -d --force-recreate
+    --no-deps api}, el identificador cambió y el saldo volvió al valor incluido en la
+    imagen, $120000000$. Además, \texttt{docker inspect} informó que la API no tenía
+    ningún volumen montado.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\columnwidth]{figures/sistema_recibido/persistencia_restart_recreate.png}
+        \caption{Verificación de persistencia al reiniciar y pérdida del cambio al recrear el contenedor de la API.}
+        \label{fig:sistema_recibido_persistencia_contenedor}
+    \end{figure}
+
+    También se consultó la API de cAdvisor en
+    \texttt{/api/v1.3/subcontainers}. La respuesta incluyó al contenedor
+    \texttt{exchange-api-1} y cuatro muestras con datos de CPU y memoria tomadas luego
+    de su recreación, lo que verifica que el componente estaba funcionando y registrando
+    los contenedores del entorno de prueba.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\columnwidth]{figures/sistema_recibido/cadvisor_api.png}
+        \caption{Respuesta de cAdvisor con métricas del contenedor de la API.}
+        \label{fig:sistema_recibido_cadvisor}
+    \end{figure}
