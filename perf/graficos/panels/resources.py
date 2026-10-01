@@ -8,6 +8,9 @@ CADVISOR = "stats.gauges.cadvisor"
 CONTAINERS = [
     ("exchange-api-1", "resources", "Resources"),
     ("exchange-log-api-1", "resources_log_api", "Resources log-api"),
+    ("exchange-watchdog-1-1", "resources_watchdog_1", "Resources watchdog-1"),
+    ("exchange-watchdog-2-1", "resources_watchdog_2", "Resources watchdog-2"),
+    ("exchange-watchdog-3-1", "resources_watchdog_3", "Resources watchdog-3"),
 ]
 MEMORY_4GB = 4_294_967_296
 NS_POR_CORE_SEGUNDO = 1_000_000_000

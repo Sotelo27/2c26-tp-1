@@ -129,14 +129,17 @@
         uso de recursos frente al sistema base ($9.68\%$ frente a $9.28\%$ de CPU promedio,
         Sección~\ref{sec:propuesta_2_pruebas_de_baseline}), por lo que la táctica no reduce la eficiencia de la API.
 
-        En una captura tomada durante la prueba de carga de 40 requests por segundo, los tres watchdogs consumieron en total
-        un $0.32\%$ de CPU y cerca de 89 MiB de memoria. El watchdog 3, que era el líder, tuvo un consumo apenas mayor.
-        En esta medición, el costo fue bajo, aunque se agregan tres contenedores sin límites de recursos configurados.
+        Durante la prueba de carga de 40 requests por segundo, los promedios de los tres watchdogs sumaron
+        un $0.32\%$ de CPU y cerca de 86 MiB de memoria. El watchdog 3, que era el líder, tuvo un consumo de CPU
+        algo mayor: $0.149\%$, frente a $0.089\%$ y $0.080\%$ de los otros dos. En esta medición, el costo fue bajo,
+        aunque se agregan tres contenedores sin límites de recursos configurados.
 
         \begin{figure}[H]
             \centering
-            \includegraphics[width=\columnwidth]{figures/propuesta_2/watchdogs_stats.png}
-            \caption{Consumo de recursos de los tres watchdogs durante la prueba de carga.}
+            \includegraphics[width=\columnwidth]{figures/propuesta_2/resources_watchdog_1.pdf}
+            \includegraphics[width=\columnwidth]{figures/propuesta_2/resources_watchdog_2.pdf}
+            \includegraphics[width=\columnwidth]{figures/propuesta_2/resources_watchdog_3.pdf}
+            \caption{Consumo de recursos de los tres watchdogs durante la prueba de carga, generado a partir de las métricas de cAdvisor.}
             \label{fig:propuesta_2_watchdogs_stats}
         \end{figure}
 
